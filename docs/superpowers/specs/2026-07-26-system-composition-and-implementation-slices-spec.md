@@ -1,6 +1,6 @@
 # 系统组成与实现切片 - 可执行规范
 
-**状态：** 已通过独立审计并由用户批准
+**状态：** 已根据 RED 证据收敛范围，通过只读审计并由用户批准
 
 ## 1. 目标与非目标
 
@@ -39,18 +39,16 @@ migration/compatibility，但存在三个可以被表面满足的缺口：
 2. `Behavioral slices` 没有定义可恢复执行的依赖、完成证据和 review gate。
 3. 没有要求作者解释同形 DTO、重复 model 或只为模拟分层而存在的数据转换。
 
-`skills/brainstorming/spec-document-reviewer-prompt.md` 检查完整性、contract、
-acceptance 和 test mapping，但不会阻止组件 ownership 不清、重复结构过多或转换
-理由不足的 spec。
+fresh-context RED evaluation 进一步校正了范围：现有 spec reviewer、code
+reviewer、completion verification 和恢复顺序 guidance 已经能稳定执行只读审查、
+拒绝错误完成声明，并保持主 Agent TDD。它们作为回归基线保留，不为本次目标重复
+增加 production guidance。
 
-`skills/requesting-code-review/code-reviewer.md` 检查一般性的 separation of
-concerns 和 DRY，但不会明确对照批准 spec 中的 canonical model，检查实现新增的
-结构和转换。
-
-`skills/requesting-code-review/SKILL.md` 已经把批准 spec 设为唯一 review
-authority，并要求主 Agent 修复 findings。`skills/verification-before-completion/
-SKILL.md` 已经要求最终提交前检查 acceptance criteria。两者都还没有使用内嵌
-implementation slices 定义完成状态。
+F1 和 F2 各 5/5 baseline samples 都没有生成完整的 checkbox、dependency、
+verification 和 review-gate slice contract，且简单配置变更仍被扩写成多段
+behavioral slices，因此为 `brainstorming` 的输出形状和比例原则建立了行为 RED。
+F7 中文默认 baseline 中 4/5 samples 已使用中文，未达到 3/5 failure threshold；
+默认中文仍是用户明确要求，并由确定性静态 RED 锁定，但不得描述为行为 RED。
 
 `tests/workflow/test-spec-to-tdd-consistency.sh` 是现役 spec-to-TDD workflow 的
 确定性回归测试。它目前只断言旧 contract，没有覆盖 system composition、
@@ -153,7 +151,8 @@ state 或 ledger。spec 内嵌 checkbox 是 canonical slice status，不违反�
 每个 slice 必须包含：
 
 - 稳定 ID 和以 outcome 命名的标题；
-- 批准 baseline 中的 unchecked progress marker；
+- 批准 baseline 中的 unchecked progress marker；唯一例外是批准前已经取得、记录
+  并通过审计的 evidence-only RED slice，可以带 checked marker 进入 baseline；
 - 完成 slice 时可以观察到的 outcome；
 - 对前置 slice 的依赖，或者 `None`；
 - 涉及的系统组件和职责边界；
@@ -179,6 +178,10 @@ gate，取得 fresh evidence 后才能重新勾选。
 预期中的后续 GREEN 修改不会重新打开它；只有 fixture、rubric、sampled response、
 recorded scoring 被修改或证据被证明无效时，才恢复为 unchecked。
 
+上述例外只适用于已完成并经审计的历史 RED evidence，不适用于任何 production
+implementation slice。所有普通 implementation slice 在批准 baseline 中仍必须是
+unchecked，且只能在完成自己的 verification 和 review gate 后勾选。
+
 修改 slice outcome、system ownership、data decision、interface、acceptance
 criteria 或 scope 属于 semantic spec change。主 Agent 必须停止实现、修订 spec、
 重复适用的 spec review、取得用户批准，并单独提交修订后的 spec，不能在实现过程
@@ -198,23 +201,15 @@ criteria 或 scope 属于 semantic spec change。主 Agent 必须停止实现、
   - 加入 system composition 和 data flow contract。
   - 用内嵌 `Implementation Slices` contract 替代 `Behavioral slices`。
   - 定义逐 slice 主 Agent TDD 和 progress-marker 语义。
-- `skills/brainstorming/spec-document-reviewer-prompt.md`
-  - 默认使用 spec 的主要语言返回 findings。
-  - 把职责不清、重复 model、无理由转换和不可执行 slice 设为 blocking finding。
-- `skills/requesting-code-review/SKILL.md`
-  - 让 review checkpoint 与完成的 implementation slice 对齐，同时保持批准 spec
-    是唯一 authority。
-- `skills/requesting-code-review/code-reviewer.md`
-  - 默认使用 approved spec 的主要语言返回 findings。
-  - 检查未批准结构、重复 canonical fact、同形 DTO chain、不必要 mapper，以及
-    偏离 spec transformation boundary 的实现。
-- `skills/verification-before-completion/SKILL.md`
-  - 最终实现提交前，要求每个 implementation slice 和 acceptance criterion 都有
-    fresh completion evidence。
 - `tests/workflow/test-spec-to-tdd-consistency.sh`
-  - 为新 contract、默认中文和 reviewer coverage 增加确定性 assertions。
+  - 为新 authoring contract、默认中文和现有 reviewer/completion 回归增加确定性
+    assertions。
 - `README.md`
   - 将单一 spec workflow 描述为 system design 加内嵌、依赖有序的执行大纲。
+
+明确不修改 `spec-document-reviewer-prompt.md`、`requesting-code-review` 或
+`verification-before-completion`：F3-F6 baseline 已经 5/5 满足对应 rubric，修改
+这些文件会超出 RED 证据。
 
 除以上文件外，不预期修改其他 active skill、harness integration、manifest 或测试
 文件。需要扩大范围时，先停止实现并修订本 spec。
@@ -260,11 +255,12 @@ contract 是强制的，篇幅按任务复杂度调整。简单 configuration ch
 
 ## 8. Implementation Slices
 
-- [ ] **S1. 建立 RED workflow 与行为证据**
+- [x] **S1. 建立 RED workflow 与行为证据**
 
   **Outcome：** 确定性 workflow assertions 和 fresh-context baseline evaluation
-  证明当前 skills 尚未强制 composition、transformation、redundancy、slice 和默认
-  中文 contract。
+  证明当前 `brainstorming` 尚未强制完整 implementation slice contract 和比例
+  原则；静态 assertions 证明 composition、transformation、redundancy、slice 和
+  默认中文 contract 尚未写入 authoring authority。
 
   **Depends on：** None
 
@@ -272,20 +268,23 @@ contract 是强制的，篇幅按任务复杂度调整。简单 configuration ch
   evaluation，不修改生产 skill 文本。
 
   **Data decisions：** 不改变 runtime data structure。evaluation fixture 使用同形
-  DTO chain、模糊 ownership 和英文默认输出作为可观察 failure stimulus。
+  DTO chain、模糊 ownership 和简单 configuration change 作为可观察 failure
+  stimulus。
 
   **Files：** 修改 `tests/workflow/test-spec-to-tdd-consistency.sh`。
 
-  **Acceptance criteria：** AC-10。为 AC-1 至 AC-9、AC-11 和 AC-12 建立 RED
-  evidence，不声称它们已经 GREEN。
+  **Acceptance criteria：** AC-10。为 AC-1 至 AC-5、AC-11 建立行为或静态 RED；
+  为 AC-12 建立静态 RED。AC-6 至 AC-9 使用既有 5/5 baseline 作为回归控制，不
+  声称存在 RED。
 
   **Verification：** 新 assertion 加入后，focused
   `tests/workflow/test-spec-to-tdd-consistency.sh` 必须在 skill 修改前失败；broader
   `tests/workflow/run-tests.sh` 必须报告同一个预期失败。使用当前未修改的 skill 或
-  reviewer surface，对固定 fixture F1-F6 和 F7 中文默认组各运行 5 个
-  fresh-context samples。只有至少 3/5 samples 违反该 fixture rubric，才建立 RED；
-  否则停止并移除或缩小相应 guidance。F7 英文 override 组不是 RED failure
-  hypothesis，不在 S1 评分。每个 response 都必须人工评分和记录。
+  reviewer surface，对固定 fixture F1-F7 各运行 5 个 fresh-context samples。只有
+  至少 3/5 samples 违反该 fixture rubric，才建立行为 RED；否则移除对应 production
+  guidance 或将其保留为明确用户 policy 加静态 contract。实际结果：F1、F2 为
+  5/5 failure；F3-F6 为 5/5 pass；F7 中文默认为 4/5 pass。每个 response 均由
+  主 Agent 人工评分。
 
   **Review gate：** None。主 Agent 检查 RED evidence 后才能继续。
 
@@ -316,63 +315,32 @@ contract 是强制的，篇幅按任务复杂度调整。简单 configuration ch
   variant 必须重新运行自己的全部 guided sample groups，并与 S1 control 对照。
   没有 GREEN evidence 不能进入 S3。
 
-- [ ] **S3. 在只读 review 中执行同一架构约束**
+- [ ] **S3. 闭合全文一致性与回归门禁**
 
-  **Outcome：** spec review 阻止 ownership 缺失和无理由转换，code review 捕获实现
-  阶段的重复结构与 mapping，同时不取得 implementation authority。
+  **Outcome：** 全部 active workflow surface 与新的 authoring contract 一致，同时
+  已经稳定工作的只读 review、完成验证和主 Agent 顺序 TDD 行为不回归。
 
   **Depends on：** S2
 
-  **System scope：** read-only spec review、code review 和 slice review checkpoint。
-
-  **Data decisions：** reviewer 读取批准 spec 的 canonical structure 和
-  transformation decision，不建立独立 architecture model。
-
-  **Files：** 修改 `skills/brainstorming/spec-document-reviewer-prompt.md`、
-  `skills/requesting-code-review/SKILL.md` 和
-  `skills/requesting-code-review/code-reviewer.md`。
-
-  **Acceptance criteria：** AC-6 至 AC-8、AC-10、AC-12。
-
-  **Verification：** focused `tests/workflow/test-spec-to-tdd-consistency.sh`；
-  broader `tests/workflow/run-tests.sh`。对 spec-reviewer prompt 运行 F3，对
-  code-reviewer prompt 运行 F4，各 5 个 fresh-context samples。每个 sample 必须为
-  对应 reviewer 的全部 seeded defects 返回 blocking findings，并使用 fixture 中
-  approved spec 的主要语言；需要 5/5 通过。修订 wording 后必须重新运行 5 个
-  guided samples 并与 S1 control 对照。
-
-  **Review gate：** Mandatory read-only code-quality review，范围覆盖 S1-S3 完整
-  diff。reviewer 只返回 findings。
-
-- [ ] **S4. 闭合完成状态与全文一致性**
-
-  **Outcome：** 最终 verification 证明所有内嵌 slices、acceptance criteria 和
-  review gates，全部 active workflow surface 使用同一套 single-spec、main-agent
-  implementation process。
-
-  **Depends on：** S3
-
-  **System scope：** completion verification 和 deterministic workflow
-  consistency。
+  **System scope：** deterministic workflow consistency、全部相关 harness tests 和
+  最终只读 code review。
 
   **Data decisions：** 不新增数据结构。slice marker 是批准 spec 内的状态，不是
   独立 progress store。
 
-  **Files：** 修改 `skills/verification-before-completion/SKILL.md`，并完成
-  `tests/workflow/test-spec-to-tdd-consistency.sh` assertions。
+  **Files：** 不修改额外 production skill；只更新本 spec 的 progress marker。
 
-  **Acceptance criteria：** AC-5、AC-9 至 AC-12。
+  **Acceptance criteria：** AC-5 至 AC-12。
 
   **Verification：** focused `tests/workflow/run-tests.sh`；broader 为
   `docs/testing.md` 记录的全部相关 harness tests、Bash/Node/JSON syntax checks、
-  `git diff --check` 和最终 working-tree inspection。使用完成后的 guidance 对 F5、
-  F6 各运行 5 个 fresh-context samples。F5 必须 5/5 拒绝错误完成；F6 必须 5/5
-  选择 dependency-ready slice、保持主 Agent TDD，并仅让 subagent 提供只读
-  findings。修订 wording 后必须重新运行 5 个 guided samples 并与 S1 control 对照。
+  `git diff --check` 和最终 working-tree inspection。F3-F6 的既有 5/5 baseline
+  结果作为 regression control；如果实现触及它们依赖的文本，必须重跑对应 5 个
+  samples，否则不重复采样已经稳定的行为。
 
-  **Review gate：** Mandatory final read-only code review，范围为 `BASE_SHA` 到完整
-  working tree。每个有效 Critical 或 Important fix 后重新运行 fresh verification
-  和 review。
+  **Review gate：** Mandatory final read-only code review，范围为修订后的
+  `BASE_SHA` 到完整 working tree。每个有效 Critical 或 Important fix 后重新运行
+  fresh verification 和 review。
 
 ## 9. 验收标准
 
@@ -438,19 +406,19 @@ contract 是强制的，篇幅按任务复杂度调整。简单 configuration ch
 - **F7 - 默认语言：** 用户用中文讨论需求，没有要求其他语言，项目也没有相反的
   authoritative language rule。合格 spec 使用中文叙述，technical literal 保持
   原文。GREEN evaluation 的第二组明确要求英文；合格 spec 必须改用英文，证明
-  用户要求能够覆盖默认值。S1 只把中文默认组作为 RED control。
+  用户要求能够覆盖默认值。S1 中文默认组是 policy control，未建立行为 RED。
 
 | Criteria | Owning slice | Deterministic proof | Behavior proof |
 |---|---|---|---|
 | AC-1, AC-2 | S2 | workflow test 要求 `brainstorming` 包含 system composition 和 canonical ownership | F1 guided samples 5/5 识别 components、ownership 和 containment |
 | AC-3, AC-4 | S2 | workflow test 要求 author contract 包含 transformation justification 和 redundancy decisions | F1 guided samples 5/5 合并、删除或明确解释 seeded DTO 和 mapper |
 | AC-5 | S2 | workflow test 要求 implementation-slice fields 并排除第二份 workflow document | F1 guided samples 5/5 生成 outcome slices，不生成 code-level micro-steps |
-| AC-6 | S3 | workflow test 要求 spec reviewer 检查 composition、redundancy、transformation 和 slice | F3 guided samples 5/5 为全部 seeded defects 返回 `Issues Found` |
-| AC-7 | S3 | workflow test 要求 code reviewer 检查 canonical data 和 conversion | F4 guided samples 5/5 报告全部 DTO-chain 和 mapper defects |
-| AC-8, AC-10 | S4 | 现有 main-agent/read-only-review assertions 保持绿色，新 assertions 覆盖 slice order 和 authority | F6 guided samples 5/5 保持主 Agent 有序 TDD、reviewer 只读 |
-| AC-9 | S4 | workflow test 要求 `verification-before-completion` 检查 slice 和 acceptance completion | F5 guided samples 5/5 拒绝 unchecked 或未 review 的 slice |
+| AC-6 | S3 | 现有 spec-review assertions 保持绿色，不修改 reviewer prompt | F3 baseline 5/5 已为全部 seeded defects 返回 `Issues Found`；最终只做回归控制 |
+| AC-7 | S3 | 现有 code-review assertions 保持绿色，不修改 code reviewer | F4 baseline 5/5 已报告全部 DTO-chain 和 mapper defects；最终只做回归控制 |
+| AC-8, AC-10 | S3 | 现有 main-agent/read-only-review assertions 保持绿色，新 authoring assertions 覆盖 slice order 和 authority | F6 baseline 5/5 已保持主 Agent 有序 TDD、reviewer 只读 |
+| AC-9 | S3 | 现有 `verification-before-completion` assertions 保持绿色 | F5 baseline 5/5 已拒绝 unchecked 或未 review 的 slice |
 | AC-11 | S2 | workflow test 要求 explicit proportional/no-data-change path | F2 guided samples 5/5 简短处理 no-change，不强制 inventory |
-| AC-12 | S2, S3 | workflow test 要求默认中文，spec/code reviewer 跟随 approved spec 语言 | F7 中文默认组、F3 和 F4 各 5/5 使用中文；F7 英文 override 组 5/5 使用英文 |
+| AC-12 | S2, S3 | workflow test 要求默认中文；现有 reviewer language assertions 保持绿色 | F7 guided 中文默认组和英文 override 组各 5/5；F3、F4 baseline language behavior 作为回归控制 |
 
 skill-behavior sample 必须人工评分。只有 required decision 出现在 evaluator 自己的
 输出或 finding 中才算通过；仅引用 prompt、复述 prohibition，或者只列 DTO 而不做
