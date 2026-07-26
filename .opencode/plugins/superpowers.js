@@ -75,8 +75,7 @@ export const SuperpowersPlugin = async ({ client, directory }) => {
 
     const toolMapping = `**Tool Mapping for OpenCode:**
 When skills request actions, substitute OpenCode equivalents:
-- Create or update todos → \`todowrite\`
-- \`Subagent (general-purpose):\` → \`task\` with \`subagent_type: "general"\`
+- \`Subagent (general-purpose):\` review/evaluation template → \`task\` with \`subagent_type: "general"\`; agents return findings or sampled responses only and never implement
 - Invoke a skill → OpenCode's native \`skill\` tool
 - Read files → \`read\`
 - Create, edit, or delete files → \`apply_patch\`

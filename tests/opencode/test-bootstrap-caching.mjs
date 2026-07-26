@@ -46,7 +46,9 @@ const result = {
   secondBootstrapParts: countBootstrapParts(secondOutput),
   staleMentionMapping: bootstrapText(firstOutput).includes('@mention'),
   staleTaskMapping: bootstrapText(firstOutput).includes('`Task` tool with subagents'),
+  planLikeTaskTracking: bootstrapText(firstOutput).includes('`todowrite`'),
   mapsSubagentToTask: bootstrapText(firstOutput).includes('`task` with `subagent_type: "general"`'),
+  reviewerOnly: bootstrapText(firstOutput).includes('agents return findings or sampled responses only and never implement'),
   mapsMutationToApplyPatch: bootstrapText(firstOutput).includes('`apply_patch`'),
   firstReadCount: afterFirst.readCount,
   secondReadCount: afterSecond.readCount,
@@ -116,8 +118,14 @@ function assertPresentBootstrap(result) {
   if (result.staleTaskMapping) {
     failures.push('expected OpenCode bootstrap not to teach stale Task-tool mapping');
   }
+  if (result.planLikeTaskTracking) {
+    failures.push('expected OpenCode bootstrap not to teach plan-like task tracking');
+  }
   if (!result.mapsSubagentToTask) {
-    failures.push('expected OpenCode bootstrap to map general-purpose subagents to task with subagent_type');
+    failures.push('expected OpenCode bootstrap to map reviewer agents to task with subagent_type');
+  }
+  if (!result.reviewerOnly) {
+    failures.push('expected OpenCode bootstrap to prohibit reviewer implementation');
   }
   if (!result.mapsMutationToApplyPatch) {
     failures.push('expected OpenCode bootstrap to map file mutation to apply_patch');

@@ -19,9 +19,9 @@ It starts from the moment you fire up your coding agent. As soon as it sees that
 
 Once it's teased a spec out of the conversation, it shows it to you in chunks short enough to actually read and digest. 
 
-After you've signed off on the design, your agent puts together an implementation plan that's clear enough for an enthusiastic junior engineer with poor taste, no judgement, no project context, and an aversion to testing to follow. It emphasizes true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. 
+After you've signed off on the design, the agent writes one executable spec: exact ownership, target files, interfaces, acceptance criteria, and test mapping. No second workflow document is created.
 
-Next up, once you say "go", it launches a *subagent-driven-development* process, having agents work through each engineering task, inspecting and reviewing their work, and continuing forward. It's not uncommon for your agent to work autonomously for a couple hours at a time without deviating from the plan you put together.
+Once you say "go", the main agent implements that spec with true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. Subagents may perform read-only review or evaluation, but they never implement changes.
 
 There's a bunch more to it, but that's the core of the system. And because the skills trigger automatically, you don't need to do anything special. Your coding agent just has Superpowers.
 
@@ -197,19 +197,19 @@ For local development, run Pi with this checkout loaded as a temporary package:
 pi -e /path/to/superpowers
 ```
 
-The Pi package loads the Superpowers skills and a small extension that injects the `using-superpowers` bootstrap at session startup and again after compaction. Pi has native skills, so no compatibility `Skill` tool is required. Subagent and task-list tools remain optional Pi companion packages.
+The Pi package loads the Superpowers skills and a small extension that injects the `using-superpowers` bootstrap at session startup and again after compaction. Pi has native skills, so no compatibility `Skill` tool is required. A subagent tool is optional and is used only for read-only review or evaluation.
 
 ## The Basic Workflow
 
-1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves design document.
+1. **brainstorming** - Activates before writing code. Refines rough ideas, presents the design, and saves an executable spec with exact contracts, acceptance criteria, and test mapping.
 
-2. **using-git-worktrees** - Activates after design approval. Creates isolated workspace on new branch, runs project setup, verifies clean test baseline.
+2. **test-driven-development** - The main agent implements the approved spec through RED-GREEN-REFACTOR: write a failing test, watch it fail, write minimal code, watch it pass.
 
-3. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
+3. **requesting-code-review** - Runs pre-review verification, dispatches a read-only reviewer over the spec baseline through the current working tree, then requires post-review verification and repeat review after important fixes. Reviewers return findings but never edit or implement.
 
-4. **verification-before-completion** - Activates before declaring done. Runs tests and verifies changes against terminal output.
+4. **verification-before-completion** - Re-checks every acceptance criterion and runs the full relevant verification before the main agent commits the implementation or declares completion.
 
-5. **finishing-a-development-branch** - Activates when implementation completes. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
+5. **finishing-a-development-branch** - Activates when implementation completes. Verifies tests and presents merge, PR, or keep options.
 
 **The agent checks for relevant skills before any task.** Mandatory workflows, not suggestions.
 
@@ -226,10 +226,8 @@ The Pi package loads the Superpowers skills and a small extension that injects t
 
 **Collaboration** 
 - **brainstorming** - Socratic design refinement
-- **dispatching-parallel-agents** - Concurrent subagent workflows
-- **requesting-code-review** - Pre-review checklist
+- **requesting-code-review** - Read-only independent review
 - **receiving-code-review** - Responding to feedback
-- **using-git-worktrees** - Parallel development branches
 - **finishing-a-development-branch** - Merge/PR decision workflow
 
 **Meta**

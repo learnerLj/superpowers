@@ -36,15 +36,15 @@ into the harness's native tools. Three components:
 
 1. **Skills (harness-agnostic).** Everything in `skills/` is the source of
    truth, shared verbatim by every harness. Skills are written to describe
-   *actions* — "invoke a skill", "read a file", "dispatch a subagent", "create a
-   todo" — and never name a specific tool. This is what lets one skill body run
+   *actions* — "invoke a skill", "read a file", and "dispatch a read-only
+   reviewer or evaluator" — and never name a specific tool. This is what lets one skill body run
    on Claude Code, Codex, Gemini, pi, and the rest without edits.
 
 2. **Tool mapping (per-harness).** Each harness needs the action vocabulary
    translated into its real tool names. That translation lives in
    `skills/using-superpowers/references/<harness>-tools.md` and/or inline in the
    harness's bootstrap injector (see Part 5). It says, e.g., "*dispatch a
-   subagent* → call `task` with `subagent_type`."
+   read-only reviewer or evaluator* → call `task` with `subagent_type`."
 
 3. **Bootstrap (per-harness).** At the start of every session, the full
    `skills/using-superpowers/SKILL.md` is injected into the model's context,
@@ -112,8 +112,7 @@ real port.
 | **Skill discovery + invocation** | The model must be able to load a skill's full content on demand | If there's no native skill tool, the sanctioned fallback is to `read` the relevant `SKILL.md` directly — see Part 5. A harness with neither a skill tool nor file-read cannot work. |
 | **File read / write / edit** | Nearly every skill manipulates files | Essential. No workaround. |
 | **Run shell commands** | TDD, verification, git workflows | Essential. |
-| **Subagent / task dispatch** | `dispatching-parallel-agents`, `subagent-driven-development` | Degradable: if unavailable, those specific skills tell the model to do the work inline or report the missing capability — *never* to invent a `Task` call. Some harnesses gate this behind a config flag (e.g. Codex needs multi-agent enabled). |
-| **Todo / task tracking** | Progress tracking in several skills | Degradable: fall back to a plan file or `TODO.md`. |
+| **Read-only reviewer/evaluator dispatch** | Independent spec/code review and skill-behavior evaluation | Degradable: work in the main session if unavailable; never invent a `Task` call or delegate implementation. |
 | **Web fetch / search** | A few skills | Degradable. |
 | **Shell or polyglot script execution (Windows)** | Only for the shell-hook shape, only if you want Windows support | See Part 7. In-process-plugin harnesses sidestep this entirely. |
 
@@ -464,9 +463,8 @@ of these actions (omit only what genuinely doesn't apply):
 - run a shell command
 - search file contents / find files by name (grep, glob)
 - fetch a URL / web search
-- **dispatch a subagent**, including how to pass the agent type — and any config
-  flag needed to enable it
-- **create / update todos** (treat older `TodoWrite` references as this action)
+- **dispatch a read-only reviewer or evaluator**, including how to pass the agent type, forbid
+  mutations, and enable any required config flag
 - **invoke a skill** — see Step 5
 
 **Get the real tool names from the harness; never invent them.** If the docs

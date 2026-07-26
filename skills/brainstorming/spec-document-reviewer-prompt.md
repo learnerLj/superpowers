@@ -1,8 +1,8 @@
 # Spec Document Reviewer Prompt Template
 
-Use this template when dispatching a spec document reviewer subagent.
+Use this template when dispatching a read-only spec reviewer subagent.
 
-**Purpose:** Verify the spec is complete, consistent, and ready for implementation planning.
+**Purpose:** Verify the spec is complete, consistent, and executable directly through TDD.
 
 **Dispatch after:** Spec document is written to docs/superpowers/specs/
 
@@ -10,7 +10,11 @@ Use this template when dispatching a spec document reviewer subagent.
 Subagent (general-purpose):
   description: "Review spec document"
   prompt: |
-    You are a spec document reviewer. Verify this spec is complete and ready for planning.
+    You are a read-only spec reviewer. Verify this spec is complete enough for
+    the main agent to implement directly through TDD.
+
+    You MUST NOT edit files, write implementation code, run implementation
+    tasks, or commit changes. Return findings only.
 
     **Spec to review:** [SPEC_FILE_PATH]
 
@@ -21,17 +25,21 @@ Subagent (general-purpose):
     | Completeness | TODOs, placeholders, "TBD", incomplete sections |
     | Consistency | Internal contradictions, conflicting requirements |
     | Clarity | Requirements ambiguous enough to cause someone to build the wrong thing |
-    | Scope | Focused enough for a single plan — not covering multiple independent subsystems |
+    | Scope | Focused enough for one coherent implementation — not covering multiple independent subsystems |
     | YAGNI | Unrequested features, over-engineering |
+    | File ownership | Exact target files and responsibilities are defined |
+    | Contracts | Interfaces, schemas, state transitions, validation, and errors are explicit |
+    | Acceptance | Concrete success, failure, and unchanged behavior are testable |
+    | Test mapping | Every acceptance criterion maps to a test location and verification command |
 
     ## Calibration
 
-    **Only flag issues that would cause real problems during implementation planning.**
+    **Only flag issues that would force the implementing agent to invent behavior or ownership.**
     A missing section, a contradiction, or a requirement so ambiguous it could be
     interpreted two different ways — those are issues. Minor wording improvements,
     stylistic preferences, and "sections less detailed than others" are not.
 
-    Approve unless there are serious gaps that would lead to a flawed plan.
+    Approve only when implementation can proceed without another design pass.
 
     ## Output Format
 
@@ -40,7 +48,7 @@ Subagent (general-purpose):
     **Status:** Approved | Issues Found
 
     **Issues (if any):**
-    - [Section X]: [specific issue] - [why it matters for planning]
+    - [Section X]: [specific issue] - [why it blocks direct implementation]
 
     **Recommendations (advisory, do not block approval):**
     - [suggestions for improvement]

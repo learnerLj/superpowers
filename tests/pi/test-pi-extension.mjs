@@ -127,11 +127,12 @@ test('pi tools reference documents pi-specific mappings', async () => {
   // were deleted — the exact regression this test exists to catch.
   const rows = text.split('\n').filter((line) => line.startsWith('|'));
   assert.ok(
-    rows.some((row) => /subagent/i.test(row)),
-    'mapping table documents subagent dispatch',
+    rows.some((row) => /read-only reviewer/i.test(row)),
+    'mapping table restricts agent dispatch to read-only review',
   );
-  assert.ok(
-    rows.some((row) => /todo|task/i.test(row)),
-    'mapping table documents task tracking',
+  assert.equal(
+    /create a todo|TODO\.md|task-list tool/i.test(text),
+    false,
+    'mapping does not require plan-like task tracking',
   );
 });

@@ -45,8 +45,7 @@ Kimi Code reads Superpowers skills from this repository. There are no copied ski
 Skills describe actions instead of hard-coding one runtime's tool names. On Kimi Code these resolve to:
 
 - "Ask the user" / "ask clarifying questions" -> `AskUserQuestion`
-- "Create a todo" / "mark complete in todo list" -> `TodoList`
-- "Dispatch a subagent" -> `Agent`
+- "Dispatch a read-only reviewer or evaluator" -> `Agent`; agents return findings or sampled responses only and never edit or implement
 - "Invoke a skill" -> Kimi Code's native `Skill` tool
 - "Read a file" / "write a file" / "edit a file" -> `Read`, `Write`, `Edit`
 - "Run a shell command" -> `Bash`

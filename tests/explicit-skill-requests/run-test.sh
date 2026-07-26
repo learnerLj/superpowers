@@ -15,7 +15,7 @@ MAX_TURNS="${3:-3}"
 
 if [ -z "$SKILL_NAME" ] || [ -z "$PROMPT_FILE" ]; then
     echo "Usage: $0 <skill-name> <prompt-file> [max-turns]"
-    echo "Example: $0 subagent-driven-development ./prompts/subagent-driven-development-please.txt"
+    echo "Example: $0 systematic-debugging ./prompts/use-systematic-debugging.txt"
     exit 1
 fi
 
@@ -43,21 +43,7 @@ cp "$PROMPT_FILE" "$OUTPUT_DIR/prompt.txt"
 
 # Create a minimal project directory for the test
 PROJECT_DIR="$OUTPUT_DIR/project"
-mkdir -p "$PROJECT_DIR/docs/superpowers/plans"
-
-# Create a dummy plan file for mid-conversation tests
-cat > "$PROJECT_DIR/docs/superpowers/plans/auth-system.md" << 'EOF'
-# Auth System Implementation Plan
-
-## Task 1: Add User Model
-Create user model with email and password fields.
-
-## Task 2: Add Auth Routes
-Create login and register endpoints.
-
-## Task 3: Add JWT Middleware
-Protect routes with JWT validation.
-EOF
+mkdir -p "$PROJECT_DIR"
 
 # Run Claude with isolated environment
 LOG_FILE="$OUTPUT_DIR/claude-output.json"
@@ -103,11 +89,10 @@ echo "Checking for premature action..."
 FIRST_SKILL_LINE=$(grep -n '"name":"Skill"' "$LOG_FILE" | head -1 | cut -d: -f1)
 if [ -n "$FIRST_SKILL_LINE" ]; then
     # Check if any non-Skill, non-system tools were invoked before the first Skill invocation
-    # Filter out task tracking tools (planning is ok) and other non-action tools
+    # Any tool call before the explicitly requested skill counts as premature work.
     PREMATURE_TOOLS=$(head -n "$FIRST_SKILL_LINE" "$LOG_FILE" | \
         grep '"type":"tool_use"' | \
-        grep -v '"name":"Skill"' | \
-        grep -vE '"name":"(TodoWrite|TaskCreate|TaskUpdate|TaskList|TaskGet)"' || true)
+        grep -v '"name":"Skill"' || true)
     if [ -n "$PREMATURE_TOOLS" ]; then
         echo "WARNING: Tools invoked BEFORE Skill tool:"
         echo "$PREMATURE_TOOLS" | head -5

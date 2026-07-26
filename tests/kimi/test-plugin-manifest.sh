@@ -35,7 +35,6 @@ if not isinstance(instructions, str) or not instructions.strip():
 
 for token in [
     "AskUserQuestion",
-    "TodoList",
     "Agent",
     "Skill",
     "Read",
@@ -48,6 +47,20 @@ for token in [
     "WebSearch",
 ]:
     assert_present(instructions, token, "skillInstructions")
+
+if "TodoWrite" in instructions or "TodoList" in instructions:
+    raise AssertionError("skillInstructions must not reintroduce plan-like task tracking")
+
+assert_present(
+    instructions,
+    "Implementation always stays in the main agent session",
+    "main-agent implementation boundary",
+)
+assert_present(
+    instructions,
+    "These agents return findings or sampled responses only",
+    "read-only reviewer and evaluator boundary",
+)
 
 version_config = json.loads(
     (manifest_path.parents[1] / ".version-bump.json").read_text(encoding="utf-8")

@@ -93,15 +93,28 @@ Skip any step = lying, not verifying
 
 **Requirements:**
 ```
-✅ Re-read plan → Create checklist → Verify each → Report gaps or completion
+✅ Re-read approved spec → Create checklist → Verify each criterion → Report gaps or completion
 ❌ "Tests pass, phase complete"
 ```
 
-**Agent delegation:**
+**Reviewer findings:**
 ```
-✅ Agent reports success → Check VCS diff → Verify changes → Report actual state
-❌ Trust agent report
+✅ Reviewer reports issue → Reproduce against spec/code → Verify evidence → Fix in main session
+❌ Let a reviewer edit or trust an unsupported finding
 ```
+
+## Completion Handoff
+
+After the read-only review loop has no remaining Critical or Important findings:
+
+1. Re-read the approved spec and check every acceptance criterion.
+2. Run the full relevant test, build, and lint commands on the current tree.
+3. Inspect the final diff and confirm it contains only the intended implementation.
+4. The main agent commits the verified implementation, staging only intended files.
+5. Invoke `finishing-a-development-branch` with that committed snapshot.
+
+Any code change after verification invalidates the evidence. Re-run the affected
+checks before committing or claiming completion.
 
 ## When To Apply
 

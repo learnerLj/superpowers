@@ -984,17 +984,17 @@ Agent vision capabilities help understand layouts and structures.
 
 ### Create verifiable intermediate outputs
 
-When agents perform complex, open-ended tasks, they can make mistakes. The "plan-validate-execute" pattern catches errors early by having the agent first create a plan in a structured format, then validate that plan with a script before executing it.
+When agents perform complex, open-ended tasks, they can make mistakes. A structured-preview pattern catches errors early by having the agent first emit the intended change set in a machine-readable format, validate it with a script, and only then apply it.
 
 **Example**: Imagine asking the agent to update 50 form fields in a PDF based on a spreadsheet. Without validation, it might reference non-existent fields, create conflicting values, miss required fields, or apply updates incorrectly.
 
-**Solution**: Use the workflow pattern shown above (PDF form filling), but add an intermediate `changes.json` file that gets validated before applying changes. The workflow becomes: analyze → **create plan file** → **validate plan** → execute → verify.
+**Solution**: Use the workflow pattern shown above (PDF form filling), but add an intermediate `changes.json` file that gets validated before applying changes. The workflow becomes: analyze → **emit change set** → **validate change set** → execute → verify.
 
 **Why this pattern works:**
 
 * **Catches errors early**: Validation finds problems before changes are applied
 * **Machine-verifiable**: Scripts provide objective verification
-* **Reversible planning**: The agent can iterate on the plan without touching originals
+* **Reversible preview**: The agent can iterate on the change set without touching originals
 * **Clear debugging**: Error messages point to specific problems
 
 **When to use**: Batch operations, destructive changes, complex validation rules, high-stakes operations.

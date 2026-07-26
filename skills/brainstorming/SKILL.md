@@ -19,17 +19,19 @@ Every project goes through this process. A todo list, a single-function utility,
 
 ## Checklist
 
-You MUST create a task for each of these items and complete them in order:
+Complete these items in order:
 
 1. **Explore project context** — check files, docs, recent commits
 2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+6. **Write executable spec** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-spec.md`
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-8. **User reviews written spec** — ask user to review the spec file before proceeding
-9. **Transition to implementation** — invoke test-driven-development skill to begin code implementation
+8. **Independent spec review** — for substantial changes, dispatch a read-only reviewer subagent using the bundled prompt
+9. **User reviews written spec** — ask user to review the spec file before proceeding
+10. **Commit approved spec** — commit only the finalized spec and record that commit as the implementation baseline
+11. **Transition to implementation** — the main agent invokes test-driven-development and implements the approved spec
 
 ## Process Flow
 
@@ -40,25 +42,33 @@ digraph brainstorming {
     "Propose 2-3 approaches" [shape=box];
     "Present design sections" [shape=box];
     "User approves design?" [shape=diamond];
-    "Write design doc" [shape=box];
+    "Write executable spec" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
+    "Substantial change?" [shape=diamond];
+    "Read-only spec review" [shape=box];
     "User reviews spec?" [shape=diamond];
-    "Invoke test-driven-development skill" [shape=doublecircle];
+    "Commit approved spec" [shape=box];
+    "Main agent invokes TDD" [shape=doublecircle];
 
     "Explore project context" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
     "Present design sections" -> "User approves design?";
     "User approves design?" -> "Present design sections" [label="no, revise"];
-    "User approves design?" -> "Write design doc" [label="yes"];
-    "Write design doc" -> "Spec self-review\n(fix inline)";
-    "Spec self-review\n(fix inline)" -> "User reviews spec?";
-    "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Invoke test-driven-development skill" [label="approved"];
+    "User approves design?" -> "Write executable spec" [label="yes"];
+    "Write executable spec" -> "Spec self-review\n(fix inline)";
+    "Spec self-review\n(fix inline)" -> "Substantial change?";
+    "Substantial change?" -> "Read-only spec review" [label="yes"];
+    "Substantial change?" -> "User reviews spec?" [label="no"];
+    "Read-only spec review" -> "Write executable spec" [label="issues"];
+    "Read-only spec review" -> "User reviews spec?" [label="approved"];
+    "User reviews spec?" -> "Write executable spec" [label="changes requested"];
+    "User reviews spec?" -> "Commit approved spec" [label="approved"];
+    "Commit approved spec" -> "Main agent invokes TDD";
 }
 ```
 
-**The terminal state is invoking test-driven-development.** Do NOT invoke writing-plans, frontend-design, or mcp-builder. The ONLY skill you invoke after brainstorming is test-driven-development.
+**The terminal state is the main agent invoking test-driven-development against the approved spec.** Never delegate implementation to a subagent. Reviewer subagents are read-only and return findings to the main agent.
 
 ## The Process
 
@@ -66,7 +76,7 @@ digraph brainstorming {
 
 - Check out the current project state first (files, docs, recent commits)
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
-- If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
+- If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, and what order should they be built? Then take the first sub-project through the normal spec-to-TDD flow.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
 - Prefer multiple choice questions when possible, but open-ended is fine too
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
@@ -100,36 +110,61 @@ digraph brainstorming {
 - Where existing code has problems that affect the work (e.g., a file that's grown too large, unclear boundaries, tangled responsibilities), include targeted improvements as part of the design - the way a good developer improves code they're working in.
 - Don't propose unrelated refactoring. Stay focused on what serves the current goal.
 
+## Executable Spec Contract
+
+The spec is the complete implementation authority. A developer with no conversation history must be able to implement it without inventing missing behavior or producing another workflow document.
+
+Every substantial spec must define:
+
+1. **Goal and Non-goals** — the observable outcome and explicit scope exclusions.
+2. **Current system context** — the existing owner, entry point, data flow, and constraints that the change must preserve.
+3. **Target files** — exact files to create, modify, or delete, with each file's responsibility. Line numbers are optional because they drift.
+4. **Interfaces and data contracts** — exact names, signatures, schemas, state transitions, validation rules, and error behavior visible across boundaries.
+5. **Behavioral slices** — dependency-ordered, independently testable outcomes. Describe behavior and boundaries, not micro-steps, commits, or production-code snippets.
+6. **Acceptance criteria** — concrete inputs, outputs, side effects, failure cases, and unchanged behavior for every slice.
+7. **Test mapping** — the test file and test case or scenario that proves each acceptance criterion, including the command used for focused and broader verification.
+8. **Migration and compatibility** — data migration, rollout, rollback, compatibility, or an explicit statement that none applies.
+
+Keep implementation mechanics in TDD. The spec defines what must be true, where the ownership lives, and how completion is proven; it does not prescribe a sequence of tiny coding actions.
+
 ## After the Design
 
 **Documentation:**
 
-- Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+- Write the validated executable spec to `docs/superpowers/specs/YYYY-MM-DD-<topic>-spec.md`
   - (User preferences for spec location override this default)
 - Use elements-of-style:writing-clearly-and-concisely skill if available
-- Commit the design document to git
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
 
 1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
-3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
+3. **Scope check:** Is this focused enough for one coherent implementation, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+5. **Coverage check:** Does every acceptance criterion map to a target file, interface or behavior, and test?
 
 Fix any issues inline. No need to re-review — just fix and move on.
+
+**Independent Review:**
+
+For substantial or cross-cutting specs, dispatch a reviewer subagent using [spec-document-reviewer-prompt.md](spec-document-reviewer-prompt.md). The reviewer is read-only: it reports gaps and contradictions but MUST NOT edit files, run implementation tasks, or commit changes. The main agent applies valid findings and repeats the review until approved.
 
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
 
-> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start implementation using test-driven-development."
+> "Spec written to `<path>`. Please review it and let me know if you want to make any changes before we approve and commit the implementation baseline."
 
 Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
 
+After approval, commit only the finalized spec and record that commit as
+`BASE_SHA`. Do not combine implementation changes with this baseline commit.
+Report the spec path and `BASE_SHA`, then begin test-driven-development.
+
 **Implementation:**
 
-- Invoke the test-driven-development skill to begin code implementation
-- Do NOT invoke writing-plans. test-driven-development is the next step.
+- After user approval, the main agent takes the approved spec directly into test-driven-development and implements it in the current session.
+- Subagents may review the spec or completed code, but MUST NOT write implementation code, edit files, run implementation tasks, or commit changes.
 
 ## Visual Companion
 
