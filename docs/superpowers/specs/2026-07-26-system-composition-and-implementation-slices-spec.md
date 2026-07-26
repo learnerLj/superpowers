@@ -94,7 +94,7 @@ spec 需要说清楚：
 目标是形成一致的 ownership model，不是为每个架构标签创建一个文件或类型。
 简单系统可以用连续短段落说明；只有在关系复杂时才使用 tree、table 或关系图。
 
-### 4.2 Canonical data 与结构关系
+### 4.2 权威数据与结构关系
 
 每个被修改的业务概念必须有明确的 canonical representation 和 owner。相关结构
 之间的关系必须说明为 containment、reference、derivation、projection 或有理由的
@@ -112,7 +112,7 @@ duplication。
 副本必须指向该 owner；当正确性依赖同步时，还必须说明 refresh、invalidation 或
 consistency rule。
 
-### 4.3 Boundary 与转换理由
+### 4.3 边界与转换理由
 
 目标是消除没有语义理由的转换，不是追求绝对零转换。
 
@@ -140,7 +140,7 @@ derivation、persistence、serialization 和 projection 发生的位置。
 字段清单或数据库模板。如果 persistent、domain、transport、cache、event、
 configuration 和 UI-state structure 都没有变化，spec 应直接明确说明并保持简短。
 
-## 5. 内嵌 Implementation Slices 契约
+## 5. 内嵌实现切片契约
 
 executable spec 在 `Implementation Slices` 下包含唯一的执行大纲。slice 是按依赖
 排序、能够独立测试和 review 的结果，不是微步骤说明。
@@ -216,12 +216,12 @@ criteria 或 scope 属于 semantic spec change。主 Agent 必须停止实现、
 
 ## 7. 接口与边界契约
 
-### Executable spec authority
+### 可执行规范权威
 
 批准 spec 保持唯一 implementation authority。内嵌 slice list 是 spec 的组成部分，
 不是第二份 workflow 文档。`BASE_SHA` 仍然是只包含批准 spec 的 commit。
 
-### Progress marker
+### 进度标记
 
 canonical slice status 使用 Markdown checkbox：
 
@@ -233,7 +233,7 @@ canonical slice status 使用 Markdown checkbox：
 正常实现中只更新 marker。checked 不表示“测试文件已经存在”，而表示该 slice 的
 outcome、acceptance criteria、verification command 和 review gate 全部通过。
 
-### Review authority
+### 审查权威
 
 spec reviewer 和 code reviewer subagent 保持只读，只返回 findings。主 Agent 负责
 判断 findings、执行全部编辑，并通过 TDD 修复。
@@ -253,31 +253,31 @@ contract 是强制的，篇幅按任务复杂度调整。简单 configuration ch
 消除真实设计歧义的关系和决策。是否合格取决于 decision coverage，不取决于文档
 长度。
 
-## 8. Implementation Slices
+## 8. 实现切片
 
 - [x] **S1. 建立 RED workflow 与行为证据**
 
-  **Outcome：** 确定性 workflow assertions 和 fresh-context baseline evaluation
+  **结果：** 确定性 workflow assertions 和 fresh-context baseline evaluation
   证明当前 `brainstorming` 尚未强制完整 implementation slice contract 和比例
   原则；静态 assertions 证明 composition、transformation、redundancy、slice 和
   默认中文 contract 尚未写入 authoring authority。
 
-  **Depends on：** None
+  **依赖：** None
 
-  **System scope：** 只修改 workflow consistency test 并运行只读 skill behavior
+  **系统范围：** 只修改 workflow consistency test 并运行只读 skill behavior
   evaluation，不修改生产 skill 文本。
 
-  **Data decisions：** 不改变 runtime data structure。evaluation fixture 使用同形
+  **数据决策：** 不改变 runtime data structure。evaluation fixture 使用同形
   DTO chain、模糊 ownership 和简单 configuration change 作为可观察 failure
   stimulus。
 
-  **Files：** 修改 `tests/workflow/test-spec-to-tdd-consistency.sh`。
+  **文件：** 修改 `tests/workflow/test-spec-to-tdd-consistency.sh`。
 
-  **Acceptance criteria：** AC-10。为 AC-1 至 AC-5、AC-11 建立行为或静态 RED；
+  **验收标准：** AC-10。为 AC-1 至 AC-5、AC-11 建立行为或静态 RED；
   为 AC-12 建立静态 RED。AC-6 至 AC-9 使用既有 5/5 baseline 作为回归控制，不
   声称存在 RED。
 
-  **Verification：** 新 assertion 加入后，focused
+  **验证：** 新 assertion 加入后，focused
   `tests/workflow/test-spec-to-tdd-consistency.sh` 必须在 skill 修改前失败；broader
   `tests/workflow/run-tests.sh` 必须报告同一个预期失败。使用当前未修改的 skill 或
   reviewer surface，对固定 fixture F1-F7 各运行 5 个 fresh-context samples。只有
@@ -286,59 +286,59 @@ contract 是强制的，篇幅按任务复杂度调整。简单 configuration ch
   5/5 failure；F3-F6 为 5/5 pass；F7 中文默认为 4/5 pass。每个 response 均由
   主 Agent 人工评分。
 
-  **Review gate：** None。主 Agent 检查 RED evidence 后才能继续。
+  **审查门禁：** None。主 Agent 检查 RED evidence 后才能继续。
 
-- [ ] **S2. 让 executable spec 描述系统结构和执行路径**
+- [x] **S2. 让 executable spec 描述系统结构和执行路径**
 
-  **Outcome：** `brainstorming` 默认用中文生成 spec，并要求比例合适的 system
+  **结果：** `brainstorming` 默认用中文生成 spec，并要求比例合适的 system
   composition、canonical ownership、data relationship、justified transformation、
   redundancy decision 和 implementation slices，可直接进入主 Agent TDD。
 
-  **Depends on：** S1
+  **依赖：** S1
 
-  **System scope：** executable-spec authoring 和公开 workflow 描述。
+  **系统范围：** executable-spec authoring 和公开 workflow 描述。
 
-  **Data decisions：** spec 用同一个比例化 composition model 描述 domain、
+  **数据决策：** spec 用同一个比例化 composition model 描述 domain、
   transport、persistence、cache、event、configuration 和 UI-state structure，
   不增加 registry 或第二份文档。
 
-  **Files：** 修改 `skills/brainstorming/SKILL.md` 和 `README.md`。
+  **文件：** 修改 `skills/brainstorming/SKILL.md` 和 `README.md`。
 
-  **Acceptance criteria：** AC-1 至 AC-5、AC-10、AC-11、AC-12。
+  **验收标准：** AC-1 至 AC-5、AC-10、AC-11、AC-12。
 
-  **Verification：** focused `tests/workflow/test-spec-to-tdd-consistency.sh`；
+  **验证：** focused `tests/workflow/test-spec-to-tdd-consistency.sh`；
   broader `tests/workflow/run-tests.sh` 和 `git diff --check`。
 
-  **Review gate：** Mandatory。使用 candidate `brainstorming` guidance 对 F1、F2
+  **审查门禁：** Mandatory。使用 candidate `brainstorming` guidance 对 F1、F2
   和 F7 中文默认组各运行 5 个 fresh-context samples，再对 F7 英文 override 组
   运行 5 个 samples。每组必须 5/5 完整通过 rubric。failed run 后产生的新 wording
   variant 必须重新运行自己的全部 guided sample groups，并与 S1 control 对照。
   没有 GREEN evidence 不能进入 S3。
 
-- [ ] **S3. 闭合全文一致性与回归门禁**
+- [x] **S3. 闭合全文一致性与回归门禁**
 
-  **Outcome：** 全部 active workflow surface 与新的 authoring contract 一致，同时
+  **结果：** 全部 active workflow surface 与新的 authoring contract 一致，同时
   已经稳定工作的只读 review、完成验证和主 Agent 顺序 TDD 行为不回归。
 
-  **Depends on：** S2
+  **依赖：** S2
 
-  **System scope：** deterministic workflow consistency、全部相关 harness tests 和
+  **系统范围：** deterministic workflow consistency、全部相关 harness tests 和
   最终只读 code review。
 
-  **Data decisions：** 不新增数据结构。slice marker 是批准 spec 内的状态，不是
+  **数据决策：** 不新增数据结构。slice marker 是批准 spec 内的状态，不是
   独立 progress store。
 
-  **Files：** 不修改额外 production skill；只更新本 spec 的 progress marker。
+  **文件：** 不修改额外 production skill；只更新本 spec 的 progress marker。
 
-  **Acceptance criteria：** AC-5 至 AC-12。
+  **验收标准：** AC-5 至 AC-12。
 
-  **Verification：** focused `tests/workflow/run-tests.sh`；broader 为
+  **验证：** focused `tests/workflow/run-tests.sh`；broader 为
   `docs/testing.md` 记录的全部相关 harness tests、Bash/Node/JSON syntax checks、
   `git diff --check` 和最终 working-tree inspection。F3-F6 的既有 5/5 baseline
   结果作为 regression control；如果实现触及它们依赖的文本，必须重跑对应 5 个
   samples，否则不重复采样已经稳定的行为。
 
-  **Review gate：** Mandatory final read-only code review，范围为修订后的
+  **审查门禁：** Mandatory final read-only code review，范围为修订后的
   `BASE_SHA` 到完整 working tree。每个有效 Critical 或 Important fix 后重新运行
   fresh verification 和 review。
 
@@ -376,7 +376,7 @@ contract 是强制的，篇幅按任务复杂度调整。简单 configuration ch
 
 ## 10. 测试与行为评估映射
 
-### 固定行为 fixtures
+### 固定行为测试样例
 
 - **F1 - 长时间订单 feature：** 要求为一个订单系统撰写 executable spec。输入
   架构包含 `OrderRequest -> CreateOrderDTO -> OrderCommand -> OrderEntity ->

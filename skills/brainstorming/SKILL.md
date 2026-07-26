@@ -13,6 +13,28 @@ Start by understanding the current project context, then ask questions one at a 
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 </HARD-GATE>
 
+<LANGUAGE-HARD-GATE>
+Before drafting any executable spec, lock one primary narrative language using
+this precedence: direct user request, authoritative project language rule,
+established language of an existing spec, then Chinese by default.
+If the user is discussing the request in Chinese and no higher-priority rule explicitly
+requires another language, the selected language is Chinese.
+
+Write the entire spec in that selected language: title, headings, prose,
+acceptance criteria, test mapping, and every Implementation Slice. Do not infer
+English from this skill, repository code, filenames, fixture text, or other
+technical material. Keep only required technical literals such as identifiers,
+API fields, commands, paths, and exact error text in their original form. Before
+review, scan every narrative heading and paragraph; translate any passage that
+uses a different language without being a required technical literal.
+
+The labeled Implementation Slice fields below define required meanings, not
+fixed English output strings. Localize `Outcome`, `Depends on`, `System scope`,
+`Data decisions`, `Files`, `Acceptance criteria`, `Verification`, and `Review
+gate` into the selected language. English labels in a Chinese spec are
+narrative-language drift, not technical literals.
+</LANGUAGE-HARD-GATE>
+
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
 
 Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
@@ -26,12 +48,13 @@ Complete these items in order:
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write executable spec** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-spec.md`
-7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-8. **Independent spec review** — for substantial changes, dispatch a read-only reviewer subagent using the bundled prompt
-9. **User reviews written spec** — ask user to review the spec file before proceeding
-10. **Commit approved spec** — commit only the finalized spec and record that commit as the implementation baseline
-11. **Transition to implementation** — the main agent invokes test-driven-development and implements the approved spec
+6. **Lock and verify spec language** — apply the language hard gate before drafting, then scan the finished spec for narrative-language drift
+7. **Write executable spec** — use the selected language and save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-spec.md`
+8. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
+9. **Independent spec review** — for substantial changes, dispatch a read-only reviewer subagent using the bundled prompt
+10. **User reviews written spec** — ask user to review the spec file before proceeding
+11. **Commit approved spec** — commit only the finalized spec and record that commit as the implementation baseline
+12. **Transition to implementation** — the main agent invokes test-driven-development and implements the approved spec
 
 ## Process Flow
 
@@ -114,18 +137,65 @@ digraph brainstorming {
 
 The spec is the complete implementation authority. A developer with no conversation history must be able to implement it without inventing missing behavior or producing another workflow document.
 
-Every substantial spec must define:
+The language hard gate above is part of this contract. Language selection happens before drafting and remains fixed for the whole spec unless the user or project authority explicitly overrides it. The self-review must reject narrative-language drift; a mostly selected-language document with English headings or sections is not compliant. Technical literals remain in their required original form.
+
+Scale detail to the decision surface. A simple configuration change can state in a few sentences that no runtime structure or transformation changes and use one small slice. A cross-component feature needs enough structure and flow detail to eliminate real design choices during implementation. Completeness is decision coverage, not length.
+
+Every substantial spec contains these sections:
 
 1. **Goal and Non-goals** — the observable outcome and explicit scope exclusions.
-2. **Current system context** — the existing owner, entry point, data flow, and constraints that the change must preserve.
+2. **Current system context** — the existing authority, entry point, flow, constraints, and behavior that must remain unchanged.
 3. **Target files** — exact files to create, modify, or delete, with each file's responsibility. Line numbers are optional because they drift.
-4. **Interfaces and data contracts** — exact names, signatures, schemas, state transitions, validation rules, and error behavior visible across boundaries.
-5. **Behavioral slices** — dependency-ordered, independently testable outcomes. Describe behavior and boundaries, not micro-steps, commits, or production-code snippets.
-6. **Acceptance criteria** — concrete inputs, outputs, side effects, failure cases, and unchanged behavior for every slice.
-7. **Test mapping** — the test file and test case or scenario that proves each acceptance criterion, including the command used for focused and broader verification.
-8. **Migration and compatibility** — data migration, rollout, rollback, compatibility, or an explicit statement that none applies.
+4. **System composition and data flow** — components, responsibilities, ownership, relationships, and input-to-output flow.
+5. **Interfaces and boundary contracts** — exact names, signatures, schemas, state transitions, validation, errors, and justified transformations visible across real boundaries.
+6. **Implementation Slices** — the single dependency-ordered execution outline embedded in the spec.
+7. **Acceptance criteria** — concrete inputs, outputs, side effects, failure cases, and unchanged behavior.
+8. **Test mapping** — the test file and scenario proving each acceptance criterion, plus focused and broader verification commands.
+9. **Migration and compatibility** — data migration, rollout, rollback, compatibility, or an explicit statement that none applies.
 
-Keep implementation mechanics in TDD. The spec defines what must be true, where the ownership lives, and how completion is proven; it does not prescribe a sequence of tiny coding actions.
+### System composition and data flow
+
+For each meaningful component, define its responsibility, owned state or business facts, inputs, outputs, dependencies, and relevant exclusions. The purpose is one coherent ownership model, not one type or file per architecture label.
+
+Name the canonical owner and representation for every changed business fact. Describe related structures as containment, reference, derivation, projection, or justified duplication. Prefer, in order:
+
+1. reuse when semantics and invariants match;
+2. containment or reference for real relationships;
+3. extension when owner and lifecycle remain the same;
+4. a new structure only for distinct semantics, invariants, ownership, lifecycle, or a real boundary contract.
+
+Classify important structures as reused, extended, merged, replaced, added, or removed. Treat same-shape DTOs, commands, entities, models, state objects, and wrappers as one structure unless a real boundary justifies separation; reuse, compose, merge, or explicitly justify them.
+
+Trace input-to-core and core-to-output data flow. State where validation, derivation, persistence, serialization, and projection occur. For every retained transformation, identify source, target, owner, information added or removed, and the boundary reason. Layer names alone do not justify a transformation. Valid reasons include untrusted-input validation, public protocol compatibility, sensitive-field filtering, wire-format or unit differences, real persistence constraints, or a newly established invariant.
+
+If persistent, domain, transport, cache, event, configuration, and UI-state structures do not change, say so briefly. Do not invent schema inventories or extra layers to fill the section.
+
+### Implementation Slices
+
+Implementation Slices are outcome-oriented, independently testable checkpoints in dependency order. They are the only execution outline; do not create a second execution document, todo ledger, or progress artifact.
+
+Each production implementation slice uses an unchecked Markdown progress marker in the approved baseline.
+A completed evidence-only RED slice may enter that baseline with a checked marker only when its
+evidence was collected, recorded, reviewed, and disclosed to the user before approval.
+This exception never applies to production implementation work. Each slice contains these labeled
+meanings, rendered in the spec's selected language:
+
+- **Outcome:** observable result when complete.
+- **Depends on:** prerequisite slice IDs, or `None`.
+- **System scope:** affected components and responsibility boundaries.
+- **Data decisions:** structure and transformation decisions, or an explicit no-change statement.
+- **Files:** exact files expected to be created, modified, or deleted.
+- **Acceptance criteria:** IDs proved by the slice.
+- **Verification:** focused and broader commands.
+- **Review gate:** read-only review required for cross-component, risky, or downstream-critical work; otherwise `None`.
+
+Slices do not contain production-code snippets, full test implementations, edit-by-edit instructions, commit commands, time estimates, or implementer subagent assignments.
+
+During implementation, the main agent selects the next dependency-ready unchecked slice and applies RED-GREEN-REFACTOR. It runs the declared verification and any read-only review gate before changing the progress marker to checked. If later work changes behavior or files proved by a completed slice, reopen that slice and obtain fresh verification and review evidence.
+
+Changing a slice outcome, system ownership, data decision, interface, acceptance criterion, or scope is a semantic spec change. Stop implementation, revise and re-review the spec, obtain user approval, and commit the revised spec alone as the new baseline.
+
+Keep implementation mechanics in TDD. The spec defines what must be true, where authority lives, and how completion is proven; it never expands into tiny coding actions.
 
 ## After the Design
 
@@ -143,6 +213,7 @@ After writing the spec document, look at it with fresh eyes:
 3. **Scope check:** Is this focused enough for one coherent implementation, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
 5. **Coverage check:** Does every acceptance criterion map to a target file, interface or behavior, and test?
+6. **Language check:** Does every title, heading, prose paragraph, acceptance criterion, test mapping, and Implementation Slice use the locked primary language, except required technical literals?
 
 Fix any issues inline. No need to re-review — just fix and move on.
 

@@ -103,7 +103,9 @@ assert_contains \
 
 for required_section in \
     'Target files' \
-    'Interfaces and data contracts' \
+    'System composition and data flow' \
+    'Interfaces and boundary contracts' \
+    'Implementation Slices' \
     'Acceptance criteria' \
     'Test mapping' \
     'Non-goals'; do
@@ -112,6 +114,51 @@ for required_section in \
         "$required_section" \
         "executable spec is missing: $required_section"
 done
+
+for required_contract in \
+    'canonical owner' \
+    'containment' \
+    'same-shape' \
+    'transformation' \
+    'dependency order' \
+    'progress marker' \
+    'LANGUAGE-HARD-GATE' \
+    'discussing the request in Chinese' \
+    'entire spec in that selected language' \
+    'English labels in a Chinese spec' \
+    'narrative-language drift' \
+    'technical literal'; do
+    assert_contains \
+        "skills/brainstorming/SKILL.md" \
+        "$required_contract" \
+        "executable spec contract is missing: $required_contract"
+done
+
+for exact_contract_line in \
+    '^this precedence: direct user request, authoritative project language rule,$' \
+    '^established language of an existing spec, then Chinese by default\.$' \
+    '^fixed English output strings\. Localize `Outcome`, `Depends on`, `System scope`,$' \
+    '^Each production implementation slice uses an unchecked Markdown progress marker in the approved baseline\.' \
+    '^evidence was collected, recorded, reviewed, and disclosed to the user before approval\.$' \
+    '^This exception never applies to production implementation work\.' \
+    '^- \*\*Outcome:\*\* observable result when complete\.$' \
+    '^- \*\*Depends on:\*\* prerequisite slice IDs, or `None`\.$' \
+    '^- \*\*System scope:\*\* affected components and responsibility boundaries\.$' \
+    '^- \*\*Data decisions:\*\* structure and transformation decisions, or an explicit no-change statement\.$' \
+    '^- \*\*Files:\*\* exact files expected to be created, modified, or deleted\.$' \
+    '^- \*\*Acceptance criteria:\*\* IDs proved by the slice\.$' \
+    '^- \*\*Verification:\*\* focused and broader commands\.$' \
+    '^- \*\*Review gate:\*\* read-only review required for cross-component, risky, or downstream-critical work; otherwise `None`\.$'; do
+    assert_contains \
+        "skills/brainstorming/SKILL.md" \
+        "$exact_contract_line" \
+        "executable spec contract line is missing: $exact_contract_line"
+done
+
+assert_contains \
+    "README.md" \
+    'embedded.*dependency-ordered implementation slices' \
+    "README must describe the embedded execution outline"
 
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \

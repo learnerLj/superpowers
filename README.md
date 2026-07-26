@@ -19,7 +19,7 @@ It starts from the moment you fire up your coding agent. As soon as it sees that
 
 Once it's teased a spec out of the conversation, it shows it to you in chunks short enough to actually read and digest. 
 
-After you've signed off on the design, the agent writes one executable spec: exact ownership, target files, interfaces, acceptance criteria, and test mapping. No second workflow document is created.
+After you've signed off on the design, the agent writes one executable spec: system ownership, canonical data relationships, justified boundary transformations, target files, interfaces, acceptance criteria, test mapping, and embedded dependency-ordered implementation slices. No second workflow document is created.
 
 Once you say "go", the main agent implements that spec with true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. Subagents may perform read-only review or evaluation, but they never implement changes.
 
@@ -201,7 +201,7 @@ The Pi package loads the Superpowers skills and a small extension that injects t
 
 ## The Basic Workflow
 
-1. **brainstorming** - Activates before writing code. Refines rough ideas, presents the design, and saves an executable spec with exact contracts, acceptance criteria, and test mapping.
+1. **brainstorming** - Activates before writing code. Refines rough ideas, presents the design, and saves one executable spec with system composition, boundary contracts, acceptance criteria, test mapping, and embedded dependency-ordered implementation slices.
 
 2. **test-driven-development** - The main agent implements the approved spec through RED-GREEN-REFACTOR: write a failing test, watch it fail, write minimal code, watch it pass.
 
