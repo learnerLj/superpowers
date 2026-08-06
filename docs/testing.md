@@ -2,18 +2,17 @@
 
 Superpowers has two distinct kinds of verification:
 
-- **`tests/`** — do skill contracts and bundled helper scripts work? Bash + node + python tests cover the workflow, brainstorm companion, debugging helpers, and shell utilities.
+- **`tests/`** — do skill contracts and bundled helper scripts work? Bash + python tests cover the workflow, debugging helpers, and shell utilities.
 - **Behavior evidence** — do fresh-context read-only evaluators follow the intended skill contract? Store the relevant prompts, source hashes, responses, and evidence boundary with the workflow test evidence.
 
 ## Local tests
 
 Live in `tests/`. Currently:
 
-- `tests/brainstorm-server/` — node test suite for the brainstorm server JS code.
 - `tests/workflow/` — static checks for short-task exit, general long-task specs, evidence profiles, main-agent TDD, and read-only-review authority boundaries. Run with `tests/workflow/run-tests.sh`.
 - `tests/systematic-debugging/` and `tests/shell-lint/` — focused helper-script tests.
 
-Run the focused directory test for the area changed. The brainstorm companion has its own Node package under `tests/brainstorm-server/`.
+Run the focused directory test for the area changed.
 
 ## Skill behavior evidence
 

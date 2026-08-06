@@ -1,32 +1,23 @@
 ---
 name: requesting-code-review
-description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements
+description: 完成任务、实现重大功能或准备合并，并需要验证工作是否满足要求时使用
 ---
 
-# Requesting Code Review
+# 请求代码审查
 
-Dispatch a read-only reviewer subagent to catch issues without delegating implementation. The reviewer gets the approved executable spec and diff — never your session's history.
+派出只读 reviewer subagent 捕获问题，但不委派实现。reviewer 只接收已批准的 executable spec 和 diff，绝不能得到当前 session 历史。
 
-**Core principle:** Review early, review often.
+**核心原则：** 尽早审查，频繁审查。
 
-## When to Request Review
+## 何时请求审查
 
-**Mandatory:**
-- After completing major feature
-- Before merge to main
+重大功能完成后和合并到 main 前必须审查。卡住时、重构前需要基线检查时，以及修复复杂 bug 后，也很有价值。
 
-**Optional but valuable:**
-- When stuck (fresh perspective)
-- Before refactoring (baseline check)
-- After fixing complex bug
+## 请求方法
 
-## How to Request
+### 1. 建立审查基线
 
-**1. Establish the review baseline:**
-
-The approved spec commit is the required baseline. Review the full current
-working tree from that commit so committed, staged, and unstaged implementation
-changes are all in scope.
+已批准 spec 的提交是必需基线。审查从该提交到当前 working tree 的全部内容，确保已提交、已暂存和未暂存的实现变更都在范围内。
 
 ```bash
 BASE_SHA=<approved-spec-commit>
@@ -35,87 +26,68 @@ git diff --stat "$BASE_SHA"
 git diff "$BASE_SHA"
 ```
 
-List untracked implementation files explicitly in the reviewer context because
-Git does not include their contents in a normal diff.
+普通 Git diff 不包含 untracked 文件内容，因此必须在 reviewer 上下文中明确列出未跟踪的实现文件。
 
-**2. Run pre-review verification:**
+### 2. 执行审查前验证
 
-Run the focused tests for the changed behavior plus the relevant broader suite.
-Record the exact commands, exit codes, and failure counts as verification
-evidence. Do not ask the reviewer to infer test status or mutate the checkout by
-running the implementation workflow.
+运行覆盖变更行为的聚焦测试和相关的更广测试集。记录精确命令、exit code 和失败数量作为验证证据。不要让 reviewer 推断测试状态，也不要让它通过运行实现流程来修改 checkout。
 
-**3. Dispatch a read-only reviewer subagent:**
+### 3. 派出只读 reviewer
 
-Dispatch a `general-purpose` subagent, filling the template at [code-reviewer.md](code-reviewer.md)
+派出 `general-purpose` subagent，并填写 [code-reviewer.md](code-reviewer.md) 模板。
 
-The reviewer MUST NOT edit files, run implementation tasks, or commit changes. It returns findings only; the main agent evaluates and implements valid fixes through TDD.
+reviewer 不得编辑文件、运行实现任务或提交。它只返回 findings；主 agent 评估意见，并通过 TDD 实施有效修复。
 
-**Placeholders:**
-- `{DESCRIPTION}` - Brief summary of what you built
-- `{APPROVED_SPEC}` - The approved executable spec path and content
-- `{BASE_SHA}` - Approved-spec baseline commit
-- `{UNTRACKED_FILES}` - Untracked implementation files, or `None`
-- `{VERIFICATION_EVIDENCE}` - Exact commands and fresh results
+占位符：
 
-**4. Act on feedback:**
-- Fix Critical issues immediately
-- Fix Important issues before proceeding
-- Note Minor issues for later
-- Push back if reviewer is wrong (with reasoning)
-- For every valid code finding, reproduce it with a failing test and fix it in the main session
-- Re-run verification after fixes and repeat the review until no Critical or Important issues remain
+- `{DESCRIPTION}`：实现内容的简述
+- `{APPROVED_SPEC}`：已批准 executable spec 的路径和内容
+- `{BASE_SHA}`：已批准 spec 所在的基线提交
+- `{UNTRACKED_FILES}`：未跟踪实现文件，或 `None`
+- `{VERIFICATION_EVIDENCE}`：精确命令和新鲜结果
 
-## Example
+### 4. 处理反馈
 
-```
-[Just completed the approved spec in the working tree]
+- 立即修复 Critical；继续前修复 Important；Minor 可留待以后。
+- reviewer 错误时用技术证据反驳。
+- 每个有效代码 finding 都必须由主 session 先用失败测试复现，再实施修复。
+- 修复后重新验证并重复审查，直到没有 Critical 或 Important。
 
-You: Let me request code review before proceeding.
+## 示例
 
-BASE_SHA=$(git rev-parse HEAD) # approved spec was committed here
+```text
+[working tree 已完成批准的 spec]
+
+You: 合并前先请求 code review。
+
+BASE_SHA=$(git rev-parse HEAD) # spec 在该提交获批
 git status --short
 git diff "$BASE_SHA"
 
-[Run focused tests and the relevant broader suite]
+[运行聚焦测试和相关的更广测试集]
 
-[Dispatch read-only code reviewer subagent]
-  DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
-  APPROVED_SPEC: docs/superpowers/specs/deployment-spec.md at BASE_SHA
+[派出只读 code reviewer]
+  DESCRIPTION: 添加 verifyIndex() 和 repairIndex()，覆盖 4 种问题
+  APPROVED_SPEC: BASE_SHA 中的 docs/superpowers/specs/deployment-spec.md
   BASE_SHA: a7981ec
   UNTRACKED_FILES: None
   VERIFICATION_EVIDENCE: npm test -- indexer.test.ts (18 passed); npm test (142 passed)
 
-[Read-only reviewer returns]:
-  Strengths: Clean architecture, real tests
-  Issues:
-    Important: Missing progress indicators
-    Minor: Magic number (100) for reporting interval
-  Assessment: Ready to proceed
+[reviewer 返回 findings]
 
-You: [Evaluate the finding, add a failing test, fix it in the main session, verify, and repeat review]
+You: 评估 finding，在主 session 添加失败测试、修复、验证并再次审查。
 ```
 
-## Common Rationalizations
+## 常见合理化借口
 
-| Excuse | Reality |
-|--------|---------|
-| "I'll just review the diff myself instead of dispatching a reviewer" | Independent review catches assumptions the implementing session may miss. Dispatch a read-only reviewer and keep all edits in the main session. |
-| "The reviewer needs my whole session history to understand the change" | Hand it precisely crafted context, never your session's history. That keeps the reviewer on the work product, not your thought process. |
-| "The reviewer can fix this small issue directly" | Review and implementation have separate authority. The reviewer reports; the main agent reproduces the issue with a failing test and fixes it. |
+| 借口 | 事实 |
+|---|---|
+| “自己看看 diff 就行，不用 reviewer” | 独立审查能发现实现 session 遗漏的假设。派只读 reviewer，所有编辑仍留在主 session。 |
+| “reviewer 需要完整 session 历史” | 只提供精心整理的工作产物上下文，避免其被你的思考过程影响。 |
+| “这个小问题让 reviewer 直接修” | 审查与实现的 authority 分离。reviewer 只报告，主 agent 用失败测试复现后修复。 |
 
-## Red Flags
+## 红旗
 
-**Never:**
-- Skip review because "it's simple"
-- Ignore Critical issues
-- Proceed with unfixed Important issues
-- Argue with valid technical feedback
-- Let a reviewer edit files, implement fixes, or commit changes
+绝不能因为“很简单”就跳过审查，不能忽略 Critical，不能带着未修复 Important 继续，不能与正确的技术反馈争辩，也不能允许 reviewer 编辑、实现或提交。
 
-**If reviewer wrong:**
-- Push back with technical reasoning
-- Show code/tests that prove it works
-- Request clarification
-
-See template at: [code-reviewer.md](code-reviewer.md)
+reviewer 错误时，给出技术推理和能证明实现正确的代码/测试，必要时请求澄清。

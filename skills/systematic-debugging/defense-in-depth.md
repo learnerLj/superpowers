@@ -1,26 +1,20 @@
-# Defense-in-Depth Validation
+# 纵深防御验证
 
-## Overview
+## 概述
 
-When you fix a bug caused by invalid data, adding validation at one place feels sufficient. But that single check can be bypassed by different code paths, refactoring, or mocks.
+无效数据导致 bug 时，只在一个位置增加校验看似足够，但其它代码路径、重构或 mock 都可能绕过它。
 
-**Core principle:** Validate at EVERY layer data passes through. Make the bug structurally impossible.
+**核心原则：** 在数据经过的每一层进行验证，让 bug 在结构上不可能发生。
 
-## Why Multiple Layers
+## 为什么需要多层验证
 
-Single validation: "We fixed the bug"
-Multiple layers: "We made the bug impossible"
+单层验证只是“修复了这个 bug”；多层验证是“让这个 bug 无法发生”。入口校验捕获大部分错误，业务逻辑捕获边界情况，环境 guard 阻止特定上下文中的危险行为，debug 日志则在其它层失效时提供证据。
 
-Different layers catch different cases:
-- Entry validation catches most bugs
-- Business logic catches edge cases
-- Environment guards prevent context-specific dangers
-- Debug logging helps when other layers fail
+## 四层防御
 
-## The Four Layers
+### 第 1 层：入口校验
 
-### Layer 1: Entry Point Validation
-**Purpose:** Reject obviously invalid input at API boundary
+目的：在 API 边界拒绝明显无效的输入。
 
 ```typescript
 function createProject(name: string, workingDirectory: string) {
@@ -33,44 +27,40 @@ function createProject(name: string, workingDirectory: string) {
   if (!statSync(workingDirectory).isDirectory()) {
     throw new Error(`workingDirectory is not a directory: ${workingDirectory}`);
   }
-  // ... proceed
 }
 ```
 
-### Layer 2: Business Logic Validation
-**Purpose:** Ensure data makes sense for this operation
+### 第 2 层：业务逻辑校验
+
+目的：确保数据符合当前操作的语义。
 
 ```typescript
 function initializeWorkspace(projectDir: string, sessionId: string) {
   if (!projectDir) {
     throw new Error('projectDir required for workspace initialization');
   }
-  // ... proceed
 }
 ```
 
-### Layer 3: Environment Guards
-**Purpose:** Prevent dangerous operations in specific contexts
+### 第 3 层：环境 guard
+
+目的：在特定上下文中阻止危险操作。
 
 ```typescript
 async function gitInit(directory: string) {
-  // In tests, refuse git init outside temp directories
   if (process.env.NODE_ENV === 'test') {
     const normalized = normalize(resolve(directory));
     const tmpDir = normalize(resolve(tmpdir()));
-
     if (!normalized.startsWith(tmpDir)) {
-      throw new Error(
-        `Refusing git init outside temp dir during tests: ${directory}`
-      );
+      throw new Error(`Refusing git init outside temp dir during tests: ${directory}`);
     }
   }
-  // ... proceed
 }
 ```
 
-### Layer 4: Debug Instrumentation
-**Purpose:** Capture context for forensics
+### 第 4 层：debug 观测
+
+目的：保留事后分析所需上下文。
 
 ```typescript
 async function gitInit(directory: string) {
@@ -80,43 +70,22 @@ async function gitInit(directory: string) {
     cwd: process.cwd(),
     stack,
   });
-  // ... proceed
 }
 ```
 
-## Applying the Pattern
+## 应用步骤
 
-When you find a bug:
+1. 追踪数据流：坏值来自哪里，又在哪里被使用？
+2. 映射所有检查点：列出数据经过的每一个位置。
+3. 在每层增加验证：入口、业务、环境和 debug。
+4. 分别测试每一层：主动绕过第 1 层，确认第 2 层仍能捕获。
 
-1. **Trace the data flow** - Where does bad value originate? Where used?
-2. **Map all checkpoints** - List every point data passes through
-3. **Add validation at each layer** - Entry, business, environment, debug
-4. **Test each layer** - Try to bypass layer 1, verify layer 2 catches it
+## 实例
 
-## Example from Session
+问题：空 `projectDir` 导致在源码目录执行 `git init`。
 
-Bug: Empty `projectDir` caused `git init` in source code
+数据流：测试 setup 产生空字符串 -> `Project.create(name, '')` -> `WorkspaceManager.createWorkspace('')` -> `git init` 在 `process.cwd()` 中运行。
 
-**Data flow:**
-1. Test setup → empty string
-2. `Project.create(name, '')`
-3. `WorkspaceManager.createWorkspace('')`
-4. `git init` runs in `process.cwd()`
+加入的四层防御：`Project.create()` 验证非空、存在且可写；`WorkspaceManager` 再次验证非空；`WorktreeManager` 在测试中拒绝对 tmpdir 外执行 `git init`；执行前记录 stack trace。
 
-**Four layers added:**
-- Layer 1: `Project.create()` validates not empty/exists/writable
-- Layer 2: `WorkspaceManager` validates projectDir not empty
-- Layer 3: `WorktreeManager` refuses git init outside tmpdir in tests
-- Layer 4: Stack trace logging before git init
-
-**Result:** All 1847 tests passed, bug impossible to reproduce
-
-## Key Insight
-
-All four layers were necessary. During testing, each layer caught bugs the others missed:
-- Different code paths bypassed entry validation
-- Mocks bypassed business logic checks
-- Edge cases on different platforms needed environment guards
-- Debug logging identified structural misuse
-
-**Don't stop at one validation point.** Add checks at every layer.
+结果：1847 个测试全部通过，问题无法复现。测试过程中每一层都捕获了其它层遗漏的路径，因此不要停在单一校验点。

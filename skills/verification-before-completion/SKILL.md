@@ -1,103 +1,122 @@
 ---
 name: verification-before-completion
-description: Use when about to claim a task, fix, analysis, deliverable, migration, or implementation is complete, correct, or passing, before committing, publishing, handing off, or ending the work
+description: 用于准备声称任务、修复、分析、交付物、迁移或实现已经完成、正确或通过时；必须在提交、发布、交接或结束工作之前使用
 ---
 
-# Verification Before Completion
+# 完成前验证
 
-## Overview
+## 概述
 
-**Core principle:** Evidence before claims, always.
+没有新鲜证据就声称完成，不是高效，而是不诚实。
 
-## The Iron Law
+**核心原则：先证明，再声明。**
 
-```
-NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
-```
-
-The approved spec owns the declared completion evidence. For a short task without a spec, identify the direct observation or command that proves the claim.
-
-## Gate Function
-
-Before claiming completion:
-
-1. **IDENTIFY** the exact claim and its required evidence.
-2. **RUN or INSPECT** the complete verification now.
-3. **READ** the full result, including exit status, failure count, missing coverage, and unresolved uncertainty.
-4. **COMPARE** the evidence with the spec, not with confidence or prior output.
-5. **REPORT** the verified result and any remaining gap.
-
-If evidence is stale, partial, indirect, or missing, the claim is not verified.
-
-## Declared Completion Evidence
-
-### Behavior evidence
-
-For changed software behavior:
-
-- map every acceptance criterion to a fresh test or direct behavioral check;
-- run the relevant test, build, lint, format, and integration commands declared by the spec;
-- inspect the final diff and intended unchanged behavior;
-- verify important review fixes again;
-- do not substitute compilation for semantic contract coverage.
-
-### Research evidence
-
-For analysis and research:
-
-- verify required source coverage and authority priority;
-- inspect the actual collected artifacts, not a summary of them;
-- check corroboration, contradictory evidence, and evidence boundaries;
-- distinguish verified fact, inference, NOT VERIFIED, and unresolved uncertainty;
-- confirm the final report does not claim more than the evidence supports.
-
-### Artifact or state evidence
-
-For writing, data work, configuration, migration, operations, or other deliverables:
-
-- inspect the target artifact or before/after state;
-- run declared format, completeness, semantic, consumer, and provenance checks;
-- verify protected or unchanged state remains intact;
-- exercise rollback or recovery when the spec requires it;
-- confirm every downstream acceptance condition.
-
-For mixed work, verify each slice using its assigned evidence profile.
-
-## Requirements Verification
-
-Re-read the approved spec line by line. A checked progress marker is not evidence by itself. Confirm that each slice has fresh, locatable evidence and reopen any slice affected by later work.
-
-Reviewer findings are evidence inputs, not authority:
+## 不可违反的规则
 
 ```
-Reviewer reports issue -> reproduce against spec/artifact -> verify -> main agent fixes
+没有新鲜验证证据，就不能声称完成
 ```
 
-Never let a reviewer implement changes or trust an unsupported finding.
+如果当前消息里没有运行或检查能直接证明声明的证据，就不能说它已经通过、正确、完成、修复、可发布或准备好。
 
-## Completion Handoff
+已批准 spec 拥有声明的完成证据。短任务没有 spec 时，明确指出能够证明当前声明的直接观察或命令。
 
-Only behavior-evidence software work continues to finishing-a-development-branch. Before that handoff:
+## 验证门槛
 
-1. Re-read the approved software spec and verify every acceptance criterion.
-2. Run the full relevant verification on the current tree.
-3. Inspect the final diff and confirm only intended changes remain.
-4. Commit only when the human partner or governing workflow authorizes it.
-5. Invoke `finishing-a-development-branch` only for an actual branch-integration decision.
+在任何完成声明之前：
 
-Research evidence and artifact or state evidence end with their declared report, artifact, state, or handoff. They do not require a code commit or development-branch workflow unless a software slice independently requires one.
+1. **确定声明**：把要说的话改写成可证伪的命题。
+2. **定位证据**：找到能够直接证明该命题的检查、命令、产物或 observation。
+3. **执行完整验证**：现在运行它，不依赖旧输出或他人摘要。
+4. **阅读完整结果**：检查退出码、失败、警告、跳过项、覆盖范围和证据边界。
+5. **比较声明与证据**：证据只覆盖一部分时，缩小声明；证据冲突时，报告冲突。
+6. **然后再表达结论**：把结论和支持它的证据放在一起。
 
-Any change after verification invalidates the affected evidence. Re-run the relevant checks before claiming completion.
+跳过任何一步，都不是验证。
 
-## Red Flags
+## 按 Evidence Profile 验证
 
-- “should”, “probably”, or “seems to” used as a success claim;
-- relying on a previous run;
-- treating a reviewer or subagent report as proof;
-- extrapolating a partial check to the whole task;
-- treating source count as research quality without inspecting coverage;
-- treating file existence as semantic correctness;
-- treating tests as proof of analysis conclusions;
-- ending because the task is long or the context is nearly full.
+### Behavior Evidence（软件行为证据）
 
-When any red flag appears, identify the missing evidence and verify it before proceeding.
+用于软件行为修改：
+
+- 运行 spec 映射的聚焦测试、扩展测试、build、lint、format 和 integration 检查；
+- 确认测试实际覆盖目标行为，而不只是命令退出 0；
+- 检查 schema、serialization、binding、API、兼容和迁移消费方；
+- 阅读从已批准 `BASE_SHA` 到当前 working tree 的完整 diff；
+- 代码在验证后发生变化时，重新运行受影响的检查。
+
+### Research Evidence（研究证据）
+
+用于分析和研究：
+
+- 检查真实来源、提取结果和可定位引用；
+- 验证 authority、时间、范围和覆盖边界；
+- 检查独立印证、矛盾、反证和未解决未知项；
+- 明确区分已验证事实、推断、`NOT VERIFIED` 和假设；
+- 确认结论没有超出证据。
+
+测试和代码输出不能证明人工判断正确；它们只能证明产生这些输出的软件行为。
+
+### Artifact or State Evidence（产物或状态证据）
+
+用于写作、数据、配置、迁移和运维：
+
+- 检查目标 artifact 或真实前后状态，而不只检查命令成功；
+- 验证格式、完整性、语义、消费方和受保护状态；
+- 适用时证明 provenance、回滚或恢复路径；
+- 检查副作用是否落在 spec 允许范围内；
+- 对外部系统使用读回、状态查询或消费方验收。
+
+文件存在不等于内容正确；命令成功不等于目标状态已经成立。
+
+## 常见失败
+
+| 失败方式 | 为什么不成立 |
+|---|---|
+| “应该已经可以了” | 推测不是证据。 |
+| 引用之前的测试 | 之后的改动可能使证据失效。 |
+| 只运行一部分检查，却声称整体通过 | 局部证据不能证明整体。 |
+| 相信 reviewer 或 subagent 的结论 | 报告是输入，不是完成 authority。 |
+| 看到文件存在就说产物正确 | 存在性不证明格式、语义或完整性。 |
+| 来源很多就说研究可靠 | 数量不证明 authority、覆盖或独立性。 |
+| 因为任务太长或上下文快满而结束 | 时间压力不会降低完成门槛。 |
+
+## 需求复核
+
+逐行重新阅读已批准 spec。已勾选进度标记本身不是证据。确认每个 slice 都有新鲜、可定位的证据；后续工作影响到某个 slice 时，重新打开它。
+
+Reviewer finding 是证据输入，不是 authority：
+
+```
+reviewer 报告问题 -> 对照 spec/artifact 复现 -> 验证证据 -> 主 agent 修复
+```
+
+绝不让 reviewer 实施修改，也不采信没有证据支持的 finding。
+
+## 完成交接
+
+只有 behavior-evidence 软件工作才继续进入 `finishing-a-development-branch`。交接前：
+
+1. 重新阅读已批准软件 spec，并验证每条验收标准。
+2. 在当前 tree 上运行完整的相关验证。
+3. 检查最终 diff，确认只有预期修改。
+4. 只有用户或治理流程授权时才提交。
+5. 只有确实存在分支集成决策时才调用 `finishing-a-development-branch`。
+
+Research evidence 和 artifact/state evidence 以 spec 声明的报告、产物、状态或交接结束。除非某个软件 slice 单独要求，否则不需要代码提交或开发分支流程。
+
+验证后发生的任何变化都会使受影响证据失效。完成声明前重新运行相关检查。
+
+## 红旗
+
+- 用“应该”“大概”“看起来”表达成功；
+- 依赖旧的运行结果；
+- 把 reviewer 或 subagent 报告当作证明；
+- 从局部检查推断整个任务；
+- 未检查覆盖范围就把来源数量当作研究质量；
+- 把文件存在当作语义正确；
+- 把测试当作分析结论正确的证明；
+- 因任务太长或上下文快满而结束。
+
+出现任何红旗时，找出缺失证据并完成验证，然后再继续。

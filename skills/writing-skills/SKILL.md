@@ -1,679 +1,241 @@
 ---
 name: writing-skills
-description: Use when creating new skills, editing existing skills, or verifying skills work before deployment
+description: 创建新 skill、编辑已有 skill，或在部署前验证 skill 是否有效时使用
 ---
 
-# Writing Skills
+# 编写 Skills
 
-## Overview
+## 概述
 
-**Writing skills IS Test-Driven Development applied to process documentation.**
+**编写 skill，就是把测试驱动开发应用到流程文档。**
 
-**Personal skills live in your runtime's skills directory** (`~/.claude/skills/` on Claude Code and `~/.agents/skills/` on Codex). See [codex-tools.md](../using-superpowers/references/codex-tools.md) for Codex-specific runtime behavior.
+个人 skill 位于 runtime 的 skills 目录：Claude Code 使用 `~/.claude/skills/`，Codex 使用 `~/.agents/skills/`。
 
-You write test cases, run them through fresh-context read-only evaluators, watch them fail (baseline behavior), write the skill, watch tests pass, and refactor.
+先写测试场景，让 fresh-context 只读 evaluator 在没有 skill 时失败（baseline）；再写 skill，让相同测试通过；最后在保持通过的前提下堵住新漏洞。
 
-**Core principle:** If you didn't watch an agent fail without the skill, you don't know if the skill teaches the right thing.
+**核心原则：** 如果没有亲眼看到 agent 在缺少该 skill 时失败，你就不知道 skill 是否教对了东西。
 
-**REQUIRED BACKGROUND:** You MUST understand superpowers:test-driven-development before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill adapts TDD to documentation.
+**必备背景：** 使用前必须理解 `superpowers:test-driven-development` 的 RED-GREEN-REFACTOR 循环。本 skill 只是把它应用到文档。
 
-**Official guidance:** For Anthropic's official skill authoring best practices, see anthropic-best-practices.md. This document provides additional patterns and guidelines that complement the TDD-focused approach in this skill.
+Anthropic 官方建议见 [anthropic-best-practices.md](anthropic-best-practices.md)，它补充本 skill 的 TDD 方法。
 
-## What is a Skill?
+## 什么是 Skill
 
-A **skill** is a reference guide for proven techniques, patterns, or tools. Skills help future agents find and apply effective approaches.
+skill 是已验证方法、模式、工具或参考的可复用指南，不是一次解决问题的经历叙事。
 
-**Skills are:** Reusable techniques, patterns, tools, reference guides
+## TDD 映射
 
-**Skills are NOT:** Narratives about how you solved a problem once
+| TDD 概念 | Skill 创建 |
+|---|---|
+| 测试用例 | fresh-context 只读 evaluator 面对的压力场景 |
+| 生产代码 | `SKILL.md` |
+| RED | agent 在无 skill baseline 下违反规则 |
+| GREEN | 加载 skill 后遵守规则 |
+| REFACTOR | 保持遵守的同时堵住合理化漏洞 |
+| 测试先行 | 写 skill 前先运行 baseline |
+| 观察失败 | 记录 agent 的精确合理化措辞 |
+| 最小实现 | 只针对已观察到的违规编写规则 |
 
-## TDD Mapping for Skills
+## 何时创建
 
-| TDD Concept | Skill Creation |
-|-------------|----------------|
-| **Test case** | Pressure scenario with a fresh-context read-only evaluator |
-| **Production code** | Skill document (SKILL.md) |
-| **Test fails (RED)** | Agent violates rule without skill (baseline) |
-| **Test passes (GREEN)** | Agent complies with skill present |
-| **Refactor** | Close loopholes while maintaining compliance |
-| **Write test first** | Run baseline scenario BEFORE writing skill |
-| **Watch it fail** | Document exact rationalizations agent uses |
-| **Minimal code** | Write skill addressing those specific violations |
-| **Watch it pass** | Verify agent now complies |
-| **Refactor cycle** | Find new rationalizations → plug → re-verify |
+当方法并不直观、会跨项目重复使用、可广泛复用时创建。一次性解法、已有权威文档充分覆盖的标准实践、项目专属约定（应放项目 instruction），以及可由 regex/validator 自动执行的机械限制，都不应做成 skill。
 
-The entire skill creation process follows RED-GREEN-REFACTOR.
+## Skill 类型
 
-## When to Create a Skill
+- **Technique：** 有具体步骤的方法，如 condition-based-waiting、root-cause-tracing。
+- **Pattern：** 解决问题的思维模式。
+- **Reference：** API、语法或工具参考。
 
-**Create when:**
-- Technique wasn't intuitively obvious to you
-- You'd reference this again across projects
-- Pattern applies broadly (not project-specific)
-- Others would benefit
+## 目录结构
 
-**Don't create for:**
-- One-off solutions
-- Standard practices well-documented elsewhere
-- Project-specific conventions (put in your instructions file)
-- Mechanical constraints (if it's enforceable with regex/validation, automate it—save documentation for judgment calls)
-
-## Skill Types
-
-### Technique
-Concrete method with steps to follow (condition-based-waiting, root-cause-tracing)
-
-### Pattern
-Way of thinking about problems (flatten-with-flags, test-invariants)
-
-### Reference
-API docs, syntax guides, tool documentation (office docs)
-
-## Directory Structure
-
-
-```
+```text
 skills/
   skill-name/
-    SKILL.md              # Main reference (required)
-    supporting-file.*     # Only if needed
+    SKILL.md              # 必需入口
+    supporting-file.*     # 仅在确有需要时添加
 ```
 
-**Flat namespace** - all skills in one searchable namespace
+使用扁平可搜索 namespace。超过 100 行的重型参考和可复用脚本应拆出；原则、概念和小于 50 行的代码模式留在入口。
 
-**Separate files for:**
-1. **Heavy reference** (100+ lines) - API docs, comprehensive syntax
-2. **Reusable tools** - Scripts, utilities, templates
+## SKILL.md 结构
 
-**Keep inline:**
-- Principles and concepts
-- Code patterns (< 50 lines)
-- Everything else
+frontmatter 必须包含 `name` 与 `description`，总长度不超过 1024 字符。
 
-## SKILL.md Structure
+- `name` 只使用字母、数字和连字符。
+- `description` 只描述何时触发，不总结流程；使用第三人称和具体症状，尽量少于 500 字符。
+- 正文包含一两句核心原则、必要决策、实现方法、快速参考和常见错误。
 
-**Frontmatter (YAML):**
-- Two required fields: `name` and `description` (see [agentskills.io/specification](https://agentskills.io/specification) for all supported fields)
-- Max 1024 characters total
-- `name`: Use letters, numbers, and hyphens only (no parentheses, special chars)
-- `description`: Third-person, describes ONLY when to use (NOT what it does)
-  - Start with "Use when..." to focus on triggering conditions
-  - Include specific symptoms, situations, and contexts
-  - **NEVER summarize the skill's process or workflow** (see SDO section for why)
-  - Keep under 500 characters if possible
+## Skill 发现优化（SDO）
 
-```markdown
----
-name: Skill-Name-With-Hyphens
-description: Use when [specific triggering conditions and symptoms]
----
+### Description 只拥有触发条件
 
-# Skill Name
-
-## Overview
-What is this? Core principle in 1-2 sentences.
-
-## When to Use
-[Small inline flowchart IF decision non-obvious]
-
-Bullet list with SYMPTOMS and use cases
-When NOT to use
-
-## Core Pattern (for techniques/patterns)
-Before/after code comparison
-
-## Quick Reference
-Table or bullets for scanning common operations
-
-## Implementation
-Inline code for simple patterns
-Link to file for heavy reference or reusable tools
-
-## Common Mistakes
-What goes wrong + fixes
-
-## Real-World Impact (optional)
-Concrete results
-```
-
-
-## Skill Discovery Optimization (SDO)
-
-**Critical for discovery:** Future agents need to FIND your skill
-
-### 1. Rich Description Field
-
-**Purpose:** Your agent reads the description to decide which skills to load for a given task. Make it answer: "Should I read this skill right now?"
-
-**Format:** Start with "Use when..." to focus on triggering conditions
-
-**CRITICAL: Description = When to Use, NOT What the Skill Does**
-
-The description should ONLY describe triggering conditions. Do NOT summarize the skill's process or workflow in the description.
-
-**Why this matters:** Testing revealed that when a description summarizes the skill's workflow, an agent may follow the description instead of reading the full skill content. A description saying "review after implementation" caused an agent to do one shallow pass even though the skill body required separate spec and quality checks.
-
-When the description was changed to name only the triggering condition, the agent read the full skill and followed both review checks.
-
-**The trap:** Descriptions that summarize workflow create a shortcut agents will take. The skill body becomes documentation agents skip.
+agent 依靠 description 判断现在是否需要读 skill。description 总结流程时，agent 可能把它当捷径，跳过正文。例如“实现后派 reviewer”会诱发一次浅层审查，即使正文要求 spec 与质量两次检查。
 
 ```yaml
-# ❌ BAD: Summarizes workflow - agents may follow this instead of reading skill
-description: Use when implementing a spec - dispatches reviewers after each slice
+# 错误：总结流程
+description: 实现 spec 时使用，会在每个切片后派 reviewer
 
-# ❌ BAD: Too much process detail
-description: Use for TDD - write test first, watch it fail, write minimal code, refactor
+# 错误：包含过多步骤
+description: 做 TDD 时使用，先写测试、看它失败、写最小实现、再重构
 
-# ✅ GOOD: Just triggering conditions, no workflow summary
-description: Use when reviewing completed work against an approved spec
+# 正确：只描述触发条件
+description: 完成工作并需要对照已批准 spec 审查时使用
 
-# ✅ GOOD: Triggering conditions only
-description: Use when implementing any feature or bugfix, before writing implementation code
+# 正确：只描述触发条件
+description: 实现任何 feature 或 bugfix，并且尚未编写实现代码时使用
 ```
 
-**Content:**
-- Use concrete triggers, symptoms, and situations that signal this skill applies
-- Describe the *problem* (race conditions, inconsistent behavior) not *language-specific symptoms* (setTimeout, sleep)
-- Keep triggers technology-agnostic unless the skill itself is technology-specific
-- If skill is technology-specific, make that explicit in the trigger
-- Write in third person (injected into system prompt)
-- **NEVER summarize the skill's process or workflow**
+description 要包含 agent 会搜索的错误、症状、同义词和工具名。除非 skill 本身绑定技术，否则描述问题而非某语言的实现细节。
 
-```yaml
-# ❌ BAD: Too abstract, vague, doesn't include when to use
-description: For async testing
+### 描述性命名与关键词
 
-# ❌ BAD: First person
-description: I can help you with async tests when they're flaky
+使用主动、动词优先的名称，例如 `creating-skills`、`condition-based-waiting`。正文早期覆盖真实错误、症状、工具和文件类型，便于搜索。
 
-# ❌ BAD: Mentions technology but skill isn't specific to it
-description: Use when tests use setTimeout/sleep and are flaky
+### 控制 token
 
-# ✅ GOOD: Starts with "Use when", describes problem, no workflow
-description: Use when tests have race conditions, timing dependencies, or pass/fail inconsistently
+agent 已经很聪明，只加入非显而易见的上下文。常加载入口应极短，其它入口也尽量少于 500 words。把 flags 交给 `--help`，用明确交叉引用替代重复流程，一个优秀示例胜过多个普通示例。
 
-# ✅ GOOD: Technology-specific skill with explicit trigger
-description: Use when using React Router and handling authentication redirects
-```
+### 交叉引用
 
-### 2. Keyword Coverage
+只写 skill 名并标明强度：
 
-Use words an agent would search for:
-- Error messages: "Hook timed out", "ENOTEMPTY", "race condition"
-- Symptoms: "flaky", "hanging", "zombie", "pollution"
-- Synonyms: "timeout/hang/freeze", "cleanup/teardown/afterEach"
-- Tools: Actual commands, library names, file types
+- `**必需子 skill：** 使用 superpowers:test-driven-development`
+- `**必备背景：** 必须理解 superpowers:systematic-debugging`
 
-### 3. Descriptive Naming
+不要用含糊文件路径或强制预加载的 `@` 引用。
 
-**Use active voice, verb-first:**
-- ✅ `creating-skills` not `skill-creation`
-- ✅ `condition-based-waiting` not `async-test-helpers`
+## 流程图
 
-### 4. Token Efficiency (Critical)
+仅在非显而易见决策、可能过早停止的循环，或 A/B 选择上使用小型 flowchart。参考资料用表格/列表，代码用 Markdown，线性步骤用编号。样式见 `graphviz-conventions.dot`，可用 `render-graphs.js` 渲染：
 
-**Problem:** getting-started and frequently-referenced skills load into EVERY conversation. Every token counts.
-
-**Target word counts:**
-- getting-started workflows: <150 words each
-- Frequently-loaded skills: <200 words total
-- Other skills: <500 words (still be concise)
-
-**Techniques:**
-
-**Move details to tool help:**
 ```bash
-# ❌ BAD: Document all flags in SKILL.md
-search-conversations supports --text, --both, --after DATE, --before DATE, --limit N
-
-# ✅ GOOD: Reference --help
-search-conversations supports multiple modes and filters. Run --help for details.
+./render-graphs.js ../some-skill
+./render-graphs.js ../some-skill --combine
 ```
 
-**Use cross-references:**
-```markdown
-# ❌ BAD: Repeat workflow details
-Repeat detailed search procedure inline...
-[20 lines of repeated instructions]
+## 代码示例
 
-# ✅ GOOD: Reference other skill
-**REQUIRED SUB-SKILL:** Use [other-skill-name] for the canonical workflow.
+一个完整、可运行、解释“为什么”、来自真实场景且可直接适配的示例，优于五种语言的平庸变体。测试方法优先 TypeScript/JavaScript，系统调试优先 Shell/Python，数据处理优先 Python。
+
+## 铁律
+
+```text
+没有先看到失败测试，就不允许新增或编辑 SKILL
 ```
 
-**Compress examples:**
-```markdown
-# ❌ BAD: Verbose example (42 words)
-your human partner: "How did we handle authentication errors in React Router before?"
-You: I'll search past conversations for React Router authentication patterns.
-[Run the canonical search workflow]
+它同时适用于新 skill 和已有 skill 的修改。先写或先改了，就删除该变更并从 RED 重来。没有“只是增加一小节”“只是文档”“先留作参考”“边测试边适配”等例外。
 
-# ✅ GOOD: Minimal example (20 words)
-Partner: "How did we handle auth errors in React Router?"
-You: Searching...
-[Search → synthesis]
-```
+## 按 Skill 类型测试
 
-**Eliminate redundancy:**
-- Don't repeat what's in cross-referenced skills
-- Don't explain what's obvious from command
-- Don't include multiple examples of same pattern
+- **纪律型：** 用学术问题、多个压力叠加、合理化借口测试。成功标准是在最大压力下仍遵守。
+- **Technique：** 用应用、变体和缺失信息场景测试。成功标准是能迁移到新场景。
+- **Pattern：** 用识别、应用和反例测试。成功标准是知道何时用、如何用以及何时不用。
+- **Reference：** 用检索、应用和缺口测试。成功标准是找到并正确使用信息。
 
-**Verification:**
-```bash
-wc -w skills/path/SKILL.md
-# getting-started workflows: aim for <150 each
-# Other frequently-loaded: aim for <200 total
-```
+## 常见跳过测试的借口
 
-**Name by what you DO or core insight:**
-- ✅ `condition-based-waiting` > `async-test-helpers`
-- ✅ `using-skills` not `skill-usage`
-- ✅ `flatten-with-flags` > `data-structure-refactoring`
-- ✅ `root-cause-tracing` > `debugging-techniques`
+| 借口 | 事实 |
+|---|---|
+| “skill 显然很清楚” | 对作者清楚不代表对其它 agent 清楚。必须测试。 |
+| “只是参考资料” | 参考也可能缺内容或难以检索。 |
+| “测试太重” | 15 分钟测试能避免生产中数小时返工。 |
+| “有问题再测” | 那意味着 agent 已经无法使用它。部署前测试。 |
+| “学术审查足够” | 阅读不等于实际使用。 |
+| “我很有信心” | 信心不是证据。 |
 
-**Gerunds (-ing) work well for processes:**
-- `creating-skills`, `testing-skills`, `debugging-with-logs`
-- Active, describes the action you're taking
+## 让形式匹配失败类型
 
-### 5. Cross-Referencing Other Skills
+先分类 baseline failure：
 
-**When writing documentation that references other skills:**
-
-Use skill name only, with explicit requirement markers:
-- ✅ Good: `**REQUIRED SUB-SKILL:** Use superpowers:test-driven-development`
-- ✅ Good: `**REQUIRED BACKGROUND:** You MUST understand superpowers:systematic-debugging`
-- ❌ Bad: `See skills/testing/test-driven-development` (unclear if required)
-- ❌ Bad: `@skills/testing/test-driven-development/SKILL.md` (force-loads, burns context)
-
-**Why no @ links:** `@` syntax force-loads files immediately, consuming 200k+ context before you need them.
-
-## Flowchart Usage
-
-```dot
-digraph when_flowchart {
-    "Need to show information?" [shape=diamond];
-    "Decision where I might go wrong?" [shape=diamond];
-    "Use markdown" [shape=box];
-    "Small inline flowchart" [shape=box];
-
-    "Need to show information?" -> "Decision where I might go wrong?" [label="yes"];
-    "Decision where I might go wrong?" -> "Small inline flowchart" [label="yes"];
-    "Decision where I might go wrong?" -> "Use markdown" [label="no"];
-}
-```
-
-**Use flowcharts ONLY for:**
-- Non-obvious decision points
-- Process loops where you might stop too early
-- "When to use A vs B" decisions
-
-**Never use flowcharts for:**
-- Reference material → Tables, lists
-- Code examples → Markdown blocks
-- Linear instructions → Numbered lists
-- Labels without semantic meaning (step1, helper2)
-
-See `graphviz-conventions.dot` in this directory for graphviz style rules.
-
-**Visualizing for your human partner:** Use `render-graphs.js` in this directory to render a skill's flowcharts to SVG:
-```bash
-./render-graphs.js ../some-skill           # Each diagram separately
-./render-graphs.js ../some-skill --combine # All diagrams in one SVG
-```
-
-## Code Examples
-
-**One excellent example beats many mediocre ones**
-
-Choose most relevant language:
-- Testing techniques → TypeScript/JavaScript
-- System debugging → Shell/Python
-- Data processing → Python
-
-**Good example:**
-- Complete and runnable
-- Well-commented explaining WHY
-- From real scenario
-- Shows pattern clearly
-- Ready to adapt (not generic template)
-
-**Don't:**
-- Implement in 5+ languages
-- Create fill-in-the-blank templates
-- Write contrived examples
-
-You're good at porting - one great example is enough.
-
-## File Organization
-
-### Self-Contained Skill
-```
-defense-in-depth/
-  SKILL.md    # Everything inline
-```
-When: All content fits, no heavy reference needed
-
-### Skill with Reusable Tool
-```
-condition-based-waiting/
-  SKILL.md    # Overview + patterns
-  example.ts  # Working helpers to adapt
-```
-When: Tool is reusable code, not just narrative
-
-### Skill with Heavy Reference
-```
-pptx/
-  SKILL.md       # Overview + workflows
-  pptxgenjs.md   # 600 lines API reference
-  ooxml.md       # 500 lines XML structure
-  scripts/       # Executable tools
-```
-When: Reference material too large for inline
-
-## The Iron Law (Same as TDD)
-
-```
-NO SKILL WITHOUT A FAILING TEST FIRST
-```
-
-This applies to NEW skills AND EDITS to existing skills.
-
-Write skill before testing? Delete it. Start over.
-Edit skill without testing? Same violation.
-
-**No exceptions:**
-- Not for "simple additions"
-- Not for "just adding a section"
-- Not for "documentation updates"
-- Don't keep untested changes as "reference"
-- Don't "adapt" while running tests
-- Delete means delete
-
-**REQUIRED BACKGROUND:** The superpowers:test-driven-development skill explains why this matters. Same principles apply to documentation.
-
-## Testing All Skill Types
-
-Different skill types need different test approaches:
-
-### Discipline-Enforcing Skills (rules/requirements)
-
-**Examples:** TDD, verification-before-completion, designing-before-coding
-
-**Test with:**
-- Academic questions: Do they understand the rules?
-- Pressure scenarios: Do they comply under stress?
-- Multiple pressures combined: time + sunk cost + exhaustion
-- Identify rationalizations and add explicit counters
-
-**Success criteria:** Agent follows rule under maximum pressure
-
-### Technique Skills (how-to guides)
-
-**Examples:** condition-based-waiting, root-cause-tracing, defensive-programming
-
-**Test with:**
-- Application scenarios: Can they apply the technique correctly?
-- Variation scenarios: Do they handle edge cases?
-- Missing information tests: Do instructions have gaps?
-
-**Success criteria:** Agent successfully applies technique to new scenario
-
-### Pattern Skills (mental models)
-
-**Examples:** reducing-complexity, information-hiding concepts
-
-**Test with:**
-- Recognition scenarios: Do they recognize when pattern applies?
-- Application scenarios: Can they use the mental model?
-- Counter-examples: Do they know when NOT to apply?
-
-**Success criteria:** Agent correctly identifies when/how to apply pattern
-
-### Reference Skills (documentation/APIs)
-
-**Examples:** API documentation, command references, library guides
-
-**Test with:**
-- Retrieval scenarios: Can they find the right information?
-- Application scenarios: Can they use what they found correctly?
-- Gap testing: Are common use cases covered?
-
-**Success criteria:** Agent finds and correctly applies reference information
-
-## Common Rationalizations for Skipping Testing
-
-| Excuse | Reality |
-|--------|---------|
-| "Skill is obviously clear" | Clear to you ≠ clear to other agents. Test it. |
-| "It's just a reference" | References can have gaps, unclear sections. Test retrieval. |
-| "Testing is overkill" | Untested skills have issues. Always. 15 min testing saves hours. |
-| "I'll test if problems emerge" | Problems = agents can't use skill. Test BEFORE deploying. |
-| "Too tedious to test" | Testing is less tedious than debugging bad skill in production. |
-| "I'm confident it's good" | Overconfidence guarantees issues. Test anyway. |
-| "Academic review is enough" | Reading ≠ using. Test application scenarios. |
-| "No time to test" | Deploying untested skill wastes more time fixing it later. |
-
-**All of these mean: Test before deploying. No exceptions.**
-
-## Match the Form to the Failure
-
-Before writing guidance, classify the baseline failure. The form that bulletproofs one failure type measurably backfires on another.
-
-| Baseline failure | Right form | Wrong form |
+| 失败类型 | 正确形式 | 错误形式 |
 |---|---|---|
-| Skips/violates a rule under pressure (knows better, does it anyway) | Prohibition + rationalization table + red flags (see Bulletproofing below) | Soft guidance ("prefer...", "consider...") |
-| Complies, but output has the wrong shape (bloated prompt, buried verdict, restated spec) | Positive recipe or contract: state what the output IS — its parts, in order | Prohibition list ("don't restate", "never narrate") |
-| Omits a required element from something they already produce | Structural: REQUIRED field or slot in the template they fill in | Prose reminders near the template |
-| Behavior should depend on a condition | Conditional keyed to an observable predicate ("if the brief exists, reference it") | Unconditional rule + exemption clauses |
+| 明知规则却在压力下跳过 | 禁止项 + 合理化表 + 红旗 | “建议”“考虑”式软指导 |
+| 输出形状错误 | 正向 recipe/contract，明确输出由哪些部分按何顺序组成 | 一长串“不要……” |
+| 已有输出缺少必需元素 | 在模板中加入 REQUIRED 字段/slot | 模板附近的散文提醒 |
+| 行为取决于条件 | 绑定可观察 predicate 的条件句 | 无条件规则加例外条款 |
 
-**Why prohibitions backfire on shaping problems:** under a competing incentive ("make the prompt self-contained"), agents negotiate with "don't X". In head-to-head wording tests on dispatch-prompt guidance, the prohibition arm produced clearly more of the unwanted content than the recipe arm (fully separated distributions), and trended worse than even the no-guidance control — micro-test your own case rather than assuming, but never reach for the prohibition by default. A recipe leaves nothing to negotiate: the output matches the stated shape or it doesn't.
+禁止项会让输出形状问题变得更糟：在“必须自包含”等竞争激励下，agent 会与“不要 X”谈判；正向 recipe 则只有匹配或不匹配。不要添加“除非有必要”这类 nuance clause。若有真实例外，把它写成以可观察条件为键的独立规则。豁免条款也常无法正确缩小范围，应重构规则，让它根本触及不到豁免内容。
 
-**Rules for whichever form you pick:**
-- **No nuance clauses.** "Don't X unless it matters" reopens the negotiation — appending a single nuance clause to a winning recipe degraded it from consistent to noisy in the same wording tests. Express a real exception as its own conditional on an observable predicate.
-- **Exemption clauses don't scope.** "This limit doesn't apply to code blocks" still suppresses code blocks. If part of the output must be exempt, restructure so the rule can't reach it.
+## 加固纪律型 Skill
 
-## Bulletproofing Skills Against Rationalization
+这套工具只适用于“知道规则但在压力下跳过”的纪律失败，不适用于输出形状或缺字段问题。
 
-Skills that enforce discipline (like TDD) need to resist rationalization. Agents are smart and will find loopholes when under pressure.
+1. 明确堵住每个已观察到的绕过方式，不只说“先写测试”，还要说先写实现就删除、不能留作参考、不能一边写测试一边看它。
+2. 尽早声明“违反字面规则就是违反规则精神”。
+3. 把 baseline 中每句借口和对应事实加入 rationalization table。
+4. 建立显眼的红旗列表；命中任何一项都要求停止并重来。
+5. description 加入即将违规时会出现的症状。
 
-**Scope:** this toolkit is for discipline failures — an agent that knows the rule and skips it under pressure. For wrong-shaped output or omitted elements, prohibition-based bulletproofing backfires; use the forms in Match the Form to the Failure instead.
+说服原则的研究背景见 [persuasion-principles.md](persuasion-principles.md)。
 
-**Psychology note:** Understanding WHY persuasion techniques work helps you apply them systematically. See persuasion-principles.md for research foundation (Cialdini, 2021; Meincke et al., 2025) on authority, commitment, scarcity, social proof, and unity principles.
+## Skill 的 RED-GREEN-REFACTOR
 
-### Close Every Loophole Explicitly
+### RED：先运行失败 baseline
 
-Don't just state the rule - forbid specific workarounds:
+让 fresh-context 只读 evaluator 在**没有 skill**时运行压力场景。它只返回响应，不编辑文件、不实现、不提交。记录它的选择、逐字合理化借口，以及哪些压力触发了违规。
 
-<Bad>
-```markdown
-Write code before test? Delete it.
-```
-</Bad>
+### GREEN：写最小 Skill
 
-<Good>
-```markdown
-Write code before test? Delete it. Start over.
+只针对已观察到的具体合理化编写规则，再让相同 evaluator 在加载 skill 后运行同一场景。
 
-**No exceptions:**
-- Don't keep it as "reference"
-- Don't "adapt" it while writing tests
-- Don't look at it
-- Delete means delete
-```
-</Good>
+### REFACTOR：堵住漏洞
 
-### Address "Spirit vs Letter" Arguments
+出现新借口就添加精确 counter，并重复相同测试，直到在压力下稳定遵守。
 
-Add foundational principle early:
+### 完整场景前先微测措辞
 
-```markdown
-**Violating the letter of the rules is violating the spirit of the rules.**
-```
+1. 每次调用只取一个 fresh-context 样本；只读 evaluator 不得实现或编辑。
+2. 必须包含 no-guidance control；control 不出现失败，就没有要修的问题，应停止 authoring。
+3. 每个措辞变体至少 5 次。
+4. 人工阅读每个命中；模板回显和引用反例会制造假阳性。
+5. 把方差当指标；五次得到五种解释说明措辞没有约束力。
 
-This cuts off entire class of "I'm following the spirit" rationalizations.
+微测只验证措辞，不替代纪律型 skill 的完整压力场景。完整方法见 [testing-skills-with-reviewers.md](testing-skills-with-reviewers.md)。
 
-### Build Rationalization Table
+## 反模式
 
-Capture rationalizations from baseline testing (see Testing section below). Every excuse agents make goes in the table:
+- 用某次 session 的故事代替可复用规则。
+- 为同一模式维护多语言低质量示例。
+- 把可复制代码画进 flowchart。
+- 使用 `helper1`、`step2` 之类无语义标签。
 
-```markdown
-| Excuse | Reality |
-|--------|---------|
-| "Too simple to test" | Simple code breaks. Test takes 30 seconds. |
-| "I'll test after" | Tests passing immediately prove nothing. |
-| "Tests after achieve same goals" | Tests-after = "what does this do?" Tests-first = "what should this do?" |
-```
+## 停止：完成当前 Skill 后才能继续
 
-### Create Red Flags List
+编写任何 skill 后，必须停止并完成该 skill 的部署验证。不得批量创建多个未测试 skill，不得因“批量更高效”而先进入下一个。未测试 skill 等于未测试代码。
 
-Make it easy for agents to self-check when rationalizing:
+## 创建 Checklist
 
-```markdown
-## Red Flags - STOP and Start Over
+### RED 阶段
 
-- Code before test
-- "I already manually tested it"
-- "Tests after achieve the same purpose"
-- "It's about spirit not ritual"
-- "This is different because..."
+- [ ] 创建压力场景；纪律型至少叠加 3 种压力
+- [ ] 无 skill 运行并逐字记录失败与合理化
+- [ ] 识别重复失败模式
 
-**All of these mean: Delete code. Start over with TDD.**
-```
+### GREEN 阶段
 
-### Update SDO for Violation Symptoms
+- [ ] `name` 与 YAML 合法，description 是中文触发条件而非流程摘要
+- [ ] 覆盖检索关键词，概述与核心原则清楚
+- [ ] 只针对 baseline failure 编写最小指导
+- [ ] 指导形式匹配失败类型
+- [ ] 行为塑造措辞已与 no-guidance control 做 5+ 次微测
+- [ ] 代码 inline 或链接到真实 supporting file
+- [ ] 使用一个优秀示例
+- [ ] 加载 skill 后同场景通过
 
-Add to description: symptoms of when you're ABOUT to violate the rule:
+### REFACTOR 阶段
 
-```yaml
-description: use when implementing any feature or bugfix, before writing implementation code
-```
+- [ ] 捕获新合理化并为纪律型规则添加精确 counter
+- [ ] 更新 rationalization table 与红旗
+- [ ] 重测直到没有新漏洞
 
-## RED-GREEN-REFACTOR for Skills
+### 质量与部署
 
-Follow the TDD cycle:
+- [ ] 仅在决策不明显时使用小 flowchart
+- [ ] 有快速参考与常见错误
+- [ ] supporting file 只用于工具或重型参考
+- [ ] 运行结构验证和行为验证
+- [ ] 按仓库要求提交；只有用户或流程明确要求时才 push/提 PR
 
-### RED: Write Failing Test (Baseline)
+## 发现路径
 
-Run the pressure scenario through a fresh-context read-only evaluator WITHOUT the skill. The evaluator returns only its response; it never edits files or performs implementation work. Document exact behavior:
-- What choices did they make?
-- What rationalizations did they use (verbatim)?
-- Which pressures triggered violations?
-
-This is "watch the test fail" - you must see what agents naturally do before writing the skill.
-
-### GREEN: Write Minimal Skill
-
-Write skill that addresses those specific rationalizations. Don't add extra content for hypothetical cases.
-
-Run same scenarios WITH skill. Agent should now comply.
-
-### REFACTOR: Close Loopholes
-
-Agent found new rationalization? Add explicit counter. Re-test until bulletproof.
-
-### Micro-Test Wording Before Full Scenarios
-
-Full pressure-scenario runs are the final gate, but they are slow and expensive per iteration. Verify the wording itself first with micro-tests:
-
-1. **One fresh-context sample per call** — use a raw API call or a single-shot read-only evaluator agent. It returns only the sampled response and must not edit files, implement fixes, or commit. System prompt = the realistic context the guidance will live in; user message = a task that tempts the failure.
-2. **Always include a no-guidance control.** If the control doesn't exhibit the failure, there is nothing to fix — stop, don't author the guidance.
-3. **5+ reps per variant.** Single samples lie.
-4. **Manually read every flagged match.** Score programmatically if you like, but template echoes and quoted counter-examples masquerade as hits; automated counts alone overstate both failure and success.
-5. **Variance is a metric.** When guidance lands, reps converge on the same shape. Five different interpretations across five reps means the wording isn't binding — tighten the form before adding words.
-
-Micro-tests verify wording; they do not replace pressure scenarios for discipline skills.
-
-**Testing methodology:** See [testing-skills-with-reviewers.md](testing-skills-with-reviewers.md) for the complete testing methodology:
-- How to write pressure scenarios
-- Pressure types (time, sunk cost, authority, exhaustion)
-- Plugging holes systematically
-- Meta-testing techniques
-
-## Anti-Patterns
-
-### ❌ Narrative Example
-"In session 2025-10-03, we found empty projectDir caused..."
-**Why bad:** Too specific, not reusable
-
-### ❌ Multi-Language Dilution
-example-js.js, example-py.py, example-go.go
-**Why bad:** Mediocre quality, maintenance burden
-
-### ❌ Code in Flowcharts
-```dot
-step1 [label="import fs"];
-step2 [label="read file"];
-```
-**Why bad:** Can't copy-paste, hard to read
-
-### ❌ Generic Labels
-helper1, helper2, step3, pattern4
-**Why bad:** Labels should have semantic meaning
-
-## STOP: Before Moving to Next Skill
-
-**After writing ANY skill, you MUST STOP and complete the deployment process.**
-
-**Do NOT:**
-- Create multiple skills in batch without testing each
-- Move to next skill before current one is verified
-- Skip testing because "batching is more efficient"
-
-**The deployment checklist below is MANDATORY for EACH skill.**
-
-Deploying untested skills = deploying untested code. It's a violation of quality standards.
-
-## Skill Creation Checklist (TDD Adapted)
-
-Complete the applicable checklist items in order and verify each result before deployment.
-
-**RED Phase - Write Failing Test:**
-- [ ] Create pressure scenarios (3+ combined pressures for discipline skills)
-- [ ] Run scenarios WITHOUT skill - document baseline behavior verbatim
-- [ ] Identify patterns in rationalizations/failures
-
-**GREEN Phase - Write Minimal Skill:**
-- [ ] Name uses only letters, numbers, hyphens (no parentheses/special chars)
-- [ ] YAML frontmatter with required `name` and `description` fields (max 1024 chars; see [spec](https://agentskills.io/specification))
-- [ ] Description starts with "Use when..." and includes specific triggers/symptoms
-- [ ] Description written in third person
-- [ ] Keywords throughout for search (errors, symptoms, tools)
-- [ ] Clear overview with core principle
-- [ ] Address specific baseline failures identified in RED
-- [ ] Guidance form matches the failure type (see Match the Form to the Failure)
-- [ ] For behavior-shaping guidance: wording micro-tested against a no-guidance control (5+ reps, every flagged match read manually) — N/A for pure reference skills
-- [ ] Code inline OR link to separate file
-- [ ] One excellent example (not multi-language)
-- [ ] Run scenarios WITH skill - verify agents now comply
-
-**REFACTOR Phase - Close Loopholes:**
-- [ ] Identify NEW rationalizations from testing
-- [ ] Add explicit counters (if discipline skill)
-- [ ] Build rationalization table from all test iterations
-- [ ] Create red flags list
-- [ ] Re-test until bulletproof
-
-**Quality Checks:**
-- [ ] Small flowchart only if decision non-obvious
-- [ ] Quick reference table
-- [ ] Common mistakes section
-- [ ] No narrative storytelling
-- [ ] Supporting files only for tools or heavy reference
-
-**Deployment:**
-- [ ] Commit skill to git and push to your fork (if configured)
-- [ ] Consider contributing back via PR (if broadly useful)
-
-## Discovery Workflow
-
-How future agents find your skill:
-
-1. **Encounters problem** ("tests are flaky")
-2. **Searches skills** (greps descriptions, browses categories)
-3. **Finds SKILL** (description matches)
-4. **Scans overview** (is this relevant?)
-5. **Reads patterns** (quick reference table)
-6. **Loads example** (only when implementing)
-
-**Optimize for this flow** - put searchable terms early and often.
+未来 agent 会经历：遇到问题 -> 从 description 找到 skill -> 扫描概述 -> 读取模式 -> 需要时加载示例。为这条路径优化，把可搜索触发词放在前面，并通过渐进披露保持入口精简。

@@ -1,76 +1,71 @@
 ---
 name: finishing-a-development-branch
-description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work
+description: 实现已经完成且全部测试通过，需要决定如何集成工作时使用
 ---
 
-# Finishing a Development Branch
+# 完成开发分支
 
-## Overview
+## 概述
 
-**Core principle:** Verify tests, detect branch state, present integration choices, and execute only the user's choice.
+**核心原则：** 验证测试、识别 branch 状态、展示集成选项，并且只执行用户选择。
 
-**Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
+开始时声明：“我正在使用 finishing-a-development-branch skill 完成这项工作。”
 
-## Step 1: Verify Tests
+## 步骤 1：验证测试
 
-Run the project's full test suite on the exact tree being integrated.
+在将被集成的精确 tree 上运行项目完整测试集。测试失败时报告失败并停止；测试未绿之前不能展示集成选项。
 
-If tests fail, report the failures and stop. Do not present integration options until the suite is green.
-
-## Step 2: Confirm The Integration Snapshot
+## 步骤 2：确认集成快照
 
 ```bash
 git status --short
 ```
 
-The implementation must already be committed by the main agent after final
-verification. If intended implementation changes remain, stop and return to
-verification and commit. Never sweep unrelated user changes into that commit.
+主 agent 必须已经在最终验证后提交实现。若预期实现变更仍未提交，停止并返回验证与提交。绝不能把用户无关变更一并塞进提交。
 
-## Step 3: Detect Branch State
+## 步骤 3：识别 branch 状态
 
 ```bash
 BRANCH=$(git branch --show-current)
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
-- Named branch: all three integration options are available.
-- Detached HEAD: local merge is unavailable; offer push-as-new-branch or keep as-is.
+named branch 可用全部三个集成选项；detached HEAD 不能本地 merge，只能提供“作为新 branch 推送并建 PR”或“保持现状”。
 
-## Step 4: Confirm Base Branch
+## 步骤 4：确认 base branch
 
-Resolve the base from the conversation, branch upstream, or merge base. If it is still ambiguous, ask the user to confirm before merging or opening a pull request.
+从对话、branch upstream 或 merge base 解析 base。仍有歧义时，必须在 merge 或创建 PR 前询问用户确认。
 
-## Step 5: Present Options
+## 步骤 5：展示选项
 
-**Named branch:**
-
-```text
-Implementation complete. What would you like to do?
-
-1. Merge back to <base-branch> locally
-2. Push and create a Pull Request
-3. Keep the branch as-is
-
-Which option?
-```
-
-**Detached HEAD:**
+named branch：
 
 ```text
-Implementation complete. You're on a detached HEAD.
+实现已完成。你希望如何处理？
 
-1. Push as a new branch and create a Pull Request
-2. Keep as-is
+1. 在本地合并回 <base-branch>
+2. 推送并创建 Pull Request
+3. 保持当前 branch 不变
 
-Which option?
+请选择：
 ```
 
-Wait for the user's answer. Discard is never a menu option.
+detached HEAD：
 
-## Step 6: Execute The Choice
+```text
+实现已完成，当前处于 detached HEAD。
 
-### Option 1: Merge Locally
+1. 作为新 branch 推送并创建 Pull Request
+2. 保持现状
+
+请选择：
+```
+
+等待用户回答。丢弃永远不能成为菜单选项。
+
+## 步骤 6：执行选择
+
+### 选项 1：本地合并
 
 ```bash
 git checkout <base-branch>
@@ -79,15 +74,13 @@ git merge <feature-branch>
 <full test command>
 ```
 
-If the merged result fails, stop and report the failure. Do not delete the feature branch.
-
-When the merged result is green:
+合并结果测试失败时停止并报告，不得删除 feature branch。全部通过后才可执行：
 
 ```bash
 git branch -d <feature-branch>
 ```
 
-### Option 2: Push And Create A Pull Request
+### 选项 2：推送并创建 Pull Request
 
 ```bash
 git push -u origin <feature-branch>
@@ -95,31 +88,31 @@ git push -u origin <feature-branch>
 # git push origin HEAD:refs/heads/<new-branch>
 ```
 
-Create the pull request against the confirmed base branch using the repository template and conventions. Report the URL.
+按照仓库模板与惯例，对已确认 base branch 创建 PR 并报告 URL。
 
-### Option 3: Keep As-Is
+### 选项 3：保持现状
 
-Report the branch name and current commit. Make no repository changes.
+报告 branch 名称和当前 commit，不修改仓库。
 
-### Explicit Discard Request
+### 用户明确要求丢弃
 
-Discard only when the user explicitly asks to throw the branch away. Show the exact branch and commits, then require the exact confirmation word `discard`.
+只有用户明确要求丢弃 branch 时才可执行。先展示精确 branch 和 commits，再要求用户输入精确确认词 `discard`。
 
-After confirmation:
+确认后：
 
 ```bash
 git checkout <base-branch>
 git branch -D <feature-branch>
 ```
 
-Never delete untracked files or unrelated branches as part of branch cleanup.
+branch cleanup 绝不能删除 untracked 文件或无关 branch。
 
-## Common Rationalizations
+## 常见合理化借口
 
-| Excuse | Reality |
-|--------|---------|
-| "Tests passed earlier" | Run the suite on the exact tree being integrated. |
-| "They obviously want it merged" | Integration is the user's decision. Present the choices and wait. |
-| "Discard would keep things tidy" | Discard is available only after an explicit request and exact confirmation. |
-| "The base is obviously main" | Resolve or confirm the real base branch first. |
-| "The push was rejected, so force-push" | Investigate remote movement. Force-push requires explicit authorization. |
+| 借口 | 事实 |
+|---|---|
+| “测试之前通过了” | 必须在将被集成的精确 tree 上重新运行。 |
+| “用户显然想 merge” | 集成由用户决定，展示选项并等待。 |
+| “丢弃更整洁” | 只有用户明确请求并精确确认后才能丢弃。 |
+| “base 显然是 main” | 必须先解析或确认真实 base。 |
+| “push 被拒，直接 force-push” | 先调查 remote 变化；force-push 需要明确授权。 |

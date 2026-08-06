@@ -30,6 +30,7 @@ for removed_skill in \
     dispatching-parallel-agents \
     executing-plans \
     subagent-driven-development \
+    using-superpowers \
     using-git-worktrees \
     writing-plans; do
     [[ ! -e "$REPO_ROOT/skills/$removed_skill" ]] ||
@@ -67,6 +68,21 @@ unsupported_distribution_surfaces=(
     "$REPO_ROOT/scripts/bump-version.sh"
     "$REPO_ROOT/scripts/package-codex-plugin.sh"
     "$REPO_ROOT/scripts/sync-to-codex-plugin.sh"
+    "$REPO_ROOT/skills/using-superpowers"
+    "$REPO_ROOT/skills/brainstorming/visual-companion.md"
+    "$REPO_ROOT/skills/brainstorming/scripts"
+    "$REPO_ROOT/tests/brainstorm-server"
+    "$REPO_ROOT/VERSION"
+    "$REPO_ROOT/docs/plans/2026-01-17-visual-brainstorming.md"
+    "$REPO_ROOT/docs/superpowers/plans/2026-02-19-visual-brainstorming-refactor.md"
+    "$REPO_ROOT/docs/superpowers/plans/2026-03-11-zero-dep-brainstorm-server.md"
+    "$REPO_ROOT/docs/superpowers/plans/2026-06-09-visual-companion-issues.md"
+    "$REPO_ROOT/docs/superpowers/plans/2026-06-10-visual-companion-auth-hardening.md"
+    "$REPO_ROOT/docs/superpowers/plans/2026-06-11-visual-companion-final-hardening-fixup.md"
+    "$REPO_ROOT/docs/superpowers/specs/2026-02-19-visual-brainstorming-refactor-design.md"
+    "$REPO_ROOT/docs/superpowers/specs/2026-03-11-zero-dep-brainstorm-server-design.md"
+    "$REPO_ROOT/docs/superpowers/specs/2026-06-10-visual-companion-auth-hardening-design.md"
+    "$REPO_ROOT/docs/superpowers/specs/2026-06-11-visual-companion-final-hardening-fixup-design.md"
 )
 
 for surface in "${unsupported_distribution_surfaces[@]}"; do
@@ -105,29 +121,33 @@ assert_absent \
     "$REPO_ROOT/skills"
 
 assert_absent \
-    'GIT_COMMON|git-common-dir' \
-    "$REPO_ROOT/skills/using-superpowers/references/codex-tools.md"
+    'Codex 工具映射|codex-tools\.md' \
+    "$REPO_ROOT/skills/writing-skills/SKILL.md"
 
 assert_contains \
-    "skills/using-superpowers/SKILL.md" \
-    '^description: Use when starting or resuming a substantial task' \
-    "using-superpowers must trigger only for substantial tasks"
+    "skills/brainstorming/SKILL.md" \
+    '^description: 用于开始或恢复.*长任务' \
+    "brainstorming must trigger for substantial tasks"
 
 for required_trigger in \
-    'dependent stages' \
-    'persistent progress' \
-    'context boundary' \
-    'explicitly requests a plan or specification' \
-    'completed and verified in one pass'; do
+    '相互依赖的阶段' \
+    '持久保存进度' \
+    '跨越上下文边界' \
+    '用户明确要求.*plan 或 specification' \
+    '一次连续处理中完成和验证'; do
     assert_contains \
-        "skills/using-superpowers/SKILL.md" \
+        "skills/brainstorming/SKILL.md" \
         "$required_trigger" \
         "long-task trigger contract is missing: $required_trigger"
 done
 
 assert_absent \
     'starting any conversation|even a 1% chance|simple question.*task|before any response or action' \
-    "$REPO_ROOT/skills/using-superpowers/SKILL.md"
+    "$REPO_ROOT/skills/brainstorming/SKILL.md"
+
+assert_absent \
+    'using-superpowers' \
+    "${active_surfaces[@]}"
 
 assert_absent \
     'SessionStart|sessionStart|loads? the `using-superpowers` bootstrap|auto-triggers? the `brainstorming` skill|including[^\n]*hooks' \
@@ -159,36 +179,36 @@ assert_contains \
 
 for reviewer_escape in \
     'READ-ONLY-REVIEWER-STOP' \
-    'dispatched as a read-only reviewer or skill-behavior evaluator' \
-    'Do not create, revise, approve, or advance an executable spec'; do
+    '派遣为只读 reviewer 或 skill 行为 evaluator' \
+    '不要创建、修改、批准或推进 executable spec'; do
     assert_contains \
-        "skills/using-superpowers/SKILL.md" \
+        "skills/brainstorming/SKILL.md" \
         "$reviewer_escape" \
         "read-only reviewer/evaluator escape is missing: $reviewer_escape"
 done
 
 for required_routing in \
-    '^## Short Tasks$' \
-    '^## Long Tasks$' \
-    '^## Resuming Work$' \
-    'one executable spec' \
+    '^## 短任务$' \
+    '^## 长任务$' \
+    '^## 恢复工作$' \
+    '一份 executable spec' \
     'behavior evidence' \
     'research evidence' \
     'artifact or state evidence'; do
     assert_contains \
-        "skills/using-superpowers/SKILL.md" \
+        "skills/brainstorming/SKILL.md" \
         "$required_routing" \
         "long-task routing contract is missing: $required_routing"
 done
 
 for software_slice_field in \
-    '^Each software \*\*Implementation Slice\*\* additionally contains:$' \
-    '\*\*Files:\*\* exact files' \
-    '\*\*Data decisions:\*\* structures and transformations' \
-    '\*\*Acceptance criteria:\*\* exact criterion IDs' \
-    '\*\*Focused verification:\*\* exact commands' \
-    '\*\*Broader verification:\*\*' \
-    '\*\*Review gate:\*\* a distinct read-only review requirement'; do
+    '^每个软件 \*\*Implementation Slice\*\* 还包含：$' \
+    '\*\*文件\*\*：预计创建、修改或删除的精确文件' \
+    '\*\*数据决策\*\*：引用上面的结构定义和转换条目' \
+    '\*\*验收标准\*\*：该 slice 证明的精确 criterion ID' \
+    '\*\*聚焦验证\*\*：针对直接行为的精确命令' \
+    '\*\*扩展验证\*\*：' \
+    '\*\*审查门槛\*\*：.*单独只读审查'; do
     assert_contains \
         "skills/brainstorming/SKILL.md" \
         "$software_slice_field" \
@@ -196,34 +216,35 @@ for software_slice_field in \
 done
 
 for debugging_contract in \
-    'long debugging task' \
+    '长时间 debugging' \
     'systematic-debugging' \
-    'root-cause slice.*research evidence' \
-    'fix slice.*behavior evidence' \
-    'only the fix slice.*test-driven-development'; do
+    '根因调查 slice.*research evidence' \
+    '修复 slice.*behavior evidence' \
+    '只有修复 slice.*test-driven-development'; do
     assert_contains \
-        "skills/using-superpowers/SKILL.md" \
+        "skills/brainstorming/SKILL.md" \
         "$debugging_contract" \
         "long debugging mixed-profile contract is missing: $debugging_contract"
 done
 
 assert_contains \
     "skills/brainstorming/SKILL.md" \
-    '^## Executable Spec Contract$' \
+    '^## Executable Spec Contract 结构$' \
     "brainstorming must define the executable spec contract"
-assert_contains \
-    "skills/brainstorming/SKILL.md" \
-    'visual-companion\.md' \
-    "brainstorming must keep its bundled visual companion reachable"
+assert_absent \
+    'visual companion|visual-companion|brainstorm-server|BRAINSTORM_' \
+    "$REPO_ROOT/README.md" \
+    "$REPO_ROOT/docs/testing.md" \
+    "$REPO_ROOT/skills/brainstorming/SKILL.md"
 
 for required_section in \
-    'Goal and non-goals' \
-    'Current state and authority' \
-    'Deliverables' \
-    'Execution slices' \
-    'Completion evidence' \
-    'Revision triggers' \
-    'Final acceptance'; do
+    '目标与非目标' \
+    '当前状态与 Authority' \
+    '交付物' \
+    '执行 Slice' \
+    '完成证据' \
+    '修订条件' \
+    '最终验收'; do
     assert_contains \
         "skills/brainstorming/SKILL.md" \
         "$required_section" \
@@ -231,15 +252,15 @@ for required_section in \
 done
 
 for required_common_contract in \
-    'single persistent execution outline' \
-    'Outcome' \
-    'Depends on' \
-    'Work scope' \
-    'Inputs and authority' \
-    'Deliverables' \
-    'Completion evidence' \
-    'Verification or review gate' \
-    'reopen'; do
+    '唯一持久的执行大纲' \
+    '结果' \
+    '依赖' \
+    '工作范围' \
+    '输入与 Authority' \
+    '交付物' \
+    '完成证据' \
+    '验证或审查门槛' \
+    '重新打开'; do
     assert_contains \
         "skills/brainstorming/SKILL.md" \
         "$required_common_contract" \
@@ -247,11 +268,11 @@ for required_common_contract in \
 done
 
 for required_profile in \
-    '^### Behavior Evidence$' \
-    '^### Research Evidence$' \
-    '^### Artifact or State Evidence$' \
-    '[Hh]uman research and judgment do not use TDD' \
-    '[Oo]nly slices that change software behavior use test-driven-development'; do
+    '^### Behavior Evidence（软件行为证据）$' \
+    '^### Research Evidence（研究证据）$' \
+    '^### Artifact or State Evidence（产物或状态证据）$' \
+    '人工研究和判断不使用 TDD' \
+    '只有改变软件行为的 slice 使用 `test-driven-development`'; do
     assert_contains \
         "skills/brainstorming/SKILL.md" \
         "$required_profile" \
@@ -259,26 +280,45 @@ for required_profile in \
 done
 
 for required_software_contract in \
-    'Target files' \
-    'System composition and data flow' \
-    'Interfaces and boundary contracts' \
-    'Implementation Slices' \
-    'Acceptance criteria' \
-    'Test mapping' \
+    '目标文件' \
+    '系统组成与数据流' \
+    '接口与边界 contract' \
+    'Implementation Slice' \
+    '验收标准' \
+    '测试映射' \
     'canonical owner' \
     'containment' \
-    'same-shape' \
-    'transformation' \
+    '相同形状' \
+    '转换表' \
     'LANGUAGE-HARD-GATE' \
-    'discussing the request in Chinese' \
-    'entire spec in that selected language' \
-    'English labels in a Chinese spec' \
-    'narrative-language drift' \
-    'technical literal'; do
+    '使用中文讨论需求' \
+    '整份 spec 必须使用中文' \
+    '中文 spec 中的英文叙述标签' \
+    '叙述语言漂移' \
+    '技术字面量'; do
     assert_contains \
         "skills/brainstorming/SKILL.md" \
         "$required_software_contract" \
         "software evidence profile is missing: $required_software_contract"
+done
+
+for required_structure_contract in \
+    '^#### 关键数据结构与 SSOT$' \
+    '逐个列出所有关键结构' \
+    '完整字段与类型' \
+    '所属层级' \
+    '嵌套、包含或引用关系' \
+    '唯一 canonical owner' \
+    'projection 不得成为第二个 authority' \
+    '仅重命名、逐字段复制、包装或格式转换' \
+    '不能证明新结构合理' \
+    'source -> target' \
+    '增加、删除、重命名、校验或编码' \
+    '无法复用 canonical type 的边界理由'; do
+    assert_contains \
+        "skills/brainstorming/SKILL.md" \
+        "$required_structure_contract" \
+        "key data-structure and SSOT contract is missing: $required_structure_contract"
 done
 
 assert_contains \
@@ -309,11 +349,11 @@ done
 
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
-    'read-only reviewer subagent' \
+    '只读 reviewer subagent' \
     "code review must use a read-only reviewer"
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
-    'MUST NOT edit files, run implementation tasks, or commit changes' \
+    '不得编辑文件、运行实现任务或提交' \
     "reviewer must be prohibited from implementation"
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
@@ -321,21 +361,21 @@ assert_contains \
     "code review must cover the current working tree from the approved-spec baseline"
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
-    'pre-review verification' \
+    '审查前验证' \
     "code review must receive fresh pre-review verification evidence"
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
-    'repeat.*review' \
+    '重复审查' \
     "important review fixes must be reviewed again"
 
 assert_contains \
     "skills/verification-before-completion/SKILL.md" \
-    'declared completion evidence' \
+    '声明的完成证据' \
     "completion verification must follow the spec evidence contract"
 for evidence_profile in \
-    'Behavior evidence' \
-    'Research evidence' \
-    'Artifact or state evidence'; do
+    'Behavior Evidence' \
+    'Research Evidence' \
+    'Artifact or State Evidence'; do
     assert_contains \
         "skills/verification-before-completion/SKILL.md" \
         "$evidence_profile" \
@@ -343,7 +383,7 @@ for evidence_profile in \
 done
 assert_contains \
     "skills/verification-before-completion/SKILL.md" \
-    'Only behavior-evidence software work continues to finishing-a-development-branch' \
+    '只有 behavior-evidence 软件工作.*finishing-a-development-branch' \
     "branch finishing must remain conditional on software behavior work"
 assert_contains \
     "skills/finishing-a-development-branch/SKILL.md" \
@@ -352,31 +392,31 @@ assert_contains \
 
 assert_contains \
     "skills/brainstorming/SKILL.md" \
-    'non-software.*direct execution.*first dependency-ready slice' \
+    '非软件 profile.*授权直接执行.*第一个依赖就绪的 slice' \
     "an explicit continue instruction must allow non-software execution after spec self-review"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
-    'plan first.*wait for approval' \
+    '先规划.*等待批准' \
     "an explicit plan-first instruction must retain the approval gate"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
-    'Behavior-evidence software.*written spec approval' \
+    'Behavior-evidence 软件工作必须获得书面 spec 批准' \
     "software behavior work must retain written approval and a separate baseline"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
-    'commit the final approved spec separately and record that commit as `BASE_SHA`' \
+    '单独提交最终已批准 spec，并把该提交记录为 `BASE_SHA`' \
     "software behavior work must hand the approved-spec commit to review"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
-    'explicit implementation pre-authorization after the human partner reviewed the complete design' \
+    '用户审阅完整设计后获得明确实现预授权' \
     "software behavior work must preserve the complete-design pre-authorization path"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
-    'Pre-authorization is invalid if the final spec adds a material decision' \
+    '最终 spec 加入了已审阅设计中不存在的实质决策，预授权立即失效' \
     "material decisions in the final spec must invalidate pre-authorization"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
-    'Apply the profile.s execution gate.*non-software.*wait-or-continue.*behavior-evidence software work.*written spec approval.*complete-design pre-authorization.*approved-spec commit.*`BASE_SHA`' \
+    '应用 profile 的执行门槛.*非软件工作.*等待或继续指令.*Behavior-evidence 软件工作.*书面 spec 获批.*明确实现预授权.*提交已批准 spec.*`BASE_SHA`' \
     "the common process must not bypass the software approval and baseline gate"
 assert_absent \
     'Spec written and committed' \

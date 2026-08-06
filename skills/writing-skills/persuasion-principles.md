@@ -1,187 +1,65 @@
-# Persuasion Principles for Skill Design
+# Skill 设计中的说服原则
 
-## Overview
+## 概述
 
-LLMs respond to the same persuasion principles as humans. Understanding this psychology helps you design more effective skills - not to manipulate, but to ensure critical practices are followed even under pressure.
+LLM 会响应许多人类说服模式。理解这些机制是为了让关键实践在压力下仍被遵守，而不是操纵模型。
 
-**Research foundation:** Meincke et al. (2025) tested 7 persuasion principles with N=28,000 AI conversations. Persuasion techniques more than doubled compliance rates (33% → 72%, p < .001).
+研究背景：Meincke 等（2025）在 28,000 次 AI 对话中测试七类原则，观察到说服措辞显著提高服从率。这里的研究结论只能作为设计启发，具体 skill 仍必须通过自己的 control 和压力测试验证。
 
-## The Seven Principles
+## 七项原则
 
-### 1. Authority
-**What it is:** Deference to expertise, credentials, or official sources.
+### 1. 权威
 
-**How it works in skills:**
-- Imperative language: "YOU MUST", "Never", "Always"
-- Non-negotiable framing: "No exceptions"
-- Eliminates decision fatigue and rationalization
+通过“必须”“绝不”“没有例外”等明确命令减少决策疲劳和合理化。用于 TDD、验证和安全关键纪律；不要把“可行时考虑测试优先”当硬规则。
 
-**When to use:**
-- Discipline-enforcing skills (TDD, verification requirements)
-- Safety-critical practices
-- Established best practices
+### 2. 承诺
 
-**Example:**
-```markdown
-✅ Write code before test? Delete it. Start over. No exceptions.
-❌ Consider writing tests first when feasible.
-```
+通过明确声明、A/B/C 选择和 checklist tracking 促使后续行为与承诺一致。适用于多步骤流程和需要确保真正执行的 skill。
 
-### 2. Commitment
-**What it is:** Consistency with prior actions, statements, or public declarations.
+### 3. 稀缺
 
-**How it works in skills:**
-- Require announcements: "Announce skill usage"
-- Force explicit choices: "Choose A, B, or C"
-- Use tracking: todos for checklists
+用“继续之前”“完成 X 后立即”表达真实的顺序和时间边界，防止“以后再做”。不要制造虚假紧迫感。
 
-**When to use:**
-- Ensuring skills are actually followed
-- Multi-step processes
-- Accountability mechanisms
+### 4. 社会证明
 
-**Example:**
-```markdown
-✅ When you find a skill, you MUST announce: "I'm using [Skill Name]"
-❌ Consider letting your partner know which skill you're using.
-```
+用“每次”“没有 Y 的 X 就是失败”建立规范。可用于普遍实践和常见失败，但只能陈述可辩护的规则，不能编造共识。
 
-### 3. Scarcity
-**What it is:** Urgency from time limits or limited availability.
+### 5. 共同体
 
-**How it works in skills:**
-- Time-bound requirements: "Before proceeding"
-- Sequential dependencies: "Immediately after X"
-- Prevents procrastination
+用“我们的代码库”“我们共同追求正确结果”表达共同目标。适用于协作流程和非层级技术讨论。
 
-**When to use:**
-- Immediate verification requirements
-- Time-sensitive workflows
-- Preventing "I'll do it later"
+### 6. 互惠
 
-**Example:**
-```markdown
-✅ After completing a task, IMMEDIATELY request code review before proceeding.
-❌ You can review code when convenient.
-```
+极少使用，容易显得操纵；其它原则通常更合适。
 
-### 4. Social Proof
-**What it is:** Conformity to what others do or what's considered normal.
+### 7. 喜好
 
-**How it works in skills:**
-- Universal patterns: "Every time", "Always"
-- Failure modes: "X without Y = failure"
-- Establishes norms
+不要用于纪律服从。它会鼓励讨好，损害诚实反馈文化。
 
-**When to use:**
-- Documenting universal practices
-- Warning about common failures
-- Reinforcing standards
+## 按 Skill 类型选择
 
-**Example:**
-```markdown
-✅ Checklists without todo tracking = steps get skipped. Every time.
-❌ Some people find a todo list helpful for checklists.
-```
+| 类型 | 可使用 | 应避免 |
+|---|---|---|
+| 纪律型 | 权威 + 承诺 + 可验证规范 | 喜好、互惠 |
+| 指导/方法 | 适度权威 + 共同体 | 过强权威 |
+| 协作型 | 共同体 + 承诺 | 层级权威、讨好 |
+| 参考型 | 只需清晰 | 所有说服机制 |
 
-### 5. Unity
-**What it is:** Shared identity, "we-ness", in-group belonging.
+## 工作机制
 
-**How it works in skills:**
-- Collaborative language: "our codebase", "we're colleagues"
-- Shared goals: "we both want quality"
+清晰边界减少“这次算不算例外”的谈判；“当 X 时做 Y”的 implementation intention 降低执行负担；训练语料中的权威、承诺和规范序列会影响模型输出。但这些都不是免测理由，必须在目标模型上建立 no-guidance control 并验证。
 
-**When to use:**
-- Collaborative workflows
-- Establishing team culture
-- Non-hierarchical practices
+## 伦理边界
 
-**Example:**
-```markdown
-✅ We're colleagues working together. I need your honest technical judgment.
-❌ You should probably tell me if I'm wrong.
-```
+合理用途是保障用户真正需要的质量和安全、阻止可预测失败。为个人利益操纵、制造虚假紧迫或用内疚逼迫服从都不合理。
 
-### 6. Reciprocity
-**What it is:** Obligation to return benefits received.
+判断标准：如果用户完全理解这项措辞技术，它是否仍服务于用户的真实利益？
 
-**How it works:**
-- Use sparingly - can feel manipulative
-- Rarely needed in skills
+## 参考文献
 
-**When to avoid:**
-- Almost always (other principles more effective)
+- Cialdini, R. B. (2021). *Influence: The Psychology of Persuasion (New and Expanded).* Harper Business.
+- Meincke, L. 等（2025）. *Call Me A Jerk: Persuading AI to Comply with Objectionable Requests.* University of Pennsylvania.
 
-### 7. Liking
-**What it is:** Preference for cooperating with those we like.
+## 快速检查
 
-**How it works:**
-- **DON'T USE for compliance**
-- Conflicts with honest feedback culture
-- Creates sycophancy
-
-**When to avoid:**
-- Always for discipline enforcement
-
-## Principle Combinations by Skill Type
-
-| Skill Type | Use | Avoid |
-|------------|-----|-------|
-| Discipline-enforcing | Authority + Commitment + Social Proof | Liking, Reciprocity |
-| Guidance/technique | Moderate Authority + Unity | Heavy authority |
-| Collaborative | Unity + Commitment | Authority, Liking |
-| Reference | Clarity only | All persuasion |
-
-## Why This Works: The Psychology
-
-**Bright-line rules reduce rationalization:**
-- "YOU MUST" removes decision fatigue
-- Absolute language eliminates "is this an exception?" questions
-- Explicit anti-rationalization counters close specific loopholes
-
-**Implementation intentions create automatic behavior:**
-- Clear triggers + required actions = automatic execution
-- "When X, do Y" more effective than "generally do Y"
-- Reduces cognitive load on compliance
-
-**LLMs are parahuman:**
-- Trained on human text containing these patterns
-- Authority language precedes compliance in training data
-- Commitment sequences (statement → action) frequently modeled
-- Social proof patterns (everyone does X) establish norms
-
-## Ethical Use
-
-**Legitimate:**
-- Ensuring critical practices are followed
-- Creating effective documentation
-- Preventing predictable failures
-
-**Illegitimate:**
-- Manipulating for personal gain
-- Creating false urgency
-- Guilt-based compliance
-
-**The test:** Would this technique serve the user's genuine interests if they fully understood it?
-
-## Research Citations
-
-**Cialdini, R. B. (2021).** *Influence: The Psychology of Persuasion (New and Expanded).* Harper Business.
-- Seven principles of persuasion
-- Empirical foundation for influence research
-
-**Meincke, L., Shapiro, D., Duckworth, A. L., Mollick, E., Mollick, L., & Cialdini, R. (2025).** Call Me A Jerk: Persuading AI to Comply with Objectionable Requests. University of Pennsylvania.
-- Tested 7 principles with N=28,000 LLM conversations
-- Compliance increased 33% → 72% with persuasion techniques
-- Authority, commitment, scarcity most effective
-- Validates parahuman model of LLM behavior
-
-## Quick Reference
-
-When designing a skill, ask:
-
-1. **What type is it?** (Discipline vs. guidance vs. reference)
-2. **What behavior am I trying to change?**
-3. **Which principle(s) apply?** (Usually authority + commitment for discipline)
-4. **Am I combining too many?** (Don't use all seven)
-5. **Is this ethical?** (Serves user's genuine interests?)
+设计 skill 时先问：它属于哪种类型？要改变什么可观察行为？哪些原则真正适用？是否叠加太多？是否符合用户的真实利益？
