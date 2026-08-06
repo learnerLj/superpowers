@@ -10,9 +10,7 @@ const assert = require('assert');
 
 const REPO_ROOT = path.join(__dirname, '../..');
 const SERVER_PATH = path.join(REPO_ROOT, 'skills/brainstorming/scripts/server.cjs');
-const PACKAGE_VERSION = JSON.parse(
-  fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf-8')
-).version;
+const LIBRARY_VERSION = fs.readFileSync(path.join(REPO_ROOT, 'VERSION'), 'utf-8').trim();
 const TOKEN = 'testtoken-branding-0123456789abcdef';
 const ASSET_URL = 'https://primeradiant.com/brand/superpowers-visual-brainstorming-logo.png';
 
@@ -57,6 +55,28 @@ function waitForServer(server) {
   });
 }
 
+function waitForStartupOrExit(server) {
+  let stdout = '';
+  let stderr = '';
+
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error(`Server neither started nor exited. stderr: ${stderr}`)), 5000);
+    server.stdout.on('data', (data) => {
+      stdout += data.toString();
+      if (stdout.includes('server-started')) {
+        clearTimeout(timeout);
+        resolve({ started: true, stderr });
+      }
+    });
+    server.stderr.on('data', (data) => { stderr += data.toString(); });
+    server.on('error', reject);
+    server.on('exit', (code) => {
+      clearTimeout(timeout);
+      resolve({ started: false, code, stderr });
+    });
+  });
+}
+
 function fetchHtml(port) {
   return new Promise((resolve, reject) => {
     const headers = { Cookie: `brainstorm-key-${port}=${TOKEN}` };
@@ -72,21 +92,6 @@ function writeFragment(dir) {
   const contentDir = path.join(dir, 'content');
   fs.mkdirSync(contentDir, { recursive: true });
   fs.writeFileSync(path.join(contentDir, 'screen.html'), '<h2>Pick a layout</h2>');
-}
-
-function createPackagedServerFixture(version) {
-  const root = fs.mkdtempSync(path.join('/tmp', 'superpowers-packaged-server-'));
-  const scriptDir = path.join(root, 'skills/brainstorming/scripts');
-  fs.cpSync(path.join(REPO_ROOT, 'skills/brainstorming/scripts'), scriptDir, { recursive: true });
-  fs.mkdirSync(path.join(root, '.codex-plugin'), { recursive: true });
-  fs.writeFileSync(
-    path.join(root, '.codex-plugin/plugin.json'),
-    JSON.stringify({ name: 'superpowers', version }, null, 2)
-  );
-  return {
-    root,
-    serverPath: path.join(scriptDir, 'server.cjs')
-  };
 }
 
 async function withServer(options, fn) {
@@ -119,7 +124,7 @@ async function test(name, fn) {
   }
 }
 
-function assertBrandedWithLogo(html, version = PACKAGE_VERSION) {
+function assertBrandedWithLogo(html, version = LIBRARY_VERSION) {
   assert(
     html.includes(`Superpowers v${version}`),
     'branding text should include dynamic package version'
@@ -154,14 +159,14 @@ function assertBrandedWithLogo(html, version = PACKAGE_VERSION) {
   );
 }
 
-function assertBrandedFallbackText(html, version = PACKAGE_VERSION) {
+function assertBrandedFallbackText(html, version = LIBRARY_VERSION) {
   assert(
     html.includes(`Prime Radiant Superpowers v${version}`),
     'disabled telemetry should keep plain text Prime Radiant/Superpowers branding'
   );
 }
 
-function assertTelemetryImage(html, version = PACKAGE_VERSION) {
+function assertTelemetryImage(html, version = LIBRARY_VERSION) {
   const expectedUrl = `${ASSET_URL}?v=${encodeURIComponent(version)}`;
   assert(html.includes(`src="${expectedUrl}"`), 'remote image should use the dedicated main-domain asset with only v=');
   assert(!html.includes('event='), 'remote image URL must not include event=');
@@ -270,23 +275,50 @@ async function main() {
     });
   });
 
-  await test('packaged Codex plugin reads version from .codex-plugin manifest', async () => {
-    const port = 3457;
-    const dir = '/tmp/brainstorm-branding-packaged-codex';
-    const packagedVersion = '7.8.9';
-    const fixture = createPackagedServerFixture(packagedVersion);
+  await test('missing repository VERSION fails startup explicitly', async () => {
+    const fakeRoot = fs.mkdtempSync('/tmp/superpowers-version-missing-');
+    const fakeSkill = path.join(fakeRoot, 'skills/brainstorming');
+    fs.mkdirSync(path.dirname(fakeSkill), { recursive: true });
+    fs.cpSync(path.join(REPO_ROOT, 'skills/brainstorming'), fakeSkill, { recursive: true });
+
+    const server = startServer({
+      port: 3457,
+      dir: path.join(fakeRoot, 'session'),
+      serverPath: path.join(fakeSkill, 'scripts/server.cjs')
+    });
 
     try {
-      await withServer({ port, dir, serverPath: fixture.serverPath }, async () => {
-        writeFragment(dir);
-        await sleep(300);
-        const html = await fetchHtml(port);
-        assertBrandedWithLogo(html, packagedVersion);
-        assertTelemetryImage(html, packagedVersion);
-        assert(!html.includes('Superpowers vunknown'), 'packaged plugin should not fall back to unknown version');
-      });
+      const result = await waitForStartupOrExit(server);
+      assert.strictEqual(result.started, false, 'server must not start without the repository VERSION authority');
+      assert.notStrictEqual(result.code, 0, 'missing VERSION must exit non-zero');
+      assert.match(result.stderr, /VERSION/, 'failure should identify the missing VERSION authority');
     } finally {
-      cleanup(fixture.root);
+      if (server.exitCode === null && server.signalCode === null) server.kill();
+      cleanup(fakeRoot);
+    }
+  });
+
+  await test('empty repository VERSION fails startup explicitly', async () => {
+    const fakeRoot = fs.mkdtempSync('/tmp/superpowers-version-empty-');
+    const fakeSkill = path.join(fakeRoot, 'skills/brainstorming');
+    fs.mkdirSync(path.dirname(fakeSkill), { recursive: true });
+    fs.cpSync(path.join(REPO_ROOT, 'skills/brainstorming'), fakeSkill, { recursive: true });
+    fs.writeFileSync(path.join(fakeRoot, 'VERSION'), '\n');
+
+    const server = startServer({
+      port: 3458,
+      dir: path.join(fakeRoot, 'session'),
+      serverPath: path.join(fakeSkill, 'scripts/server.cjs')
+    });
+
+    try {
+      const result = await waitForStartupOrExit(server);
+      assert.strictEqual(result.started, false, 'server must not start with an empty repository VERSION');
+      assert.notStrictEqual(result.code, 0, 'empty VERSION must exit non-zero');
+      assert.match(result.stderr, /VERSION.*empty/i, 'failure should identify the empty VERSION authority');
+    } finally {
+      if (server.exitCode === null && server.signalCode === null) server.kill();
+      cleanup(fakeRoot);
     }
   });
 

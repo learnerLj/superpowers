@@ -5,9 +5,8 @@ labels: bug
 ---
 
 <!--
-BEFORE FILING: Search open AND closed issues. The Windows SessionStart
-hook alone has been reported 29 times. If your issue already exists,
-add a comment or reaction to the existing one instead.
+BEFORE FILING: Search open AND closed issues. If your issue already exists,
+add a comment or reaction to the existing one instead of filing a duplicate.
 -->
 
 - [ ] I searched existing issues and this is not a duplicate
@@ -19,14 +18,14 @@ add a comment or reaction to the existing one instead.
 | Field | Value |
 |-------|-------|
 | Superpowers version | |
-| Harness (Claude Code, Cursor, etc.) | |
+| Harness (Claude Code or Codex) | |
 | Harness version | |
 | Your model + version | |
-| All plugins installed | |
+| Relevant skills installed | |
 | OS + shell | |
 
 ## Is this a Superpowers issue or a platform issue?
-<!-- Superpowers is a plugin. Some reported "bugs" are actually issues
+<!-- Superpowers is a skills library. Some reported "bugs" are actually issues
      in the underlying platform or model. If you're not sure, try
      reproducing without Superpowers installed.
 

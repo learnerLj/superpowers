@@ -1,12 +1,12 @@
 # 通用长任务执行 Spec
 
-**状态：** 已批准，待实现
+**状态：** 已实现，待提交
 
 **日期：** 2026-08-06
 
 **设计前代码基线：** `0019bbc0d757ceeefea3dfba85a5bdc15d7e6648`
 
-**批准 Spec review baseline：** 由本文件的首次独立 commit 定义；commit 后在进度版本中记录精确 `BASE_SHA`
+**批准 Spec review baseline：** `ab5dfaadad0510c80901ed95ab6b14c118973400`
 
 ## 目标与非目标
 
@@ -18,7 +18,8 @@
 - 多阶段、存在依赖、风险、不确定性、持久进度或上下文中断可能的任务，使用一份 executable spec 约束执行。
 - 软件开发、分析研究和其它长任务共享同一个 spec 核心，但使用与交付物匹配的完成证据。
 - 只有修改软件行为的任务进入 TDD、code review 和 branch finishing。
-- 删除 Claude、Cursor、Kimi、Pi、OpenCode 和 Gemini 对 `using-superpowers` 的自动 bootstrap；保留各运行环境对 `skills/` 的发现能力。
+- 仓库只维护 `skills/` 及其直接文档、helper 和测试；删除 plugin、marketplace、package、extension、hook 和 harness-specific adapter。
+- Claude Code 与 Codex 通过各自原生 skills 目录消费同一组 skill，不由本仓库维护安装插件或启动注入。
 
 ### 非目标
 
@@ -27,10 +28,11 @@
 - 不把 TDD 泛化到人工分析、写作、研究判断或纯操作任务。
 - 不为所有可能任务类型建立固定枚举；未知类型通过自己的交付物与完成证据定义执行 contract。
 - 不向上游仓库提交 PR；这是个人 fork 的工作流变更。
+- 不保证或测试 Cursor、Kimi、Pi、OpenCode、Gemini、Antigravity、Copilot 等其它 harness 的安装、发现或运行。
 
 ## 当前系统上下文
 
-当前 `using-superpowers` 通过 SessionStart hook、manifest 或平台扩展在会话开始及压缩后自动注入，并要求任何对话在行动前检查 skill。`brainstorming` 把所有 creative work 导向一份软件 executable spec，批准后的唯一终点是 TDD。`verification-before-completion` 的原则可复用，但完成交接默认绑定代码 review、commit 和 branch finishing。
+变更前，`using-superpowers` 通过 SessionStart hook、manifest 或平台扩展在会话开始及压缩后自动注入，并要求任何对话在行动前检查 skill。`brainstorming` 把所有 creative work 导向一份软件 executable spec，批准后的唯一终点是 TDD。`verification-before-completion` 的原则可复用，但完成交接默认绑定代码 review、commit 和 branch finishing。
 
 已有软件开发主路径仍然有效：`brainstorming -> executable spec -> main-agent TDD -> read-only review -> verification -> branch finishing`。本次修改保留该路径，把它降为通用长任务协议中的“行为证明”profile。
 
@@ -39,7 +41,7 @@
 - `skills/using-superpowers/SKILL.md` 拥有“何时进入长任务协议、如何恢复已有 spec、如何选择执行 profile”的 authority。
 - `skills/brainstorming/SKILL.md` 拥有 executable spec 的通用 contract 与 profile 扩展。
 - 任务 spec 是目标、边界、执行切片、进度和完成证据的唯一持久 outline；不得再创建第二份 plan 或 todo 文档。
-- 项目级 `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、策略论文或其它明确 authority 高于任务 spec。Spec 必须引用这些 authority，不能取代它们。
+- 项目级 instruction 文件、策略论文或其它明确 authority 高于任务 spec。Spec 必须引用这些 authority，不能取代它们。
 - `skills/verification-before-completion/SKILL.md` 拥有完成声明前的证据检查，但不拥有各任务的具体完成定义；具体定义来自已批准 spec。
 
 ## 触发 Contract
@@ -104,15 +106,14 @@
 - 目标、authority、交付物、完成证据或风险边界发生实质变化时，停止执行、修订 spec 并取得必要批准。
 - 恢复长任务时先定位已有 spec 与交付物，确认最后一个有证据的已完成切片，再从下一个依赖就绪切片继续；不得依赖聊天记忆重建状态。
 
-## 自动 Bootstrap 移除
+## Skills-only 分发边界
 
-- Claude 与 Cursor：删除 SessionStart hook 配置、脚本和专用测试。
-- Kimi：删除 `sessionStart.skill`，保留 skills 注册和平台工具映射。
-- Pi：保留 `resources_discover` 的 `skillPaths`，删除 session、compaction 和 context bootstrap 注入。
-- OpenCode：保留 `config.skills.paths`，删除首条用户消息 bootstrap transform 与缓存逻辑。
-- OpenCode 的 action-to-tool mapping 迁到 `skills/using-superpowers/references/opencode-tools.md`，由 `using-superpowers` 在 OpenCode 上实际触发时按需读取。
-- Gemini：停止强制 include `using-superpowers`；平台映射可继续独立加载。
-- Codex 通过 `.codex-plugin/plugin.json` 的 `skills` 字段发现 bundled skills。仓库自带 Claude-compatible marketplace 使用 `.claude-plugin/marketplace.json` 的 `source: "./"` 安装仓库根，根目录 `skills/` 是 repo-owned discovery owner；Copilot CLI、Factory Droid 等外部 consumer/marketplace 是否正确安装该根目录，需要各自 clean-session transcript 证明，不能只凭本仓库 manifest 推断。Cursor 通过 `.cursor-plugin/plugin.json` 的 `skills` 字段注册 bundled skills。Antigravity 的 repo-root 安装和 Gemini extension package 保留 bundled `skills/` 与按需工具映射。这些路径都不补充等价的自动 prompt 注入。
+- 仓库根 `skills/` 是唯一可消费能力集合；每个一级子目录是一项独立 skill。
+- Claude Code 使用 `~/.claude/skills/<skill-name>`，Codex 使用 `~/.agents/skills/<skill-name>`；README 只说明把各 skill 链接到对应原生目录。
+- 删除 `.claude-plugin/`、`.codex-plugin/`、`.cursor-plugin/`、`.kimi-plugin/`、`.opencode/`、`.pi/`、`.agents/plugins/`、Gemini extension、根 `package.json`、版本发布脚本、plugin assets 及其专用测试。
+- 删除仓库拥有的 SessionStart hook 和自动 bootstrap 资产；不以其它注入方式替代。
+- `skills/using-superpowers/references/codex-tools.md` 保留，因为它是 skill 在 Codex 内运行时按需读取的工具语义，不是安装或 plugin adapter。
+- 其它 harness 如果兼容 Agent Skills，可由用户在仓库之外把 `skills/` 接到其原生目录；本仓库不维护其 manifest、映射、安装文档或端到端测试。
 
 ## 长时间 Debugging
 
@@ -130,12 +131,11 @@
 - 修改 `skills/brainstorming/SKILL.md`：改为通用 executable spec 生成器，并保留软件 profile 的既有严格字段。
 - 修改 `skills/verification-before-completion/SKILL.md`：按 spec 声明的证据完成验证，代码交接仅用于行为证明。
 - 保持 `skills/test-driven-development/SKILL.md`、`skills/requesting-code-review/SKILL.md` 和 `skills/finishing-a-development-branch/SKILL.md` 为软件专用。
-- 修改 `README.md`、`CLAUDE.md`、平台 README、porting/testing 文档、`.github` issue/PR 模板及 manifests，使产品描述与新路由一致。
-- 删除 `hooks/` 下自动 bootstrap 资产及其测试。
-- 简化 `.pi/extensions/superpowers.ts`、`.opencode/plugins/superpowers.js` 与 `.kimi-plugin/plugin.json`，只保留 skill discovery 或工具映射。
-- 修改 `scripts/sync-to-codex-plugin.sh`，使未来 Codex plugin 同步也永久排除根目录 `hooks/`，避免自动注入资产回流。
-- 新增 `skills/using-superpowers/references/opencode-tools.md`，接管从 OpenCode bootstrap 中迁出的工具映射。
-- 修改 workflow、Codex、Kimi、Pi、OpenCode、Antigravity 和 packaging 测试，锁定“可发现但不自动注入”。
+- 修改 `README.md`、`CLAUDE.md`、testing 文档和 `.github` issue/PR 模板，使产品描述与 skills-only 路由一致。
+- 删除所有 plugin、marketplace、package、extension、hook、平台安装文档、平台工具映射及其专用测试。
+- 删除仍通过 `--plugin-dir` 加载仓库的 explicit-skill-request 测试；行为评估只验证 skill contract，不验证 plugin 安装。
+- 修改 workflow 测试，锁定不支持的发行 surface 必须不存在，并保留通用长任务 contract。
+- 修改 brainstorm server 的版本读取，使 helper 从根 `VERSION` 读取，不依赖已删除的根 `package.json`。
 
 ## 验收标准
 
@@ -145,26 +145,18 @@
 - **AC4：** 其它长任务使用产物或状态证明，只有实际软件行为切片进入 TDD。
 - **AC5：** 一个长任务只维护一份 spec 作为执行 outline 和进度 authority。
 - **AC6：** 用户明确要求持续执行时，非软件 profile 在 spec 自检后可直接开始；行为证明的软件任务必须获得最终书面 spec 批准，或使用“完整设计已审阅且最终 spec 未新增实质决策”的明确预授权，并保留独立 baseline；重大 contract 变化会暂停修订。
-- **AC7：** Claude、Cursor、Kimi、Pi、OpenCode 和 Gemini 不再自动注入 `using-superpowers`。
-- **AC8：** 各 harness 的原生 discovery owner、manifest/package 注册和平台工具映射保持有效。当前环境没有对应可执行 harness 时，证据只证明发行/配置 contract，并明确标为未做 live end-to-end 验证，不能把静态检查表述成真实会话证明。
+- **AC7：** 仓库不存在 plugin、marketplace、extension、package、SessionStart hook 或自动 bootstrap surface。
+- **AC8：** README 只维护 Claude Code 与 Codex 的原生 skills 目录安装方式；其它 harness 明确在维护范围外。
 - **AC9：** 完成验证依据 spec 声明的行为、证据或产物/状态证明，不默认要求代码 commit。
-- **AC10：** 活跃文档、贡献/issue 模板、manifest、package、同步脚本和测试不再把 SessionStart bootstrap 描述为正确集成条件，也不会在未来同步时重新引入根目录 hook 资产。
+- **AC10：** 活跃文档、贡献/issue 模板和测试不再把本仓库描述为 plugin，也不提供新增 harness adapter 的入口。
 - **AC11：** 长时间 debugging 使用诊断证据切片与软件修复切片的 mixed profile，只有修复切片进入 TDD。
-- **AC12：** OpenCode 删除 bootstrap 后仍有可发现、按需读取且被正向测试覆盖的工具映射。
+- **AC12：** brainstorm server 不依赖已删除的根 `package.json`，并从明确的 skills-repository 版本 authority 读取版本。
 
 ## 测试映射
 
 - `tests/workflow/test-spec-to-tdd-consistency.sh`：扩展为通用长任务 contract，覆盖 AC1-AC6、AC9。
-- `tests/hooks/`：删除自动注入测试，workflow 测试断言 hook 资产不存在，覆盖 AC7、AC10。
-- `tests/kimi/test-plugin-manifest.sh`：断言无 `sessionStart` 且 skills/mapping 保留，覆盖 AC7-AC8。
-- `tests/pi/test-pi-extension.mjs`：断言只注册 skill path、不注册 bootstrap 生命周期 handler，覆盖 AC7-AC8。
-- `tests/opencode/`：断言 skills path 注册且不存在消息 transform/bootstrap，覆盖 AC7-AC8。
-- `tests/opencode/`：同时断言 `opencode-tools.md` 存在、被 `using-superpowers` 引用并保留 reviewer、skill、read/edit/bash/search/fetch 映射，覆盖 AC12。
-- `tests/codex/test-marketplace-manifest.sh` 与 packaging 测试：断言发行包不重新引入 SessionStart hook，覆盖 AC7、AC10。
-- `tests/codex-plugin-sync/test-sync-to-codex-plugin.sh`：使用包含 SessionStart 资产的上游 fixture，断言同步预览和目标插件永久排除根目录 `hooks/`，覆盖 AC7、AC10。
-- `tests/antigravity/test-antigravity-tools.sh`：断言仓库内 Antigravity 映射存在且不依赖 bootstrap；这是 package contract 检查，不声称已启动真实 Antigravity 会话，覆盖 AC8 的静态部分。
-- `tests/plugin-discovery/test-native-skill-discovery.sh`：断言仓库自带 Claude-compatible marketplace 的 `source: "./"`、仓库根 `skills/`、Cursor/Codex skills 字段均存在且无 hook 注册；它证明本仓库的共享 discovery owner，不替代外部 Copilot marketplace 的 clean-session transcript，覆盖 AC7-AC8 的静态部分、AC10。
-- `tests/gemini/test-context.sh`：断言 Gemini extension context 不再 include `using-superpowers`，仍按需保留工具映射引用；本地未启动 Gemini CLI，覆盖 AC7 与 AC8 的静态部分。
+- `tests/workflow/test-spec-to-tdd-consistency.sh`：断言 plugin/package/hook/platform-adapter surface 不存在，README 只描述 Claude/Codex 原生 skills 目录，覆盖 AC7、AC8、AC10。
+- `tests/brainstorm-server/branding.test.js`：断言 helper 从根 `VERSION` 读取品牌版本且缺失时明确失败，覆盖 AC12。
 - fresh-context 行为评估：分别使用短任务、长分析、其它长任务、长 debugging 和长软件任务，比较修改前后路由，覆盖 AC1-AC4、AC11。
 - `tests/workflow/evidence/2026-08-06-general-long-task-routing-evals.md`：保存五组 paired control/candidate 的场景、运行边界和逐次原始返回，使行为证据可定位和复核。
 
@@ -182,26 +174,26 @@
 | 跨模块软件功能 | 使用 behavior-evidence spec、批准的 spec commit/`BASE_SHA`、主 agent TDD、只读 review 和 fresh verification | AC3、AC6 通过 |
 | 跨天间歇性 debugging | 使用 mixed-profile spec；诊断走 `systematic-debugging` + research evidence，只有确认需要软件修复的 slice 进入 TDD；无需代码时以诊断证据结束 | AC11 通过 |
 
-这些 evaluator 只返回行为判断，没有编辑、实现或提交。逐次 prompt、control/candidate 来源、harness/model 边界及原始返回保存在 `tests/workflow/evidence/2026-08-06-general-long-task-routing-evals.md`。平台 discovery 的静态测试与模型行为 evaluator 是两种不同证据，不能互相替代。
+这些 evaluator 只返回行为判断，没有编辑、实现或提交。逐次 prompt、control/candidate 来源、运行边界及原始返回保存在 `tests/workflow/evidence/2026-08-06-general-long-task-routing-evals.md`。它们只验证 skill 的路由语义，不证明任何外部 harness 的安装或发现能力。
 
 ## 迁移与兼容
 
-这是有意的行为变更。依赖旧 bootstrap 的 harness 将从自动强制触发改为原生 description discovery 或显式 skill 调用。Skill 名称和目录保持稳定，现有显式 `using-superpowers`、`brainstorming`、TDD、debugging、review 与 verification 调用继续有效。
+这是有意的行为与发行边界变更。Skill 名称和目录保持稳定，现有显式 `using-superpowers`、`brainstorming`、TDD、debugging、review 与 verification 调用继续有效。
 
-平台不支持原生 skill discovery 时，不再通过全局 prompt 注入模拟；该平台必须提供自己的 skill 注册能力，或者由用户显式加载。历史 release notes 与旧 plans/specs 保留为记录，不作为活跃 workflow 检查对象。
+Claude Code 与 Codex 的现有用户级 skill 链接需要指向仓库根 `skills/` 下的各 skill。其它平台的旧安装方式停止维护。历史 release notes 与旧 plans/specs 保留为记录，不作为活跃 workflow 检查对象。
 
 ## 实现切片
 
-- [ ] **S1：建立新路由的 RED 证据**
+- [x] **S1：建立新路由的 RED 证据**
   - **结果：** 静态 workflow 测试在现有实现上因短任务退出、非软件 profile、长 debugging mixed profile、OpenCode 映射迁移和无 bootstrap contract 缺失而失败。
   - **依赖：** 无。
-  - **工作范围：** workflow 与 harness 回归测试。
+  - **工作范围：** workflow 与 skills-only 发行边界回归测试。
   - **输入与 Authority：** AC1-AC12、现有行为评估样本。
   - **交付物：** 修改后的测试与失败输出。
   - **完成证据：** 失败原因只指向尚未实现的新 contract。
-  - **验证或审查门槛：** `bash tests/workflow/run-tests.sh` 及相关 harness exact tests。
+  - **验证或审查门槛：** `bash tests/workflow/run-tests.sh` 及相关保留 exact tests。
 
-- [ ] **S2：实现通用长任务 spec 路由**
+- [x] **S2：实现通用长任务 spec 路由**
   - **结果：** `using-superpowers`、`brainstorming` 和 verification 支持短任务退出及三类完成证据。
   - **依赖：** S1。
   - **工作范围：** 三个 skill 与活跃 workflow 说明。
@@ -210,20 +202,33 @@
   - **完成证据：** workflow 测试通过；软件 profile 的 owner/interface/test contract 未退化。
   - **验证或审查门槛：** fresh-context 只读 evaluator review。
 
-- [ ] **S3：移除跨平台自动 bootstrap**
-  - **结果：** 所有活跃 harness 只注册技能发现或工具映射，不再注入 `using-superpowers`。
+- [x] **S3：移除 plugin 与 harness adapter**
+  - **结果：** 仓库只保留 skills、直接文档、helper 和测试，不再发行或测试 plugin/package/extension/hook。
   - **依赖：** S1。
-  - **工作范围：** hooks、manifests、Pi、OpenCode、Gemini、平台测试与文档。
-  - **输入与 Authority：** 自动 bootstrap 移除 contract。
-  - **交付物：** 删除/简化后的平台集成与同步测试。
-  - **完成证据：** exact harness tests 通过，全文活跃扫描无 bootstrap 正向要求。
+  - **工作范围：** plugins、manifests、extensions、hooks、packages、平台测试与文档。
+  - **输入与 Authority：** 用户明确的 skills-only 范围修订。
+  - **交付物：** 删除后的平台 surface，以及 Claude/Codex 原生目录安装说明。
+  - **完成证据：** workflow 负向断言通过，全文活跃扫描无平台安装或 plugin 正向要求。
   - **验证或审查门槛：** 只读代码 review。
 
-- [ ] **S4：全链路验证与行为复测**
-  - **结果：** 静态 contract、平台集成、package 与短任务、长分析、其它长任务、长 debugging、长软件任务五类行为场景全部符合 AC1-AC12。
+- [x] **S4：全链路验证与行为复测**
+  - **结果：** 静态 contract、保留 helper 与短任务、长分析、其它长任务、长 debugging、长软件任务五类行为场景全部符合 AC1-AC12。
   - **依赖：** S2、S3。
-  - **工作范围：** 当前变更覆盖的最小跨平台集合。
+  - **工作范围：** 当前 skills-only 变更覆盖的最小集合。
   - **输入与 Authority：** 测试映射和修改前基线样本。
   - **交付物：** 验证输出、修改后 evaluator 样本和最终 diff review。
-  - **完成证据：** AC1-AC12 对应的所有相关测试退出 0，五类行为复测符合路由 contract，review 无 Critical/Important 问题。
+  - **完成证据：** AC1-AC12 对应的所有保留测试退出 0，候选 skill hash 已刷新，五类行为复测符合路由 contract，review 无 Critical/Important 问题。
   - **验证或审查门槛：** 独立只读 reviewer。
+
+## 最终验证记录
+
+- `bash tests/workflow/run-tests.sh`：通过。
+- `npm test`（`tests/brainstorm-server`）：通过，包括缺失或空 `VERSION` 明确失败的回归测试。
+- `bash tests/systematic-debugging/test-find-polluter.sh`：通过。
+- `bash tests/shell-lint/test-lint-shell.sh`：通过。
+- 9 个保留 skill 的 `quick_validate.py`：全部通过。
+- `git diff --check` 与 `node --check skills/brainstorming/scripts/server.cjs`：通过。
+- 五类最终 hash 行为复测：全部 PASS；证据位于 `tests/workflow/evidence/2026-08-06-general-long-task-routing-evals.md`。
+- 独立只读 reviewer 的两项 Important 均已关闭，复审无新 Critical/Important。
+- `scripts/lint-shell.sh --all` 未运行完成，因为当前环境没有 `shellcheck`；其命令编排与参数行为由 `tests/shell-lint/test-lint-shell.sh` 的 stub 测试覆盖。
+- 未做 Claude Code 或 Codex 内 visual companion 的真实浏览器端到端交互；本次只验证 skill 入口、server runtime 和生命周期测试。

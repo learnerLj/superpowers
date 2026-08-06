@@ -1,64 +1,85 @@
 ---
 name: using-superpowers
-description: Use when starting any conversation - establishes how to find and use skills, requiring skill invocation before ANY response including clarifying questions
+description: Use when starting or resuming a substantial task with dependent stages, material uncertainty or risk, persistent progress, likely context boundary crossings, or when the human partner explicitly requests a plan or specification; not for short one-pass tasks or dispatched read-only reviews and evaluations
 ---
 
-<SUBAGENT-STOP>
-If you were dispatched as a read-only reviewer, ignore this skill and perform only the assigned review. Do not edit files, implement fixes, or commit changes.
-</SUBAGENT-STOP>
+# Using Superpowers
 
-<EXTREMELY-IMPORTANT>
-If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
+<READ-ONLY-REVIEWER-STOP>
+If you were dispatched as a read-only reviewer or skill-behavior evaluator, perform only the assigned review or evaluation. Do not create, revise, approve, or advance an executable spec; do not edit files, implement fixes, run implementation tasks, or commit changes.
+</READ-ONLY-REVIEWER-STOP>
 
-IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
+## Overview
 
-This is not negotiable. You cannot rationalize your way out of this.
-</EXTREMELY-IMPORTANT>
+Use one executable spec to keep substantial work aligned, resumable, and provable. Let short tasks and narrowly applicable skills proceed without this workflow.
 
-## The Rule
+## Short Tasks
 
-**Invoke relevant or requested skills BEFORE any response or action** — including clarifying questions, exploring the codebase, or checking files. If it turns out wrong for the situation, you don't have to use it.
+A task is short only when it is self-contained, has no material branch decisions, and can be completed and verified in one pass.
 
-**Before implementation:** if you do not have an approved executable spec, invoke the brainstorming skill first.
+For a short task:
 
-Then announce "Using [skill] to [purpose]" and follow the skill exactly.
+- do not invoke `brainstorming` merely to create process;
+- do not create a spec, plan, or progress artifact;
+- use any directly applicable specialist skill;
+- complete the task and verify the result at the task's natural scope.
 
-## Skill Priority
+Examples include a factual answer, one read-only lookup, a simple explanation, or a narrow action whose contract is already explicit. A small software behavior change may still require `test-driven-development`, but it does not automatically require a separate spec.
 
-When multiple skills apply, process skills come first — they set the approach, then implementation skills carry it out. Brainstorming and systematic-debugging are Superpowers' primary process skills.
+## Long Tasks
 
-- "Let's build X" → superpowers:brainstorming creates the executable spec, then the main agent uses superpowers:test-driven-development.
-- "Fix this bug" → superpowers:systematic-debugging first, then domain skills.
+Use this workflow when any observable condition applies:
 
-Implementation stays in the main agent's session. Subagents may be used only for read-only spec/code review or skill-behavior evaluation; they never edit files, implement fixes, run implementation tasks, or commit changes.
+- the task has dependent stages;
+- work needs persistent progress or is likely to cross a context boundary;
+- material uncertainty or a later decision can change direction;
+- execution combines multiple authorities, sources, datasets, components, or systems;
+- side effects, cost, migration, rollback, or other risk require explicit control;
+- the human partner explicitly requests a plan or specification.
 
-## Red Flags
+Before executing a long task:
 
-These thoughts mean STOP—you're rationalizing:
+1. Read the human partner's instructions and the project's authoritative files.
+2. Look for an existing approved spec before creating another one.
+3. If no usable spec exists, invoke `brainstorming` to create one executable spec.
+4. Classify each execution slice by the evidence that proves it complete:
+   - **behavior evidence** for changed software behavior;
+   - **research evidence** for analysis and research conclusions;
+   - **artifact or state evidence** for writing, data work, configuration, migration, operations, and other deliverables.
+5. Invoke specialist skills only for the slices where their trigger applies. TDD applies to changed software behavior, not to an entire mixed task merely because one slice uses code.
 
-| Thought | Reality |
-|---------|---------|
-| "This is just a simple question" | Questions are tasks. Check for skills. |
-| "I need more context first" | Skill check comes BEFORE clarifying questions. |
-| "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
-| "I can check git/files quickly" | Files lack conversation context. Check for skills. |
-| "Let me gather information first" | Skills tell you HOW to gather information. |
-| "This doesn't need a formal skill" | If a skill exists, use it. |
-| "I remember this skill" | Skills evolve. Read current version. |
-| "This doesn't count as a task" | Action = task. Check for skills. |
-| "The skill is overkill" | Simple things become complex. Use it. |
-| "I'll just do this one thing first" | Check BEFORE doing anything. |
-| "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
-| "I know what that means" | Knowing the concept ≠ using the skill. Invoke it. |
+The executable spec is the single persistent execution outline and progress authority. Do not create a second implementation plan, todo ledger, or parallel status document.
+
+## Resuming Work
+
+On a resumed long task:
+
+1. Re-read the authoritative project instructions and the existing spec.
+2. Inspect the declared deliverables and completion evidence instead of trusting conversation memory or checked boxes alone.
+3. Reopen any completed slice whose inputs, deliverables, or evidence are stale.
+4. Continue from the next dependency-ready slice.
+5. Revise the spec before continuing if the goal, authority, deliverables, evidence profile, or risk boundary changed materially.
+
+## Skill Boundaries
+
+- `brainstorming` creates or revises the executable spec for a substantial task.
+- `systematic-debugging` diagnoses bugs, test failures, and unexpected behavior whether or not a larger spec exists.
+- `test-driven-development` governs slices that change software behavior.
+- `requesting-code-review` and `finishing-a-development-branch` remain software-specific.
+- `verification-before-completion` checks the completion evidence declared by the spec or, for a short task, the direct claim being made.
+
+### Long Debugging Tasks
+
+A long debugging task uses one mixed-profile spec. Invoke `systematic-debugging` for the diagnostic method. The root-cause slice uses research evidence to preserve reproduction, boundary observations, eliminated hypotheses, and the supported cause; it does not use TDD. If a software fix is required, the fix slice uses behavior evidence and only the fix slice invokes `test-driven-development`. If the evidence shows that no software change is needed, finish with research evidence instead of inventing an implementation slice.
+
+Implementation stays in the main agent's session. Subagents may perform read-only spec/code review or skill-behavior evaluation; they never edit files, implement fixes, run implementation tasks, or commit changes.
 
 ## Platform Adaptation
 
-If your harness appears here, read its reference file for special instructions:
+If the current harness needs tool-name mapping, read its reference only when this skill is invoked:
 
 - Codex: `references/codex-tools.md`
-- Pi: `references/pi-tools.md`
-- Antigravity: `references/antigravity-tools.md`
 
-## User Instructions
+## Instruction Priority
 
-User instructions (CLAUDE.md, AGENTS.md, GEMINI.md, etc, direct requests) take precedence over skills, which in turn override default behavior. Only skip skill workflows or instructions when your human partner has explicitly told you to.
+Direct human-partner instructions and project authorities such as `AGENTS.md` and `CLAUDE.md` override a task spec. A spec must cite those authorities; it never replaces them.

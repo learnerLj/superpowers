@@ -9,7 +9,7 @@ description: Use when creating new skills, editing existing skills, or verifying
 
 **Writing skills IS Test-Driven Development applied to process documentation.**
 
-**Personal skills live in your runtime's skills directory** (`~/.claude/skills/` on Claude Code) — see [codex-tools.md](../using-superpowers/references/codex-tools.md) or [gemini-tools.md](../using-superpowers/references/gemini-tools.md) for the path on those runtimes. Codex, Copilot CLI, and Gemini CLI all also recognize `~/.agents/skills/` as a cross-runtime alias.
+**Personal skills live in your runtime's skills directory** (`~/.claude/skills/` on Claude Code and `~/.agents/skills/` on Codex). See [codex-tools.md](../using-superpowers/references/codex-tools.md) for Codex-specific runtime behavior.
 
 You write test cases, run them through fresh-context read-only evaluators, watch them fail (baseline behavior), write the skill, watch tests pass, and refactor.
 

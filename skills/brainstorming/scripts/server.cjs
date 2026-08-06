@@ -207,21 +207,18 @@ const helperInjection = '<script>\n' + helperScript + '\n</script>';
 
 function readSuperpowersVersion() {
   const root = path.join(__dirname, '../../..');
-  const manifests = [
-    path.join(root, 'package.json'),
-    path.join(root, '.codex-plugin/plugin.json')
-  ];
+  const versionPath = path.join(root, 'VERSION');
+  let contents;
 
-  for (const manifest of manifests) {
-    try {
-      const data = JSON.parse(fs.readFileSync(manifest, 'utf-8'));
-      if (data.version) return String(data.version);
-    } catch (e) {
-      // Packaged Codex plugins omit package.json; try the next manifest.
-    }
+  try {
+    contents = fs.readFileSync(versionPath, 'utf-8');
+  } catch (e) {
+    throw new Error(`Cannot read repository VERSION at ${versionPath}: ${e.message}`);
   }
 
-  return 'unknown';
+  const version = contents.trim();
+  if (!version) throw new Error(`Repository VERSION at ${versionPath} is empty`);
+  return version;
 }
 
 function isTruthyEnv(value) {

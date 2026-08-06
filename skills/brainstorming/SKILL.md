@@ -1,257 +1,150 @@
 ---
 name: brainstorming
-description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
+description: Use when a substantial task needs an executable specification before work begins or resumes, especially when the goal, authority, deliverables, evidence, boundaries, or execution stages require decisions
 ---
 
-# Brainstorming Ideas Into Designs
+# Brainstorming Executable Specifications
 
-Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
+## Overview
 
-Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
+Turn substantial work into one executable spec that preserves intent, constrains execution, records progress, and defines proof of completion. Scale the spec to the decision surface rather than forcing every task into a software-development shape.
 
 <HARD-GATE>
-Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
+Do not begin a substantial task's execution until its goal, authority, deliverables, execution slices, completion evidence, and revision triggers are explicit in one spec. This gate applies only after this skill has correctly triggered; short self-contained tasks do not need a spec.
 </HARD-GATE>
 
 <LANGUAGE-HARD-GATE>
-Before drafting any executable spec, lock one primary narrative language using
-this precedence: direct user request, authoritative project language rule,
-established language of an existing spec, then Chinese by default.
-If the user is discussing the request in Chinese and no higher-priority rule explicitly
-requires another language, the selected language is Chinese.
+Before drafting a spec, lock one primary narrative language using this precedence: direct human-partner request, authoritative project language rule, established language of an existing spec, then Chinese by default.
 
-Write the entire spec in that selected language: title, headings, prose,
-acceptance criteria, test mapping, and every Implementation Slice. Do not infer
-English from this skill, repository code, filenames, fixture text, or other
-technical material. Keep only required technical literals such as identifiers,
-API fields, commands, paths, and exact error text in their original form. Before
-review, scan every narrative heading and paragraph; translate any passage that
-uses a different language without being a required technical literal.
+If the human partner is discussing the request in Chinese and no higher-priority rule requires another language, write the entire spec in Chinese. Localize headings, prose, acceptance criteria, evidence descriptions, and slice labels. Keep only required technical literals such as identifiers, API fields, commands, paths, and exact errors in their original form. English labels in a Chinese spec are narrative-language drift, not technical literals.
 
-The labeled Implementation Slice fields below define required meanings, not
-fixed English output strings. Localize `Outcome`, `Depends on`, `System scope`,
-`Data decisions`, `Files`, `Acceptance criteria`, `Verification`, and `Review
-gate` into the selected language. English labels in a Chinese spec are
-narrative-language drift, not technical literals.
+Keep the entire spec in that selected language except for those required technical literals.
 </LANGUAGE-HARD-GATE>
 
-## Anti-Pattern: "This Is Too Simple To Need A Design"
+## Process
 
-Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
-
-## Checklist
-
-Complete these items in order:
-
-1. **Explore project context** — check files, docs, recent commits
-2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
-3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 approaches** — with trade-offs and your recommendation
-5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Lock and verify spec language** — apply the language hard gate before drafting, then scan the finished spec for narrative-language drift
-7. **Write executable spec** — use the selected language and save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-spec.md`
-8. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-9. **Independent spec review** — for substantial changes, dispatch a read-only reviewer subagent using the bundled prompt
-10. **User reviews written spec** — ask user to review the spec file before proceeding
-11. **Commit approved spec** — commit only the finalized spec and record that commit as the implementation baseline
-12. **Transition to implementation** — the main agent invokes test-driven-development and implements the approved spec
-
-## Process Flow
-
-```dot
-digraph brainstorming {
-    "Explore project context" [shape=box];
-    "Ask clarifying questions" [shape=box];
-    "Propose 2-3 approaches" [shape=box];
-    "Present design sections" [shape=box];
-    "User approves design?" [shape=diamond];
-    "Write executable spec" [shape=box];
-    "Spec self-review\n(fix inline)" [shape=box];
-    "Substantial change?" [shape=diamond];
-    "Read-only spec review" [shape=box];
-    "User reviews spec?" [shape=diamond];
-    "Commit approved spec" [shape=box];
-    "Main agent invokes TDD" [shape=doublecircle];
-
-    "Explore project context" -> "Ask clarifying questions";
-    "Ask clarifying questions" -> "Propose 2-3 approaches";
-    "Propose 2-3 approaches" -> "Present design sections";
-    "Present design sections" -> "User approves design?";
-    "User approves design?" -> "Present design sections" [label="no, revise"];
-    "User approves design?" -> "Write executable spec" [label="yes"];
-    "Write executable spec" -> "Spec self-review\n(fix inline)";
-    "Spec self-review\n(fix inline)" -> "Substantial change?";
-    "Substantial change?" -> "Read-only spec review" [label="yes"];
-    "Substantial change?" -> "User reviews spec?" [label="no"];
-    "Read-only spec review" -> "Write executable spec" [label="issues"];
-    "Read-only spec review" -> "User reviews spec?" [label="approved"];
-    "User reviews spec?" -> "Write executable spec" [label="changes requested"];
-    "User reviews spec?" -> "Commit approved spec" [label="approved"];
-    "Commit approved spec" -> "Main agent invokes TDD";
-}
-```
-
-**The terminal state is the main agent invoking test-driven-development against the approved spec.** Never delegate implementation to a subagent. Reviewer subagents are read-only and return findings to the main agent.
-
-## The Process
-
-**Understanding the idea:**
-
-- Check out the current project state first (files, docs, recent commits)
-- Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
-- If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, and what order should they be built? Then take the first sub-project through the normal spec-to-TDD flow.
-- For appropriately-scoped projects, ask questions one at a time to refine the idea
-- Prefer multiple choice questions when possible, but open-ended is fine too
-- Only one question per message - if a topic needs more exploration, break it into multiple questions
-- Focus on understanding: purpose, constraints, success criteria
-
-**Exploring approaches:**
-
-- Propose 2-3 different approaches with trade-offs
-- Present options conversationally with your recommendation and reasoning
-- Lead with your recommended option and explain why
-- YAGNI ruthlessly - remove unnecessary features from every approach and design
-
-**Presenting the design:**
-
-- Once you believe you understand what you're building, present the design
-- Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
-- Ask after each section whether it looks right so far
-- Cover: architecture, components, data flow, error handling, testing
-- Be ready to go back and clarify if something doesn't make sense
-
-**Design for isolation and clarity:**
-
-- Break the system into smaller units that each have one clear purpose, communicate through well-defined interfaces, and can be understood and tested independently
-- For each unit, you should be able to answer: what does it do, how do you use it, and what does it depend on?
-- Can someone understand what a unit does without reading its internals? Can you change the internals without breaking consumers? If not, the boundaries need work.
-- Smaller, well-bounded units are also easier for you to work with - you reason better about code you can hold in context at once, and your edits are more reliable when files are focused. When a file grows large, that's often a signal that it's doing too much.
-
-**Working in existing codebases:**
-
-- Explore the current structure before proposing changes. Follow existing patterns.
-- Where existing code has problems that affect the work (e.g., a file that's grown too large, unclear boundaries, tangled responsibilities), include targeted improvements as part of the design - the way a good developer improves code they're working in.
-- Don't propose unrelated refactoring. Stay focused on what serves the current goal.
+1. **Explore context** - read project authorities, existing artifacts, real entry points, consumers, and recent relevant work.
+2. **Offer the visual companion just-in-time** - only when the current question would genuinely be clearer shown than described. If no visual question arises, never offer it.
+3. **Find an existing spec** - revise or resume it when it still owns the same goal; do not fork a second execution outline.
+4. **Resolve material decisions** - ask only questions whose answers change scope, authority, deliverables, evidence, risk, or execution order. Do not force questions when the human partner already made the choice.
+5. **Compare approaches when needed** - present alternatives only for a real decision. Lead with the recommendation and trade-offs.
+6. **Select completion evidence** - assign behavior evidence, research evidence, artifact or state evidence, or an explicit combination.
+7. **Write the executable spec** - use the common contract and only the profile fields that apply.
+8. **Self-review** - remove placeholders, contradictions, ambiguity, unsupported assumptions, scope drift, and narrative-language drift.
+9. **Review substantial risk** - use a read-only reviewer for cross-component, high-risk, or downstream-critical specs.
+10. **Apply the profile's execution gate** - for non-software work, follow the human partner's wait-or-continue instruction after required review. For behavior-evidence software work, begin only after written spec approval or valid complete-design pre-authorization, then create the approved-spec commit and record `BASE_SHA` before production changes.
 
 ## Executable Spec Contract
 
-The spec is the complete implementation authority. A developer with no conversation history must be able to implement it without inventing missing behavior or producing another workflow document.
+The spec is the single persistent execution outline. A capable agent with no conversation history must be able to resume it without inventing the goal, authority, next step, or definition of done.
 
-The language hard gate above is part of this contract. Language selection happens before drafting and remains fixed for the whole spec unless the user or project authority explicitly overrides it. The self-review must reject narrative-language drift; a mostly selected-language document with English headings or sections is not compliant. Technical literals remain in their required original form.
+Every substantial spec contains:
 
-Scale detail to the decision surface. A simple configuration change can state in a few sentences that no runtime structure or transformation changes and use one small slice. A cross-component feature needs enough structure and flow detail to eliminate real design choices during implementation. Completeness is decision coverage, not length.
+1. **Goal and non-goals** - observable outcome and explicit exclusions.
+2. **Current state and authority** - actual starting state, priority rules, existing artifacts, and resume location.
+3. **Deliverables** - files, reports, code, data, or external state, with their owners and consumers.
+4. **Execution and data flow** - how inputs become deliverables; state explicitly when no data or state transformation exists.
+5. **Execution slices** - dependency-ordered, outcome-oriented checkpoints.
+6. **Completion evidence** - evidence required for every slice and final acceptance.
+7. **Revision triggers** - facts or changes that invalidate the current contract.
+8. **Final acceptance** - the complete set of claims that must be freshly verified before completion.
 
-Every substantial spec contains these sections:
+Do not create a second workflow document, implementation plan, todo ledger, or progress artifact. The spec owns progress as well as scope.
 
-1. **Goal and Non-goals** — the observable outcome and explicit scope exclusions.
-2. **Current system context** — the existing authority, entry point, flow, constraints, and behavior that must remain unchanged.
-3. **Target files** — exact files to create, modify, or delete, with each file's responsibility. Line numbers are optional because they drift.
-4. **System composition and data flow** — components, responsibilities, ownership, relationships, and input-to-output flow.
-5. **Interfaces and boundary contracts** — exact names, signatures, schemas, state transitions, validation, errors, and justified transformations visible across real boundaries.
-6. **Implementation Slices** — the single dependency-ordered execution outline embedded in the spec.
-7. **Acceptance criteria** — concrete inputs, outputs, side effects, failure cases, and unchanged behavior.
-8. **Test mapping** — the test file and scenario proving each acceptance criterion, plus focused and broader verification commands.
-9. **Migration and compatibility** — data migration, rollout, rollback, compatibility, or an explicit statement that none applies.
+### Execution Slices
 
-### System composition and data flow
+Each slice uses an unchecked Markdown progress marker in the approved baseline and contains meanings rendered in the spec's selected language:
 
-For each meaningful component, define its responsibility, owned state or business facts, inputs, outputs, dependencies, and relevant exclusions. The purpose is one coherent ownership model, not one type or file per architecture label.
-
-Name the canonical owner and representation for every changed business fact. Describe related structures as containment, reference, derivation, projection, or justified duplication. Prefer, in order:
-
-1. reuse when semantics and invariants match;
-2. containment or reference for real relationships;
-3. extension when owner and lifecycle remain the same;
-4. a new structure only for distinct semantics, invariants, ownership, lifecycle, or a real boundary contract.
-
-Classify important structures as reused, extended, merged, replaced, added, or removed. Treat same-shape DTOs, commands, entities, models, state objects, and wrappers as one structure unless a real boundary justifies separation; reuse, compose, merge, or explicitly justify them.
-
-Trace input-to-core and core-to-output data flow. State where validation, derivation, persistence, serialization, and projection occur. For every retained transformation, identify source, target, owner, information added or removed, and the boundary reason. Layer names alone do not justify a transformation. Valid reasons include untrusted-input validation, public protocol compatibility, sensitive-field filtering, wire-format or unit differences, real persistence constraints, or a newly established invariant.
-
-If persistent, domain, transport, cache, event, configuration, and UI-state structures do not change, say so briefly. Do not invent schema inventories or extra layers to fill the section.
-
-### Implementation Slices
-
-Implementation Slices are outcome-oriented, independently testable checkpoints in dependency order. They are the only execution outline; do not create a second execution document, todo ledger, or progress artifact.
-
-Each production implementation slice uses an unchecked Markdown progress marker in the approved baseline.
-A completed evidence-only RED slice may enter that baseline with a checked marker only when its
-evidence was collected, recorded, reviewed, and disclosed to the user before approval.
-This exception never applies to production implementation work. Each slice contains these labeled
-meanings, rendered in the spec's selected language:
-
-- **Outcome:** observable result when complete.
+- **Outcome:** observable result when the slice is complete.
 - **Depends on:** prerequisite slice IDs, or `None`.
-- **System scope:** affected components and responsibility boundaries.
-- **Data decisions:** structure and transformation decisions, or an explicit no-change statement.
-- **Files:** exact files expected to be created, modified, or deleted.
-- **Acceptance criteria:** IDs proved by the slice.
-- **Verification:** focused and broader commands.
-- **Review gate:** read-only review required for cross-component, risky, or downstream-critical work; otherwise `None`.
+- **Work scope:** affected artifacts, systems, sources, or responsibility boundaries.
+- **Inputs and authority:** required starting evidence and governing sources.
+- **Deliverables:** exact artifacts or state produced by the slice.
+- **Completion evidence:** fresh evidence that proves the outcome.
+- **Verification or review gate:** required checks and read-only review, or `None`.
 
-Slices do not contain production-code snippets, full test implementations, edit-by-edit instructions, commit commands, time estimates, or implementer subagent assignments.
+Mark a slice complete only after its declared evidence exists and is locatable. If later work changes its inputs, deliverables, or evidence, reopen the slice and verify it again.
 
-During implementation, the main agent selects the next dependency-ready unchecked slice and applies RED-GREEN-REFACTOR. It runs the declared verification and any read-only review gate before changing the progress marker to checked. If later work changes behavior or files proved by a completed slice, reopen that slice and obtain fresh verification and review evidence.
+## Completion Evidence Profiles
 
-Changing a slice outcome, system ownership, data decision, interface, acceptance criterion, or scope is a semantic spec change. Stop implementation, revise and re-review the spec, obtain user approval, and commit the revised spec alone as the new baseline.
+### Behavior Evidence
 
-Keep implementation mechanics in TDD. The spec defines what must be true, where authority lives, and how completion is proven; it never expands into tiny coding actions.
+Use for changed software behavior. In addition to the common contract, define:
 
-## After the Design
+- **Target files** and each file's responsibility;
+- **System composition and data flow**;
+- **Interfaces and boundary contracts** including exact names, signatures, schemas, state transitions, validation, and errors;
+- **Implementation Slices** with software-specific files and data decisions;
+- **Acceptance criteria** with observable success and failure cases;
+- **Test mapping** from each criterion to a test file, scenario, and focused verification command;
+- migration, compatibility, rollout, and rollback, or an explicit statement that none applies.
 
-**Documentation:**
+Each software **Implementation Slice** additionally contains:
 
-- Write the validated executable spec to `docs/superpowers/specs/YYYY-MM-DD-<topic>-spec.md`
-  - (User preferences for spec location override this default)
-- Use elements-of-style:writing-clearly-and-concisely skill if available
+- **Files:** exact files expected to be created, modified, or deleted;
+- **Data decisions:** structures and transformations owned by the slice, or an explicit no-change statement;
+- **Acceptance criteria:** exact criterion IDs proved by the slice;
+- **Focused verification:** exact commands for the slice's direct behavior;
+- **Broader verification:** the smallest downstream or integration commands required by the changed contract;
+- **Review gate:** a distinct read-only review requirement for cross-component, risky, or downstream-critical work, otherwise `None`.
 
-**Spec Self-Review:**
-After writing the spec document, look at it with fresh eyes:
+Name the canonical owner and representation for every changed business fact. Describe relationships as containment, reference, derivation, projection, or justified duplication. Treat same-shape DTOs, commands, entities, models, state objects, and wrappers as one structure unless a real boundary justifies separation. For every transformation, identify source, target, owner, information added or removed, and the boundary reason.
 
-1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
-2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
-3. **Scope check:** Is this focused enough for one coherent implementation, or does it need decomposition?
-4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
-5. **Coverage check:** Does every acceptance criterion map to a target file, interface or behavior, and test?
-6. **Language check:** Does every title, heading, prose paragraph, acceptance criterion, test mapping, and Implementation Slice use the locked primary language, except required technical literals?
+The main agent invokes `test-driven-development` for these slices. Cross-component, risky, or downstream-critical behavior uses read-only spec/code review. Completed software behavior proceeds through `verification-before-completion` and, when branch integration applies, `finishing-a-development-branch`.
 
-Fix any issues inline. No need to re-review — just fix and move on.
+### Research Evidence
 
-**Independent Review:**
+Use for analysis and research. In addition to the common contract, define:
 
-For substantial or cross-cutting specs, dispatch a reviewer subagent using [spec-document-reviewer-prompt.md](spec-document-reviewer-prompt.md). The reviewer is read-only: it reports gaps and contradictions but MUST NOT edit files, run implementation tasks, or commit changes. The main agent applies valid findings and repeats the review until approved.
+- core questions and explicit exclusions;
+- known facts, hypotheses, and unknowns;
+- source and authority priority;
+- evidence thresholds and coverage boundaries;
+- collection, extraction, comparison, and synthesis methods;
+- independent corroboration, contradiction, and counter-evidence handling;
+- output labels for verified fact, inference, NOT VERIFIED, and unresolved uncertainty.
 
-**User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
+Human research and judgment do not use TDD. If a slice creates or changes reusable software behavior for collection or analysis, apply TDD to that slice only. Conclusions are complete only when the declared evidence exists and the report does not exceed it.
 
-> "Spec written to `<path>`. Please review it and let me know if you want to make any changes before we approve and commit the implementation baseline."
+### Artifact or State Evidence
 
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
+Use for writing, data organization, configuration, migration, operations, and other long deliverables. In addition to the common contract, define:
 
-After approval, commit only the finalized spec and record that commit as
-`BASE_SHA`. Do not combine implementation changes with this baseline commit.
-Report the spec path and `BASE_SHA`, then begin test-driven-development.
+- target artifact or before/after state;
+- allowed side effects and protected state;
+- completeness, format, semantic, or consumer checks;
+- rollback, recovery, or provenance evidence when relevant;
+- downstream acceptance and unchanged behavior.
 
-**Implementation:**
+Only slices that change software behavior use test-driven-development. Other slices use the checks declared by their artifact or state contract.
 
-- After user approval, the main agent takes the approved spec directly into test-driven-development and implements it in the current session.
-- Subagents may review the spec or completed code, but MUST NOT write implementation code, edit files, run implementation tasks, or commit changes.
+### Mixed Work
+
+A spec may combine profiles. Assign completion evidence per slice. Do not classify an entire analysis, migration, or writing task as software implementation merely because one slice uses code.
+
+## Approval and Direct Execution
+
+- If the human partner says **plan first**, **spec only**, **show me before execution**, or equivalent, wait for approval after writing and reviewing the spec.
+- For non-software profiles, if the human partner authorizes direct execution, **continue**, **do not stop**, or equivalent, begin the first dependency-ready slice after spec self-review and any required independent review.
+- Behavior-evidence software work requires either written spec approval or explicit implementation pre-authorization after the human partner reviewed the complete design. Before production changes, commit the final approved spec separately and record that commit as `BASE_SHA`; implementation, review, and final diff verification use this approved-spec baseline. Pre-authorization is invalid if the final spec adds a material decision that the reviewed design did not contain.
+- If higher-priority project instructions require an approval or safety gate, obey them regardless of the general execution instruction.
+
+Changing the goal, authority, deliverables, evidence profile, risk boundary, acceptance criteria, or slice outcome is a semantic spec change. Stop, revise the spec, perform the required review, and obtain approval when the governing instruction requires it.
 
 ## Visual Companion
 
-A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.
+The bundled browser companion is an optional tool for mockups, diagrams, spatial relationships, and visual comparisons. Offer it only when the current decision is materially easier to understand visually, and make that offer in its own message. Do not offer it for text-only requirements, trade-offs, or technical decisions.
 
-**Offering the companion (just-in-time):** Do NOT offer it upfront. Wait until a question would genuinely be clearer shown than told — a real mockup / layout / diagram question, not merely a UI *topic*. The first time that happens, offer it then, as its own message:
-> "This next part might be easier if I show you — I can put together mockups, diagrams, and comparisons in a browser tab as we go. It's still new and can be token-intensive. Want me to? I'll open it for you."
+If the human partner accepts, read `visual-companion.md` before starting the server or creating a screen. Decide separately for each later question whether the browser adds value; acceptance does not turn the whole session into a visual workflow.
 
-**This offer MUST be its own message.** Only the offer — no clarifying question, summary, or other content. Wait for the user's response. If they accept, start the server with `--open` so their browser opens to the first screen automatically. If they decline, continue text-only and don't offer again unless they raise it.
+## Review
 
-**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the terminal. The test: **would the user understand this better by seeing it than reading it?**
+For substantial or cross-cutting specs, dispatch a read-only reviewer using `spec-document-reviewer-prompt.md`. The reviewer reports gaps and contradictions but does not edit files, execute task slices, implement fixes, or commit changes. The main agent applies valid findings and repeats review until no blocking issue remains.
 
-- **Use the browser** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
-- **Use the terminal** for content that is text — requirements questions, conceptual choices, tradeoff lists, A/B/C/D text options, scope decisions
+## After the Spec
 
-A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
-
-If they agree to the companion, read the detailed guide before proceeding:
-`skills/brainstorming/visual-companion.md`
+- Keep the spec at the project-authorized location; otherwise default to `docs/superpowers/specs/YYYY-MM-DD-<topic>-spec.md`.
+- Execute only dependency-ready slices.
+- Update a progress marker only after fresh completion evidence exists.
+- Use specialist skills only when their own triggers apply.
+- Finish by invoking `verification-before-completion` against the spec's declared evidence.

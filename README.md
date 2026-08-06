@@ -1,6 +1,6 @@
 # Superpowers
 
-Superpowers is a complete software development methodology for your coding agents, built on top of a set of composable skills and some initial instructions that make sure your agent uses them.
+Superpowers is a composable execution methodology for coding agents. It keeps substantial, multi-stage work aligned through one executable spec while letting short tasks finish without process overhead.
 
 
 ## We're Hiring!
@@ -11,19 +11,15 @@ If this sounds like someone you know, definitely send them our way.
 
 ## Quickstart
 
-Give your agent Superpowers: [Claude Code](#claude-code), [Antigravity](#antigravity), [Codex App](#codex-app), [Codex CLI](#codex-cli), [Cursor](#cursor), [Factory Droid](#factory-droid), [Gemini CLI](#gemini-cli), [GitHub Copilot CLI](#github-copilot-cli), [Kimi Code](#kimi-code), [OpenCode](#opencode), [Pi](#pi).
+Use the skills directly with [Claude Code](#claude-code) or [Codex](#codex).
 
 ## How it works
 
-It starts from the moment you fire up your coding agent. As soon as it sees that you're building something, it *doesn't* just jump into trying to write code. Instead, it steps back and asks you what you're really trying to do. 
+Short, self-contained work that can be completed and verified in one pass proceeds directly. Substantial work — dependent stages, persistent progress, material uncertainty or risk, cross-context execution, or an explicit request for a plan/spec — uses `using-superpowers` and one executable spec.
 
-Once it's teased a spec out of the conversation, it shows it to you in chunks short enough to actually read and digest. 
+The spec owns goal, authority, deliverables, dependency-ordered slices, progress, revision triggers, and completion evidence. It is both the execution constraint and the resume point; no second workflow document is created.
 
-After you've signed off on the design, the agent writes one executable spec: system ownership, canonical data relationships, justified boundary transformations, target files, interfaces, acceptance criteria, test mapping, and embedded dependency-ordered implementation slices. No second workflow document is created.
-
-Once you say "go", the main agent implements that spec with true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. Subagents may perform read-only review or evaluation, but they never implement changes.
-
-There's a bunch more to it, but that's the core of the system. And because the skills trigger automatically, you don't need to do anything special. Your coding agent just has Superpowers.
+Completion evidence matches the task: research evidence for analysis, artifact or state evidence for writing/migration/operations, and behavior evidence for software changes. Only changed software behavior enters red/green TDD, code review, and branch finishing. Subagents may perform read-only review or evaluation, but they never implement changes.
 
 ## Commercial Services
 
@@ -31,187 +27,49 @@ If you're using Superpowers in enterprise and could benefit from commercial supp
 
 ## Installation
 
-Installation differs by harness. If you use more than one, install Superpowers separately for each one.
+Superpowers is a skills library, not a plugin. Clone the repository, then link each skill into the native user-level skills directory of the harness you use.
 
 ### Claude Code
 
-Superpowers is available via the [official Claude plugin marketplace](https://claude.com/plugins/superpowers)
-
-#### Official Marketplace
-
-- Install the plugin from Anthropic's official marketplace:
-
-  ```bash
-  /plugin install superpowers@claude-plugins-official
-  ```
-
-#### Superpowers Marketplace
-
-The Superpowers marketplace provides Superpowers and some other related plugins for Claude Code.
-
-- Register the marketplace:
-
-  ```bash
-  /plugin marketplace add obra/superpowers-marketplace
-  ```
-
-- Install the plugin from this marketplace:
-
-  ```bash
-  /plugin install superpowers@superpowers-marketplace
-  ```
-
-### Antigravity
-
-Install Superpowers as a plugin from this repository:
+Link the repository's skill directories into Claude Code's native user skills directory:
 
 ```bash
-agy plugin install https://github.com/obra/superpowers
+mkdir -p "$HOME/.claude/skills"
+for skill in /absolute/path/to/superpowers/skills/*; do
+  [ -d "$skill" ] || continue
+  ln -sfn "$skill" "$HOME/.claude/skills/$(basename "$skill")"
+done
 ```
 
-Antigravity runs the plugin's session-start hook, so Superpowers is active from
-the first message. Reinstall with the same command to update.
+Restart Claude Code after adding or updating links.
 
-### Codex App
+### Codex
 
-Superpowers is available via the [official Codex plugin marketplace](https://github.com/openai/plugins).
-
-- In the Codex app, click on Plugins in the sidebar.
-- You should see `Superpowers` in the Coding section.
-- Click the `+` next to Superpowers and follow the prompts.
-
-### Codex CLI
-
-Superpowers is available via the [official Codex plugin marketplace](https://github.com/openai/plugins).
-
-- Open the plugin search interface:
-
-  ```bash
-  /plugins
-  ```
-
-- Search for Superpowers:
-
-  ```bash
-  superpowers
-  ```
-
-- Select `Install Plugin`.
-
-### Cursor
-
-- In Cursor Agent chat, install from marketplace:
-
-  ```text
-  /add-plugin superpowers
-  ```
-
-- Or search for "superpowers" in the plugin marketplace.
-
-### Factory Droid
-
-- Register the marketplace:
-
-  ```bash
-  droid plugin marketplace add https://github.com/obra/superpowers
-  ```
-
-- Install the plugin:
-
-  ```bash
-  droid plugin install superpowers@superpowers
-  ```
-
-### Gemini CLI
-
-- Install the extension:
-
-  ```bash
-  gemini extensions install https://github.com/obra/superpowers
-  ```
-
-- Update later:
-
-  ```bash
-  gemini extensions update superpowers
-  ```
-
-### GitHub Copilot CLI
-
-- Register the marketplace:
-
-  ```bash
-  copilot plugin marketplace add obra/superpowers-marketplace
-  ```
-
-- Install the plugin:
-
-  ```bash
-  copilot plugin install superpowers@superpowers-marketplace
-  ```
-
-### Kimi Code
-
-Superpowers is available in Kimi Code's plugin marketplace.
-
-- Open Kimi Code's plugin manager:
-
-  ```text
-  /plugins
-  ```
-
-- Go to `Marketplace` > `Superpowers` and install it.
-
-- Or install directly from this repository:
-
-  ```text
-  /plugins install https://github.com/obra/superpowers
-  ```
-
-- Detailed docs: [docs/README.kimi.md](docs/README.kimi.md)
-
-### OpenCode
-
-OpenCode uses its own plugin install; install Superpowers separately even if you
-already use it in another harness.
-
-- Tell OpenCode:
-
-  ```
-  Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.opencode/INSTALL.md
-  ```
-
-- Detailed docs: [docs/README.opencode.md](docs/README.opencode.md)
-
-### Pi
-
-Install Superpowers as a Pi package from this repository:
+Link the same skill directories into Codex's native shared skills directory:
 
 ```bash
-pi install git:github.com/obra/superpowers
+mkdir -p "$HOME/.agents/skills"
+for skill in /absolute/path/to/superpowers/skills/*; do
+  [ -d "$skill" ] || continue
+  ln -sfn "$skill" "$HOME/.agents/skills/$(basename "$skill")"
+done
 ```
 
-For local development, run Pi with this checkout loaded as a temporary package:
-
-```bash
-pi -e /path/to/superpowers
-```
-
-The Pi package loads the Superpowers skills and a small extension that injects the `using-superpowers` bootstrap at session startup and again after compaction. Pi has native skills, so no compatibility `Skill` tool is required. A subagent tool is optional and is used only for read-only review or evaluation.
+Restart Codex after adding or updating links. No session hook or startup prompt is installed.
 
 ## The Basic Workflow
 
-1. **brainstorming** - Activates before writing code. Refines rough ideas, presents the design, and saves one executable spec with system composition, boundary contracts, acceptance criteria, test mapping, and embedded dependency-ordered implementation slices.
+1. **using-superpowers** - Activates for substantial or resumable work, not for short one-pass tasks. It finds or creates the task's single executable spec and routes each slice by its completion evidence.
 
-2. **test-driven-development** - The main agent implements the approved spec through RED-GREEN-REFACTOR: write a failing test, watch it fail, write minimal code, watch it pass.
+2. **brainstorming** - Creates the executable spec. Common fields constrain every long task; research evidence, artifact or state evidence, and behavior evidence add only the fields their deliverables require.
 
-3. **requesting-code-review** - Runs pre-review verification, dispatches a read-only reviewer over the spec baseline through the current working tree, then requires post-review verification and repeat review after important fixes. Reviewers return findings but never edit or implement.
+3. **execution** - The main agent completes dependency-ready slices. Software behavior uses `test-driven-development`; analysis and other deliverables use the evidence declared by their spec.
 
-4. **verification-before-completion** - Re-checks every acceptance criterion and runs the full relevant verification before the main agent commits the implementation or declares completion.
+4. **verification-before-completion** - Re-checks every slice and final claim against fresh behavior, research, artifact, or state evidence.
 
-5. **finishing-a-development-branch** - Activates when implementation completes. Verifies tests and presents merge, PR, or keep options.
+5. **software-only completion** - `requesting-code-review` and `finishing-a-development-branch` apply only when software behavior and branch integration require them.
 
-**The agent checks for relevant skills before any task.** Mandatory workflows, not suggestions.
+Skills are discovered natively from the linked directories and trigger from their descriptions or explicit invocation. There is no plugin, hook, or session-start bootstrap.
 
 ## What's Inside
 
@@ -222,17 +80,17 @@ The Pi package loads the Superpowers skills and a small extension that injects t
 
 **Debugging**
 - **systematic-debugging** - 4-phase root cause process (includes root-cause-tracing, defense-in-depth, condition-based-waiting techniques)
-- **verification-before-completion** - Ensure it's actually fixed
+- **verification-before-completion** - Verify software, research, artifacts, and state against declared evidence
 
 **Collaboration** 
-- **brainstorming** - Socratic design refinement
+- **brainstorming** - Executable specifications for substantial work
 - **requesting-code-review** - Read-only independent review
 - **receiving-code-review** - Responding to feedback
 - **finishing-a-development-branch** - Merge/PR decision workflow
 
 **Meta**
 - **writing-skills** - Create new skills following best practices (includes testing methodology)
-- **using-superpowers** - Introduction to the skills system
+- **using-superpowers** - Long-task routing, execution constraints, and resume workflow
 
 ## Philosophy
 
@@ -245,7 +103,7 @@ Read [the original release announcement](https://blog.fsck.com/2025/10/09/superp
 
 ## Contributing
 
-The general contribution process for Superpowers is below. Keep in mind that we don't generally accept contributions of new skills and that any updates to skills must work across all of the coding agents we support.
+The general contribution process for Superpowers is below. Keep in mind that we don't generally accept contributions of new skills and that updates must preserve the documented skill contracts in Claude Code and Codex.
 
 1. Fork the repository
 2. Switch to the 'dev' branch
@@ -253,7 +111,7 @@ The general contribution process for Superpowers is below. Keep in mind that we 
 4. Follow the `writing-skills` skill for creating and testing new and modified skills
 5. Submit a PR, being sure to fill in the pull request template.
 
-Skill-behavior tests use the drill eval harness from [superpowers-evals](https://github.com/prime-radiant-inc/superpowers-evals/), cloned into `evals/` — see `evals/README.md` for setup. Plugin-infrastructure tests live at `tests/` and run via the relevant `run-*.sh` or `npm test`.
+Skill-behavior changes require paired control/candidate evidence from fresh-context read-only evaluators. Local skill and helper tests live at `tests/`.
 
 See `skills/writing-skills/SKILL.md` for the complete guide.
 
@@ -267,7 +125,7 @@ MIT License - see LICENSE file for details
 
 ## Visual companion telemetry
 
-Because skills and plugins don't provide any feedback to creators, we have no idea how many of you are using Superpowers. By default, the Prime Radiant logo on brainstorming's optional visual companion feature is loaded from our website. It includes the version of Superpowers in use. It does not include any details about your project, prompt, or coding agent. We don't see your clicks or anything about what you're building. This helps us have a rough idea of how many folks are using Superpowers and which version of Superpowers they're using. It's 100% optional. To disable this, set the environment variable `SUPERPOWERS_DISABLE_TELEMETRY` to any true value. Superpowers also honors Claude Code's `DISABLE_TELEMETRY` and `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` opt-outs.
+Because skills don't provide any feedback to creators, we have no idea how many of you are using Superpowers. By default, the Prime Radiant logo on brainstorming's optional visual companion feature is loaded from our website. It includes the version of Superpowers in use. It does not include any details about your project, prompt, or coding agent. We don't see your clicks or anything about what you're building. This helps us have a rough idea of how many folks are using Superpowers and which version of Superpowers they're using. It's 100% optional. To disable this, set the environment variable `SUPERPOWERS_DISABLE_TELEMETRY` to any true value. Superpowers also honors Claude Code's `DISABLE_TELEMETRY` and `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` opt-outs.
 
 ## Community
 

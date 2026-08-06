@@ -18,7 +18,7 @@ of human involvement will be closed without review.
 |-------|-------|
 | Your model + version | |
 | Harness + version | |
-| All plugins installed | |
+| Relevant skills installed | |
 | Human partner who reviewed this diff | |
 
 ## What problem are you trying to solve?
@@ -42,8 +42,7 @@ of human involvement will be closed without review.
      - Does this integrate or promote a third-party service?
 
      If your change is a new skill for a specific domain, workflow tool,
-     or third-party integration, it belongs in its own plugin — not here.
-     See the plugin development docs for how to publish it separately. -->
+     or third-party integration, it belongs in a separate repository — not here. -->
 
 ## What alternatives did you consider?
 <!-- What other approaches did you try or evaluate before landing on this
@@ -63,48 +62,9 @@ of human involvement will be closed without review.
 
 ## Environment tested
 
-| Harness (e.g. Claude Code, Cursor) | Harness version | Model | Model version/ID |
+| Harness (Claude Code or Codex) | Harness version | Model | Model version/ID |
 |-------------------------------------|-----------------|-------|------------------|
 |                                     |                 |       |                  |
-
-## New harness support (required if this PR adds a new harness)
-
-<!-- If this PR adds support for a new harness (IDE, CLI tool, agent
-     runner), you MUST include a session transcript proving the
-     integration actually works.
-
-     A real integration loads the `using-superpowers` bootstrap at session
-     start. The bootstrap is what causes skills to auto-trigger. Without
-     it, the skills are dead weight — present on disk but never invoked
-     at the right moments.
-
-     ACCEPTANCE TEST: Open a clean session in the new harness and send
-     exactly this user message:
-
-         Let's make a react todo list
-
-     A working integration auto-triggers the `brainstorming` skill before
-     any code is written. Paste the complete transcript below.
-
-     These are NOT real integrations and PRs that ship them will be closed:
-
-     - Manually copying skill files into the harness
-     - Wrapping with `npx skills` or similar at-runtime shims
-     - Anything that requires the user to opt in to skills per-session
-     - Anything where brainstorming does not auto-trigger on the test above
-
-     If you are not sure whether your integration loads the bootstrap at
-     session start, it does not.
--->
-
-<details>
-<summary>Clean-session transcript for "Let's make a react todo list"</summary>
-
-```
-paste the complete transcript here
-```
-
-</details>
 
 ## Evaluation
 - What was the initial prompt you (or your human partner) used to start

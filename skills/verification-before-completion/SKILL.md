@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
+description: Use when about to claim a task, fix, analysis, deliverable, migration, or implementation is complete, correct, or passing, before committing, publishing, handing off, or ending the work
 ---
 
 # Verification Before Completion
@@ -9,125 +9,95 @@ description: Use when about to claim work is complete, fixed, or passing, before
 
 **Core principle:** Evidence before claims, always.
 
-**Violating the letter of this rule is violating the spirit of this rule.**
-
 ## The Iron Law
 
 ```
 NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
 ```
 
-If you haven't run the verification command in this message, you cannot claim it passes.
+The approved spec owns the declared completion evidence. For a short task without a spec, identify the direct observation or command that proves the claim.
 
-## The Gate Function
+## Gate Function
+
+Before claiming completion:
+
+1. **IDENTIFY** the exact claim and its required evidence.
+2. **RUN or INSPECT** the complete verification now.
+3. **READ** the full result, including exit status, failure count, missing coverage, and unresolved uncertainty.
+4. **COMPARE** the evidence with the spec, not with confidence or prior output.
+5. **REPORT** the verified result and any remaining gap.
+
+If evidence is stale, partial, indirect, or missing, the claim is not verified.
+
+## Declared Completion Evidence
+
+### Behavior evidence
+
+For changed software behavior:
+
+- map every acceptance criterion to a fresh test or direct behavioral check;
+- run the relevant test, build, lint, format, and integration commands declared by the spec;
+- inspect the final diff and intended unchanged behavior;
+- verify important review fixes again;
+- do not substitute compilation for semantic contract coverage.
+
+### Research evidence
+
+For analysis and research:
+
+- verify required source coverage and authority priority;
+- inspect the actual collected artifacts, not a summary of them;
+- check corroboration, contradictory evidence, and evidence boundaries;
+- distinguish verified fact, inference, NOT VERIFIED, and unresolved uncertainty;
+- confirm the final report does not claim more than the evidence supports.
+
+### Artifact or state evidence
+
+For writing, data work, configuration, migration, operations, or other deliverables:
+
+- inspect the target artifact or before/after state;
+- run declared format, completeness, semantic, consumer, and provenance checks;
+- verify protected or unchanged state remains intact;
+- exercise rollback or recovery when the spec requires it;
+- confirm every downstream acceptance condition.
+
+For mixed work, verify each slice using its assigned evidence profile.
+
+## Requirements Verification
+
+Re-read the approved spec line by line. A checked progress marker is not evidence by itself. Confirm that each slice has fresh, locatable evidence and reopen any slice affected by later work.
+
+Reviewer findings are evidence inputs, not authority:
 
 ```
-BEFORE claiming any status or expressing satisfaction:
-
-1. IDENTIFY: What command proves this claim?
-2. RUN: Execute the FULL command (fresh, complete)
-3. READ: Full output, check exit code, count failures
-4. VERIFY: Does output confirm the claim?
-   - If NO: State actual status with evidence
-   - If YES: State claim WITH evidence
-5. ONLY THEN: Make the claim
-
-Skip any step = lying, not verifying
+Reviewer reports issue -> reproduce against spec/artifact -> verify -> main agent fixes
 ```
 
-## Common Failures
-
-| Claim | Requires | Not Sufficient |
-|-------|----------|----------------|
-| Tests pass | Test command output: 0 failures | Previous run, "should pass" |
-| Linter clean | Linter output: 0 errors | Partial check, extrapolation |
-| Build succeeds | Build command: exit 0 | Linter passing, logs look good |
-| Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
-| Regression test works | Red-green cycle verified | Test passes once |
-| Agent completed | VCS diff shows changes | Agent reports "success" |
-| Requirements met | Line-by-line checklist | Tests passing |
-
-## Red Flags - STOP
-
-- Using "should", "probably", "seems to"
-- Expressing satisfaction before verification ("Great!", "Perfect!", "Done!", etc.)
-- About to commit/push/PR without verification
-- Trusting agent success reports
-- Relying on partial verification
-- Thinking "just this once"
-- Tired and wanting work over
-- **ANY wording implying success without having run verification**
-
-## Rationalization Prevention
-
-| Excuse | Reality |
-|--------|---------|
-| "Should work now" | RUN the verification |
-| "I'm confident" | Confidence ≠ evidence |
-| "Just this once" | No exceptions |
-| "Linter passed" | Linter ≠ compiler |
-| "Agent said success" | Verify independently |
-| "I'm tired" | Exhaustion ≠ excuse |
-| "Partial check is enough" | Partial proves nothing |
-| "Different words so rule doesn't apply" | Spirit over letter |
-
-## Key Patterns
-
-**Tests:**
-```
-✅ [Run test command] [See: 34/34 pass] "All tests pass"
-❌ "Should pass now" / "Looks correct"
-```
-
-**Regression tests (TDD Red-Green):**
-```
-✅ Write → Run (pass) → Revert fix → Run (MUST FAIL) → Restore → Run (pass)
-❌ "I've written a regression test" (without red-green verification)
-```
-
-**Build:**
-```
-✅ [Run build] [See: exit 0] "Build passes"
-❌ "Linter passed" (linter doesn't check compilation)
-```
-
-**Requirements:**
-```
-✅ Re-read approved spec → Create checklist → Verify each criterion → Report gaps or completion
-❌ "Tests pass, phase complete"
-```
-
-**Reviewer findings:**
-```
-✅ Reviewer reports issue → Reproduce against spec/code → Verify evidence → Fix in main session
-❌ Let a reviewer edit or trust an unsupported finding
-```
+Never let a reviewer implement changes or trust an unsupported finding.
 
 ## Completion Handoff
 
-After the read-only review loop has no remaining Critical or Important findings:
+Only behavior-evidence software work continues to finishing-a-development-branch. Before that handoff:
 
-1. Re-read the approved spec and check every acceptance criterion.
-2. Run the full relevant test, build, and lint commands on the current tree.
-3. Inspect the final diff and confirm it contains only the intended implementation.
-4. The main agent commits the verified implementation, staging only intended files.
-5. Invoke `finishing-a-development-branch` with that committed snapshot.
+1. Re-read the approved software spec and verify every acceptance criterion.
+2. Run the full relevant verification on the current tree.
+3. Inspect the final diff and confirm only intended changes remain.
+4. Commit only when the human partner or governing workflow authorizes it.
+5. Invoke `finishing-a-development-branch` only for an actual branch-integration decision.
 
-Any code change after verification invalidates the evidence. Re-run the affected
-checks before committing or claiming completion.
+Research evidence and artifact or state evidence end with their declared report, artifact, state, or handoff. They do not require a code commit or development-branch workflow unless a software slice independently requires one.
 
-## When To Apply
+Any change after verification invalidates the affected evidence. Re-run the relevant checks before claiming completion.
 
-**ALWAYS before:**
-- ANY variation of success/completion claims
-- ANY expression of satisfaction
-- ANY positive statement about work state
-- Committing, PR creation, task completion
-- Moving to next task
-- Delegating to agents
+## Red Flags
 
-**Rule applies to:**
-- Exact phrases
-- Paraphrases and synonyms
-- Implications of success
-- ANY communication suggesting completion/correctness
+- “should”, “probably”, or “seems to” used as a success claim;
+- relying on a previous run;
+- treating a reviewer or subagent report as proof;
+- extrapolating a partial check to the whole task;
+- treating source count as research quality without inspecting coverage;
+- treating file existence as semantic correctness;
+- treating tests as proof of analysis conclusions;
+- ending because the task is long or the context is nearly full.
+
+When any red flag appears, identify the missing evidence and verify it before proceeding.
