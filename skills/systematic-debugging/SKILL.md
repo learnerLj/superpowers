@@ -119,7 +119,7 @@ description: 遇到任何 bug、测试失败或非预期行为，并且尚未提
 1. **先创建失败测试**
    - 使用最简单的复现；能自动化就写自动化测试，否则写一次性测试脚本
    - 修复前必须拥有该测试
-   - 使用 `superpowers:test-driven-development` 编写正确的失败测试
+   - 使用 `test-driven-development` 编写正确的失败测试
 
 2. **只实施一个修复**
    - 只处理已确认的根因，一次一个变更
@@ -127,7 +127,8 @@ description: 遇到任何 bug、测试失败或非预期行为，并且尚未提
 
 3. **验证修复**
    - 测试现在是否通过？其它测试是否仍通过？原问题是否真的解决？
-   - 宣称成功前使用 `superpowers:verification-before-completion`
+   - 复杂 bug、高风险、跨组件或公共 contract 修复先使用 `requesting-code-review`
+   - reviewer 有 findings 时使用 `receiving-code-review`；按授权边界处理完毕后再使用 `verification-before-completion`
 
 4. **修复不奏效时**
    - 立即停止，并统计已经尝试的修复次数
@@ -143,7 +144,7 @@ description: 遇到任何 bug、测试失败或非预期行为，并且尚未提
 
    这不是一次假设失败，而是架构选错了。
 
-## 红旗：停止并回到流程
+## 必须停下并回到流程的信号
 
 出现以下想法或行为时，全部意味着停止并回到阶段 1：
 

@@ -3,7 +3,7 @@
 Superpowers has two distinct kinds of verification:
 
 - **`tests/`** — do skill contracts and bundled helper scripts work? Bash + python tests cover the workflow, debugging helpers, and shell utilities.
-- **Behavior evidence** — do fresh-context read-only evaluators follow the intended skill contract? Store the relevant prompts, source hashes, responses, and evidence boundary with the workflow test evidence.
+- **Behavior evidence** — do fresh-context read-only evaluators follow the intended skill contract? Store relevant prompts, source hashes, responses, and the evidence boundary in the task record or PR description, not as one-off files under `tests/`.
 
 ## Local tests
 

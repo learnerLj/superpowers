@@ -15,7 +15,7 @@ description: 创建新 skill、编辑已有 skill，或在部署前验证 skill 
 
 **核心原则：** 如果没有亲眼看到 agent 在缺少该 skill 时失败，你就不知道 skill 是否教对了东西。
 
-**必备背景：** 使用前必须理解 `superpowers:test-driven-development` 的 RED-GREEN-REFACTOR 循环。本 skill 只是把它应用到文档。
+**必备背景：** 使用前必须理解 `test-driven-development` 的 RED-GREEN-REFACTOR 循环。本 skill 只是把它应用到文档。
 
 Anthropic 官方建议见 [anthropic-best-practices.md](anthropic-best-practices.md)，它补充本 skill 的 TDD 方法。
 
@@ -99,8 +99,8 @@ agent 已经很聪明，只加入非显而易见的上下文。常加载入口�
 
 只写 skill 名并标明强度：
 
-- `**必需子 skill：** 使用 superpowers:test-driven-development`
-- `**必备背景：** 必须理解 superpowers:systematic-debugging`
+- `**必需子 skill：** 使用 test-driven-development`
+- `**必备背景：** 必须理解 systematic-debugging`
 
 不要用含糊文件路径或强制预加载的 `@` 引用。
 
@@ -149,7 +149,7 @@ agent 已经很聪明，只加入非显而易见的上下文。常加载入口�
 
 | 失败类型 | 正确形式 | 错误形式 |
 |---|---|---|
-| 明知规则却在压力下跳过 | 禁止项 + 合理化表 + 红旗 | “建议”“考虑”式软指导 |
+| 明知规则却在压力下跳过 | 禁止项 + 合理化表 + 停止信号 | “建议”“考虑”式软指导 |
 | 输出形状错误 | 正向 recipe/contract，明确输出由哪些部分按何顺序组成 | 一长串“不要……” |
 | 已有输出缺少必需元素 | 在模板中加入 REQUIRED 字段/slot | 模板附近的散文提醒 |
 | 行为取决于条件 | 绑定可观察 predicate 的条件句 | 无条件规则加例外条款 |
@@ -163,7 +163,7 @@ agent 已经很聪明，只加入非显而易见的上下文。常加载入口�
 1. 明确堵住每个已观察到的绕过方式，不只说“先写测试”，还要说先写实现就删除、不能留作参考、不能一边写测试一边看它。
 2. 尽早声明“违反字面规则就是违反规则精神”。
 3. 把 baseline 中每句借口和对应事实加入 rationalization table。
-4. 建立显眼的红旗列表；命中任何一项都要求停止并重来。
+4. 建立显眼的停止信号列表；命中任何一项都要求停止并重来。
 5. description 加入即将违规时会出现的症状。
 
 说服原则的研究背景见 [persuasion-principles.md](persuasion-principles.md)。
@@ -225,7 +225,7 @@ agent 已经很聪明，只加入非显而易见的上下文。常加载入口�
 ### REFACTOR 阶段
 
 - [ ] 捕获新合理化并为纪律型规则添加精确 counter
-- [ ] 更新 rationalization table 与红旗
+- [ ] 更新 rationalization table 与停止信号
 - [ ] 重测直到没有新漏洞
 
 ### 质量与部署

@@ -232,7 +232,7 @@ npm test path/to/test.test.ts
 | “手工测试更快” | 手工测试不证明边界，每次修改都要重新手工检查。 |
 | “现有代码没有测试” | 本次变更仍应补上能保护目标行为的测试。 |
 
-## 红旗：停止并重新开始
+## 必须停下并重新开始的信号
 
 - 代码写在测试之前；
 - 实现后才补测试；
@@ -297,6 +297,10 @@ function submitForm(data: FormData) {
 - [ ] 边界和错误场景得到覆盖。
 
 无法勾选时，就没有执行 TDD，应重新开始或如实声明获得了用户例外授权。
+
+## 下一步
+
+TDD 只拥有 RED-GREEN-REFACTOR 实现循环，不拥有审查或完成声明。重大或高风险功能、复杂 bug、跨组件或公共 contract 变更，以及准备合并的软件变更，下一步使用 `requesting-code-review`；reviewer 有 findings 时使用 `receiving-code-review`，按授权边界处理完毕后再使用 `verification-before-completion`。未命中强制 review 门槛的局部低风险变更可直接进入最终验证。
 
 ## 遇到困难时
 

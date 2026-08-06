@@ -136,7 +136,7 @@ Spec 是唯一持久的执行大纲。一个没有对话历史的合格 agent �
 
 把所有结构关系归类为 containment、reference、derivation、projection 或有理由的 duplication。除非上述真实边界能够证明分离合理，否则把相同形状的 DTO、command、entity、model、state object 和 wrapper 视为同一结构。
 
-主 agent 为这些 slice 调用 `test-driven-development`。跨组件、高风险或下游关键行为使用只读 spec/code review。软件行为完成后进入 `verification-before-completion`；需要分支集成时再进入 `finishing-a-development-branch`。
+主 agent 为这些 slice 调用 `test-driven-development`。跨组件、高风险、公共 contract 或下游关键行为完成后，必须进入 `requesting-code-review`；reviewer 返回 findings 时进入 `receiving-code-review`，按授权边界处理完毕后再进入 `verification-before-completion`。未命中强制 review 门槛的软件行为可直接进入最终验证。
 
 ### Research Evidence（研究证据）
 

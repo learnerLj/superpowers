@@ -19,7 +19,7 @@ Short, self-contained work that can be completed and verified in one pass procee
 
 The spec owns goal, authority, deliverables, dependency-ordered slices, progress, revision triggers, and completion evidence. It is both the execution constraint and the resume point; no second workflow document is created.
 
-Completion evidence matches the task: research evidence for analysis, artifact or state evidence for writing/migration/operations, and behavior evidence for software changes. Only changed software behavior enters red/green TDD, code review, and branch finishing. Subagents may perform read-only review or evaluation, but they never implement changes.
+Completion evidence matches the task: research evidence for analysis, artifact or state evidence for writing/migration/operations, and behavior evidence for software changes. Changed software behavior enters red/green TDD; code review is mandatory for major or high-risk changes and before merging software changes, and optional when its expected value exceeds its cost. Subagents may perform read-only review or evaluation, but they never implement changes.
 
 ## Commercial Services
 
@@ -61,11 +61,9 @@ Restart Codex after adding or updating links. No session hook or startup prompt 
 
 1. **brainstorming** - Activates for substantial or resumable work and creates or resumes the single executable spec. Common fields constrain every long task; research evidence, artifact or state evidence, and behavior evidence add only the fields their deliverables require.
 
-2. **execution** - The main agent completes dependency-ready slices. Software behavior uses `test-driven-development`; analysis and other deliverables use the evidence declared by their spec.
+2. **execution** - The main agent completes dependency-ready slices. Software behavior uses `test-driven-development` and risk-based read-only code review; analysis and other deliverables use the evidence declared by their spec.
 
 3. **verification-before-completion** - Re-checks every slice and final claim against fresh behavior, research, artifact, or state evidence.
-
-4. **software-only completion** - `requesting-code-review` and `finishing-a-development-branch` apply only when software behavior and branch integration require them.
 
 Skills are discovered natively from the linked directories and trigger from their descriptions or explicit invocation. There is no plugin, hook, or session-start bootstrap.
 
@@ -84,7 +82,6 @@ Skills are discovered natively from the linked directories and trigger from thei
 - **brainstorming** - Long-task routing, executable specifications, and resume workflow
 - **requesting-code-review** - Read-only independent review
 - **receiving-code-review** - Responding to feedback
-- **finishing-a-development-branch** - Merge/PR decision workflow
 
 **Meta**
 - **writing-skills** - Create new skills following best practices (includes testing methodology)

@@ -29,6 +29,7 @@ assert_absent() {
 for removed_skill in \
     dispatching-parallel-agents \
     executing-plans \
+    finishing-a-development-branch \
     subagent-driven-development \
     using-superpowers \
     using-git-worktrees \
@@ -90,7 +91,7 @@ for surface in "${unsupported_distribution_surfaces[@]}"; do
 done
 
 assert_absent \
-    'executing-plans|subagent-driven-development|using-git-worktrees|writing-plans' \
+    'executing-plans|finishing-a-development-branch|subagent-driven-development|using-git-worktrees|writing-plans' \
     "${active_surfaces[@]}"
 
 if rg -n \
@@ -147,6 +148,10 @@ assert_absent \
 
 assert_absent \
     'using-superpowers' \
+    "${active_surfaces[@]}"
+
+assert_absent \
+    'superpowers:' \
     "${active_surfaces[@]}"
 
 assert_absent \
@@ -330,22 +335,67 @@ assert_contains \
     'research evidence.*artifact or state evidence.*behavior evidence' \
     "README must describe all completion-evidence profiles"
 
-eval_evidence="tests/workflow/evidence/2026-08-06-general-long-task-routing-evals.md"
-for eval_contract in \
-    'Control source: committed baseline' \
-    'Candidate source: the content-addressed working-tree skill snapshot' \
-    'Candidate snapshot SHA-256 values used by the final recheck' \
-    '^## E1: Short Read-Only Lookup$' \
-    '^## E2: Long Research$' \
-    '^## E3: Configuration Migration$' \
-    '^## E4: Cross-Module Software Change$' \
-    '^## E5: Long Intermittent Debugging$' \
-    '^## Evidence Boundary$'; do
-    assert_contains \
-        "$eval_evidence" \
-        "$eval_contract" \
-        "paired behavior-eval evidence is missing: $eval_contract"
+[[ ! -e "$REPO_ROOT/tests/workflow/evidence" ]] ||
+    fail "one-off evaluator evidence must stay in task records, not the active test tree"
+
+for retired_artifact in \
+    skills/systematic-debugging/CREATION-LOG.md \
+    skills/systematic-debugging/test-academic.md \
+    skills/systematic-debugging/test-pressure-1.md \
+    skills/systematic-debugging/test-pressure-2.md \
+    skills/systematic-debugging/test-pressure-3.md \
+    skills/writing-skills/examples/CLAUDE_MD_TESTING.md; do
+    [[ ! -e "$REPO_ROOT/$retired_artifact" ]] ||
+        fail "retired skill-development artifact remains: $retired_artifact"
 done
+
+assert_absent \
+    'CREATION-LOG|test-academic|test-pressure-[123]|CLAUDE_MD_TESTING|tests/workflow/evidence' \
+    "${active_surfaces[@]}"
+
+for review_entry in \
+    skills/brainstorming/SKILL.md \
+    skills/systematic-debugging/SKILL.md \
+    skills/test-driven-development/SKILL.md; do
+    assert_contains \
+        "$review_entry" \
+        'requesting-code-review' \
+        "software workflow must name the code-review entrypoint"
+done
+
+for completion_entry in \
+    skills/systematic-debugging/SKILL.md \
+    skills/test-driven-development/SKILL.md; do
+    assert_contains \
+        "$completion_entry" \
+        'receiving-code-review.*verification-before-completion' \
+        "software workflow must name the review-feedback and verification route"
+done
+
+assert_contains \
+    "skills/requesting-code-review/SKILL.md" \
+    '^description: 完成软件实现' \
+    "code review trigger must be limited to software implementation"
+assert_contains \
+    "skills/receiving-code-review/SKILL.md" \
+    '^description: 收到 code review 反馈，需要验证、回应或准备实施建议时使用' \
+    "receiving review must cover validation and response without requiring implementation"
+assert_contains \
+    "skills/receiving-code-review/SKILL.md" \
+    '用户只要求 review.*返回核查结果.*等待确认' \
+    "review-only feedback must stop before implementation"
+assert_contains \
+    "skills/receiving-code-review/SKILL.md" \
+    '只有用户已明确授权.*直接修复.*才进入实施' \
+    "review findings must not silently authorize implementation"
+assert_contains \
+    "skills/requesting-code-review/SKILL.md" \
+    '影响.*触发频率.*修复成本' \
+    "code review must use an explicit ROI gate"
+assert_contains \
+    "skills/requesting-code-review/code-reviewer.md" \
+    '触发路径.*发生概率或频率.*影响范围' \
+    "review findings must include likelihood and impact evidence"
 
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
@@ -358,7 +408,7 @@ assert_contains \
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     'git diff.*BASE_SHA' \
-    "code review must cover the current working tree from the approved-spec baseline"
+    "code review must cover the current working tree from the selected review baseline"
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     '审查前验证' \
@@ -367,6 +417,10 @@ assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     '重复审查' \
     "important review fixes must be reviewed again"
+assert_contains \
+    "skills/requesting-code-review/SKILL.md" \
+    '^\- reviewer 返回 findings 后，必须先加载 `receiving-code-review`，不能把 finding 直接当成修改指令。$' \
+    "review findings must route explicitly to receiving-code-review"
 
 assert_contains \
     "skills/verification-before-completion/SKILL.md" \
@@ -381,15 +435,6 @@ for evidence_profile in \
         "$evidence_profile" \
         "verification profile is missing: $evidence_profile"
 done
-assert_contains \
-    "skills/verification-before-completion/SKILL.md" \
-    '只有 behavior-evidence 软件工作.*finishing-a-development-branch' \
-    "branch finishing must remain conditional on software behavior work"
-assert_contains \
-    "skills/finishing-a-development-branch/SKILL.md" \
-    'git status --short' \
-    "branch finishing must check for uncommitted implementation changes"
-
 assert_contains \
     "skills/brainstorming/SKILL.md" \
     '非软件 profile.*授权直接执行.*第一个依赖就绪的 slice' \
@@ -423,12 +468,28 @@ assert_absent \
     "$REPO_ROOT/skills/brainstorming/SKILL.md"
 
 assert_absent \
-    'preferred baseline|exact requirements|Spec / Requirements|SPEC_OR_REQUIREMENTS' \
+    'preferred baseline|Spec / Requirements|SPEC_OR_REQUIREMENTS' \
     "$REPO_ROOT/skills/requesting-code-review/SKILL.md" \
     "$REPO_ROOT/skills/requesting-code-review/code-reviewer.md"
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
-    'APPROVED_SPEC' \
-    "code review must use the approved executable spec as its sole authority"
+    'REVIEW_AUTHORITY' \
+    "code review must receive the task's governing authority"
+
+assert_contains \
+    "skills/requesting-code-review/SKILL.md" \
+    '没有独立 spec 的短软件任务.*用户原始要求.*项目 authority.*验收条件' \
+    "spec-less short software work must have a valid review authority"
+assert_contains \
+    "skills/requesting-code-review/SKILL.md" \
+    '不得为了 review 事后补写 spec' \
+    "short-task review must not force a retroactive spec"
+assert_contains \
+    "skills/requesting-code-review/code-reviewer.md" \
+    'REVIEW_AUTHORITY' \
+    "review template must accept the governing authority for both long and short work"
+assert_absent \
+    '证明 spec|对照已批准 executable spec' \
+    "$REPO_ROOT/skills/requesting-code-review/code-reviewer.md"
 
 echo "General long-task spec workflow consistency checks passed"

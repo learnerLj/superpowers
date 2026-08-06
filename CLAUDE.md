@@ -77,14 +77,14 @@ This repository maintains skill content, not plugins, manifests, extensions, pac
 
 Skills are not prose — they are code that shapes agent behavior. If you modify skill content:
 
-- Use `superpowers:writing-skills` to develop and test changes
+- Use `writing-skills` to develop and test changes
 - Run adversarial pressure testing across multiple sessions
 - Show before/after eval results in your PR
 - Do not modify carefully-tuned content (Red Flags tables, rationalization lists, "human partner" language) without evidence the change is an improvement
 
 ## Skill behavior evaluation
 
-Behavior-changing skill edits require paired control/candidate evidence from fresh-context read-only evaluators. Record the scenario, exact skill source or hash, raw response, and evidence boundary. Skill-contract and helper tests live at `tests/`.
+Behavior-changing skill edits require paired control/candidate evidence from fresh-context read-only evaluators. Record the scenario, exact skill source or hash, raw response, and evidence boundary in the task record or PR description; do not add one-off evaluator transcripts to `tests/`. Skill-contract and helper tests live at `tests/`.
 
 ## Understand the Project Before Contributing
 

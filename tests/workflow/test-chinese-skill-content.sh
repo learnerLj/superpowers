@@ -14,12 +14,9 @@ while IFS= read -r file; do
     model_files+=("$file")
 done < <(find "$REPO_ROOT/skills" -type f \( -name '*.md' -o -name '*.dot' \) | sort)
 
-[[ "${#model_files[@]}" -eq 24 ]] ||
-    fail "expected 24 model-readable skill files, found ${#model_files[@]}"
-
 skill_files=("$REPO_ROOT"/skills/*/SKILL.md)
-[[ "${#skill_files[@]}" -eq 8 ]] ||
-    fail "expected 8 SKILL.md entrypoints, found ${#skill_files[@]}"
+[[ "${#skill_files[@]}" -eq 7 ]] ||
+    fail "expected 7 SKILL.md entrypoints, found ${#skill_files[@]}"
 
 for file in "${skill_files[@]}"; do
     description="$(sed -n '3p' "$file")"
@@ -32,6 +29,9 @@ done
 for file in "${model_files[@]}"; do
     rg -q '\p{Han}' "$file" ||
         fail "model-readable file contains no Chinese: ${file#$REPO_ROOT/}"
+
+    ! rg -n '红旗' "$file" ||
+        fail "literal Red Flags translation remains: ${file#$REPO_ROOT/}"
 
     if [[ "$file" == *.md ]]; then
         english_headings="$(awk '

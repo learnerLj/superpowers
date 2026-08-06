@@ -96,19 +96,18 @@ reviewer 报告问题 -> 对照 spec/artifact 复现 -> 验证证据 -> 主 agen
 
 ## 完成交接
 
-只有 behavior-evidence 软件工作才继续进入 `finishing-a-development-branch`。交接前：
+Behavior-evidence 软件工作交接前：
 
 1. 重新阅读已批准软件 spec，并验证每条验收标准。
 2. 在当前 tree 上运行完整的相关验证。
 3. 检查最终 diff，确认只有预期修改。
-4. 只有用户或治理流程授权时才提交。
-5. 只有确实存在分支集成决策时才调用 `finishing-a-development-branch`。
+4. 只有用户或治理流程授权时才提交、push、merge 或创建 PR。
 
 Research evidence 和 artifact/state evidence 以 spec 声明的报告、产物、状态或交接结束。除非某个软件 slice 单独要求，否则不需要代码提交或开发分支流程。
 
 验证后发生的任何变化都会使受影响证据失效。完成声明前重新运行相关检查。
 
-## 红旗
+## 必须停下的信号
 
 - 用“应该”“大概”“看起来”表达成功；
 - 依赖旧的运行结果；
@@ -119,4 +118,4 @@ Research evidence 和 artifact/state evidence 以 spec 声明的报告、产物�
 - 把测试当作分析结论正确的证明；
 - 因任务太长或上下文快满而结束。
 
-出现任何红旗时，找出缺失证据并完成验证，然后再继续。
+出现任何上述信号时，找出缺失证据并完成验证，然后再继续。
