@@ -52,26 +52,17 @@ description: 用于实现任何功能、bugfix、重构或软件行为变更，�
 
 ## RED-GREEN-REFACTOR 循环
 
-```dot
-digraph tdd_cycle {
-    rankdir=LR;
-    red [label="RED\n编写失败测试", shape=box, style=filled, fillcolor="#ffcccc"];
-    verify_red [label="确认失败原因\n正确", shape=diamond];
-    green [label="GREEN\n最小实现", shape=box, style=filled, fillcolor="#ccffcc"];
-    verify_green [label="确认全部\n通过", shape=diamond];
-    refactor [label="REFACTOR\n清理实现", shape=box, style=filled, fillcolor="#ccccff"];
-    next [label="下一个行为", shape=ellipse];
+```text
+RED：编写失败测试
+  -> 失败原因不对：修正测试，重新确认 RED
+  -> 失败原因正确：进入 GREEN
 
-    red -> verify_red;
-    verify_red -> green [label="是"];
-    verify_red -> red [label="失败原因错误"];
-    green -> verify_green;
-    verify_green -> refactor [label="是"];
-    verify_green -> green [label="否"];
-    refactor -> verify_green [label="保持绿色"];
-    verify_green -> next;
-    next -> red;
-}
+GREEN：编写最小实现
+  -> 测试未全部通过：修实现
+  -> 测试全部通过：进入 REFACTOR
+
+REFACTOR：在保持全部测试通过的前提下清理实现
+  -> 下一个行为：回到 RED
 ```
 
 ### RED：编写失败测试

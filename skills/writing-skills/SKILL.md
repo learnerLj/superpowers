@@ -104,15 +104,6 @@ agent 已经很聪明，只加入非显而易见的上下文。常加载入口�
 
 不要用含糊文件路径或强制预加载的 `@` 引用。
 
-## 流程图
-
-仅在非显而易见决策、可能过早停止的循环，或 A/B 选择上使用小型 flowchart。参考资料用表格/列表，代码用 Markdown，线性步骤用编号。样式见 `graphviz-conventions.dot`，可用 `render-graphs.js` 渲染：
-
-```bash
-./render-graphs.js ../some-skill
-./render-graphs.js ../some-skill --combine
-```
-
 ## 代码示例
 
 一个完整、可运行、解释“为什么”、来自真实场景且可直接适配的示例，优于五种语言的平庸变体。测试方法优先 TypeScript/JavaScript，系统调试优先 Shell/Python，数据处理优先 Python。
@@ -196,7 +187,6 @@ agent 已经很聪明，只加入非显而易见的上下文。常加载入口�
 
 - 用某次 session 的故事代替可复用规则。
 - 为同一模式维护多语言低质量示例。
-- 把可复制代码画进 flowchart。
 - 使用 `helper1`、`step2` 之类无语义标签。
 
 ## 停止：完成当前 Skill 后才能继续
@@ -230,7 +220,6 @@ agent 已经很聪明，只加入非显而易见的上下文。常加载入口�
 
 ### 质量与部署
 
-- [ ] 仅在决策不明显时使用小 flowchart
 - [ ] 有快速参考与常见错误
 - [ ] supporting file 只用于工具或重型参考
 - [ ] 运行结构验证和行为验证

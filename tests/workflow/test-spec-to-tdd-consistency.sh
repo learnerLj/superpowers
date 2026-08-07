@@ -125,6 +125,10 @@ assert_absent \
     'Codex 工具映射|codex-tools\.md' \
     "$REPO_ROOT/skills/writing-skills/SKILL.md"
 
+assert_absent \
+    '```dot|Graphviz|graphviz|render-graphs' \
+    "$REPO_ROOT/skills"
+
 assert_contains \
     "skills/brainstorming/SKILL.md" \
     '^description: 用于开始或恢复.*长任务' \
@@ -344,6 +348,8 @@ for retired_artifact in \
     skills/systematic-debugging/test-pressure-1.md \
     skills/systematic-debugging/test-pressure-2.md \
     skills/systematic-debugging/test-pressure-3.md \
+    skills/writing-skills/graphviz-conventions.dot \
+    skills/writing-skills/render-graphs.js \
     skills/writing-skills/examples/CLAUDE_MD_TESTING.md; do
     [[ ! -e "$REPO_ROOT/$retired_artifact" ]] ||
         fail "retired skill-development artifact remains: $retired_artifact"
