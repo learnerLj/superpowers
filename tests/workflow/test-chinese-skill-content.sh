@@ -15,10 +15,10 @@ while IFS= read -r file; do
 done < <(find "$REPO_ROOT/skills" -type f \( -name '*.md' -o -name '*.dot' \) | sort)
 
 skill_files=("$REPO_ROOT"/skills/*/SKILL.md)
-[[ "${#skill_files[@]}" -eq 9 ]] ||
-    fail "expected 9 SKILL.md entrypoints, found ${#skill_files[@]}"
+[[ "${#skill_files[@]}" -eq 10 ]] ||
+    fail "expected 10 SKILL.md entrypoints, found ${#skill_files[@]}"
 
-for required_skill in code-path-explainer code-simplification-review; do
+for required_skill in code-path-explainer code-simplification-review verify-this; do
     [[ -f "$REPO_ROOT/skills/$required_skill/SKILL.md" ]] ||
         fail "required skill entrypoint is missing: $required_skill"
     rg -q "\*\*$required_skill\*\*" "$REPO_ROOT/README.md" ||

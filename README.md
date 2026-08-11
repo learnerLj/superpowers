@@ -77,6 +77,7 @@ Skills are discovered natively from the linked directories and trigger from thei
 **Debugging**
 - **systematic-debugging** - 4-phase root cause process (includes root-cause-tracing, defense-in-depth, condition-based-waiting techniques)
 - **verification-before-completion** - Verify software, research, artifacts, and state against declared evidence
+- **verify-this** - Verify a user-specified claim against fresh authority evidence and return an explicit verdict
 
 **Code Quality**
 - **code-simplification-review** - Evidence-based review for deletable complexity, ownership mistakes, wrapper/layer sprawl, and maintainability regressions
