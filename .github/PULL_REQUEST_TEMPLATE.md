@@ -69,17 +69,17 @@ of human involvement will be closed without review.
 ## Evaluation
 - What was the initial prompt you (or your human partner) used to start
   the session that led to this change?
-- How many eval sessions did you run AFTER making the change?
+- What fresh-context control/candidate pair did you run after making the change?
 - How did outcomes change compared to before the change?
 
 <!-- "It works" is not evaluation. Describe the before/after difference
-     you observed across multiple sessions. -->
+     you observed across the paired control/candidate sessions. -->
 
 ## Rigor
 
 - [ ] If this is a skills change: I used `writing-skills` and
-      completed adversarial pressure testing (paste results below)
-- [ ] This change was tested adversarially, not just on the happy path
+      completed one fresh-context control/candidate pair
+- [ ] I added adversarial pressure only when `writing-skills` required more samples
 - [ ] I did not modify carefully-tuned content (Red Flags table,
       rationalizations, "human partner" language) without extensive evals
       showing the change is an improvement

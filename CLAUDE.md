@@ -78,7 +78,7 @@ This repository maintains skill content, not plugins, manifests, extensions, pac
 Skills are not prose — they are code that shapes agent behavior. If you modify skill content:
 
 - Use `writing-skills` to develop and test changes
-- Run adversarial pressure testing across multiple sessions
+- Run one fresh-context control/candidate pair; add adversarial pressure only when `writing-skills` requires more samples
 - Show before/after eval results in your PR
 - Do not modify carefully-tuned content (Red Flags tables, rationalization lists, "human partner" language) without evidence the change is an improvement
 

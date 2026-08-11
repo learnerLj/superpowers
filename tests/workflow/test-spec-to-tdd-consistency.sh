@@ -179,6 +179,17 @@ assert_contains \
     "README must define the skills-only distribution boundary"
 assert_contains \
     "README.md" \
+    'criterion-to-Oracle verification contract' \
+    "README must expose the verification contract"
+assert_contains \
+    "README.md" \
+    'Write tests first for changed software behavior' \
+    "README TDD philosophy must match the software-behavior boundary"
+assert_absent \
+    'Write tests first, always' \
+    "$REPO_ROOT/README.md"
+assert_contains \
+    "README.md" \
     '\.claude/skills' \
     "README must document Claude native skill discovery"
 assert_contains \
@@ -209,6 +220,30 @@ for required_routing in \
         "$required_routing" \
         "long-task routing contract is missing: $required_routing"
 done
+
+for verification_contract in \
+    '^### 验证合同$' \
+    '每个会影响 slice 或最终完成判断的.*criterion ID' \
+    '\*\*要证明的事实\*\*：可观察、可证伪' \
+    '\*\*Oracle\*\*：能够区分该事实成立与不成立' \
+    '\*\*通过条件\*\*：执行验证前确定' \
+    '\*\*完成证据\*\*：执行后填写.*执行前写 `待执行`' \
+    '\*\*覆盖边界\*\*：该 Oracle 没有证明的范围' \
+    '需要证明.*发生了改变.*前后比较.*修改前基线'; do
+    assert_contains \
+        "skills/brainstorming/SKILL.md" \
+        "$verification_contract" \
+        "verification contract is missing: $verification_contract"
+done
+
+assert_absent \
+    '^\- \*\*完成证据\*\*：执行后回填' \
+    "$REPO_ROOT/skills/brainstorming/SKILL.md"
+
+assert_contains \
+    "skills/brainstorming/spec-document-reviewer-prompt.md" \
+    '验证闭环.*criterion.*Oracle.*通过条件.*覆盖边界.*待执行.*实际结果.*位置' \
+    "spec reviewer must check the verification contract"
 
 for software_slice_field in \
     '^每个软件 \*\*Implementation Slice\*\* 还包含：$' \

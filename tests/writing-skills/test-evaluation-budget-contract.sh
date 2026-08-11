@@ -7,6 +7,8 @@ SKILL_FILE="$REPO_ROOT/skills/writing-skills/SKILL.md"
 REVIEWER_GUIDE="$REPO_ROOT/skills/writing-skills/testing-skills-with-reviewers.md"
 ANTHROPIC_GUIDE="$REPO_ROOT/skills/writing-skills/anthropic-best-practices.md"
 PERSUASION_GUIDE="$REPO_ROOT/skills/writing-skills/persuasion-principles.md"
+CONTRIBUTOR_GUIDE="$REPO_ROOT/CLAUDE.md"
+PR_TEMPLATE="$REPO_ROOT/.github/PULL_REQUEST_TEMPLATE.md"
 
 fail() {
     echo "FAIL: $*" >&2
@@ -87,6 +89,18 @@ assert_absent "$SKILL_FILE" \
 assert_contains "$SKILL_FILE" \
     "若修改行为塑造措辞，已完成默认的 1 次 control + 1 次 candidate" \
     "writing-skills 只应对行为塑造修改要求 paired evaluator"
+assert_contains "$CONTRIBUTOR_GUIDE" \
+    'Run one fresh-context control/candidate pair; add adversarial pressure only when `writing-skills` requires more samples' \
+    "contributor evaluation policy must match the writing-skills budget"
+assert_absent "$CONTRIBUTOR_GUIDE" \
+    "Run adversarial pressure testing across multiple sessions" \
+    "contributor guide must not require unconditional pressure testing"
+assert_contains "$PR_TEMPLATE" \
+    'completed one fresh-context control/candidate pair' \
+    "PR template must require the default paired evaluation"
+assert_contains "$PR_TEMPLATE" \
+    'added adversarial pressure only when `writing-skills` required more samples' \
+    "PR template pressure testing must follow the writing-skills expansion gate"
 assert_contains "$REVIEWER_GUIDE" \
     "GREEN 已通过且没有观察到新违规时停止" \
     "reviewer 指南必须在没有新失败时停止继续迭代"

@@ -17,7 +17,7 @@ Use the skills directly with [Claude Code](#claude-code) or [Codex](#codex).
 
 Short, self-contained work that can be completed and verified in one pass proceeds directly. Substantial work — dependent stages, persistent progress, material uncertainty or risk, cross-context execution, or an explicit request for brainstorming or a plan/spec — invokes `brainstorming` to create or resume one executable spec.
 
-The spec owns goal, authority, deliverables, dependency-ordered slices, progress, revision triggers, and completion evidence. It is both the execution constraint and the resume point; no second workflow document is created.
+The spec owns goal, authority, deliverables, dependency-ordered slices, progress, revision triggers, a criterion-to-Oracle verification contract, and completion evidence. It is both the execution constraint and the resume point; no second workflow document is created.
 
 Completion evidence matches the task: research evidence for analysis, artifact or state evidence for writing/migration/operations, and behavior evidence for software changes. Changed software behavior enters red/green TDD; code review is mandatory for major or high-risk changes and before merging software changes, and optional when its expected value exceeds its cost. Subagents may perform read-only review or evaluation, but they never implement changes.
 
@@ -78,6 +78,12 @@ Skills are discovered natively from the linked directories and trigger from thei
 - **systematic-debugging** - 4-phase root cause process (includes root-cause-tracing, defense-in-depth, condition-based-waiting techniques)
 - **verification-before-completion** - Verify software, research, artifacts, and state against declared evidence
 
+**Code Quality**
+- **code-simplification-review** - Evidence-based review for deletable complexity, ownership mistakes, wrapper/layer sprawl, and maintainability regressions
+
+**Code Understanding**
+- **code-path-explainer** - Trace a line or execution path through callers, state changes, side effects, owners, and consumers with file-line evidence
+
 **Collaboration** 
 - **brainstorming** - Long-task routing, executable specifications, and resume workflow
 - **requesting-code-review** - Read-only independent review
@@ -88,7 +94,7 @@ Skills are discovered natively from the linked directories and trigger from thei
 
 ## Philosophy
 
-- **Test-Driven Development** - Write tests first, always
+- **Test-Driven Development** - Write tests first for changed software behavior
 - **Systematic over ad-hoc** - Process over guessing
 - **Complexity reduction** - Simplicity as primary goal
 - **Evidence over claims** - Verify before declaring success
