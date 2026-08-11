@@ -93,8 +93,7 @@ Spec 是唯一持久的执行大纲。一个没有对话历史的合格 agent �
 - **输入与 Authority**：所需起始证据和治理来源。
 - **交付物**：该 slice 产生的精确产物或状态。
 - **验收标准**：该 slice 必须满足的 criterion ID。
-- **验证合同**：每个 criterion 的 Oracle、通过条件、覆盖边界和证据位置；执行前写 `待执行`，执行后原位回填实际结果。
-- **验证或审查门槛**：所需检查和只读审查；没有时写 `无`。
+- **审查门槛**：所需只读审查；没有时写 `无`。
 
 只有声明的证据已经存在且可以定位时，才把 slice 标记为完成。如果后续工作改变了它的输入、交付物或证据，重新打开该 slice 并再次验证。
 
@@ -110,7 +109,9 @@ Spec 是唯一持久的执行大纲。一个没有对话历史的合格 agent �
 - **完成证据**：执行后填写的实际结果及其可定位位置；执行前写 `待执行`；
 - **覆盖边界**：该 Oracle 没有证明的范围。
 
-只有需要证明“发生了改变”或进行前后比较时，才记录修改前基线。命令名称或退出码本身不构成完成证据，除非它直接观察并覆盖对应事实。简单 criterion 可以直接写在 slice 中；只有复杂任务才使用验证矩阵。
+软件 Oracle 适用时包含测试文件、场景、命令，以及聚焦与扩展验证层级。
+
+只有需要证明“发生了改变”或进行前后比较时，才记录修改前基线。命令名称或退出码本身不构成完成证据，除非它直接观察并覆盖对应事实。简单 criterion 可以使用简短 contract；只有复杂任务才使用验证矩阵。软件 Implementation Slice 只引用 criterion ID，Oracle、命令、通过条件、Evidence 和覆盖边界统一留在验证合同。
 
 ### Behavior Evidence（软件行为证据）
 
@@ -121,8 +122,8 @@ Spec 是唯一持久的执行大纲。一个没有对话历史的合格 agent �
 - **关键数据结构与 SSOT**，包括精确字段、层级、owner、关系和转换；
 - **接口与边界 contract**，包括精确名称、签名、schema、状态转换、校验和错误；
 - 带有软件专用文件与数据决策的 **Implementation Slice**；
-- 覆盖可观察成功和失败场景的**验收标准**；
-- 从每条标准映射到测试文件、场景和聚焦验证命令的**测试映射**；
+- 带有 criterion ID、覆盖可观察成功和失败场景的**验收标准**；
+- 为每条 criterion 定义软件测试定位与命令的**验证合同**；
 - 迁移、兼容、发布与回滚，或者明确写出不适用。
 
 #### 关键数据结构与 SSOT
@@ -136,15 +137,13 @@ Spec 是唯一持久的执行大纲。一个没有对话历史的合格 agent �
 5. **重复表示门槛**：两个结构若共享大部分业务字段，默认视为同一表示。优先复用 canonical type、组合已有 value object，或只保存 identity/reference。仅重命名、逐字段复制、包装或格式转换，不能证明新结构合理；“解耦”“分层更干净”也不是充分理由。
 6. **允许的 projection**：只有 transport、persistence、外部协议、版本兼容或安全裁剪确实要求不同 shape 时，才允许字段重叠。Spec 必须说明该 projection 为什么不能直接复用 canonical type、它删除或增加了什么、是否可逆、由谁转换，以及如何保证它永远不拥有业务规则。
 7. **转换表**：逐项列出 `source -> target`、触发边界、owner、消费方、字段如何增加、删除、重命名、校验或编码，以及无法复用 canonical type 的边界理由。若转换不增加或删除任何语义，只做机械逐字段复制，应删除该转换层或合并结构。
-8. **结构验收**：验收标准和测试映射必须覆盖 canonical owner 的不变量、合法 writer、serialization、边界转换、round-trip/不可逆裁剪，以及任何 projection 不得绕过 canonical owner 直接形成下一层业务状态。
+8. **结构验收**：验收标准和验证合同必须覆盖 canonical owner 的不变量、合法 writer、serialization、边界转换、round-trip/不可逆裁剪，以及任何 projection 不得绕过 canonical owner 直接形成下一层业务状态。
 
 每个软件 **Implementation Slice** 还包含：
 
 - **文件**：预计创建、修改或删除的精确文件；
 - **数据决策**：引用上面的结构定义和转换条目，说明该 slice 创建或修改哪些结构；不得在 slice 中临时发明未进入 SSOT 设计的新 model；
 - **验收标准**：该 slice 证明的精确 criterion ID；
-- **聚焦验证**：针对直接行为的精确命令；
-- **扩展验证**：变更 contract 所需的最小下游或集成命令；
 - **审查门槛**：跨组件、高风险或下游关键工作必须单独只读审查，否则写 `无`。
 
 把所有结构关系归类为 containment、reference、derivation、projection 或有理由的 duplication。除非上述真实边界能够证明分离合理，否则把相同形状的 DTO、command、entity、model、state object 和 wrapper 视为同一结构。
@@ -175,7 +174,7 @@ Spec 是唯一持久的执行大纲。一个没有对话历史的合格 agent �
 - 适用时的回滚、恢复或 provenance 证据；
 - 下游验收和未改变的行为。
 
-只有改变软件行为的 slice 使用 `test-driven-development`。其它 slice 使用 artifact/state contract 声明的检查。
+软件行为变化或纯行为保持型重构的 slice 使用 `test-driven-development`。其它 slice 使用 artifact/state contract 声明的检查。
 
 ### 混合任务
 

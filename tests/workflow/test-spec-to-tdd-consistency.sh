@@ -226,6 +226,7 @@ for verification_contract in \
     '每个会影响 slice 或最终完成判断的.*criterion ID' \
     '\*\*要证明的事实\*\*：可观察、可证伪' \
     '\*\*Oracle\*\*：能够区分该事实成立与不成立' \
+    '软件 Oracle.*测试文件.*场景.*命令.*聚焦.*扩展' \
     '\*\*通过条件\*\*：执行验证前确定' \
     '\*\*完成证据\*\*：执行后填写.*执行前写 `待执行`' \
     '\*\*覆盖边界\*\*：该 Oracle 没有证明的范围' \
@@ -244,20 +245,33 @@ assert_contains \
     "skills/brainstorming/spec-document-reviewer-prompt.md" \
     '验证闭环.*criterion.*Oracle.*通过条件.*覆盖边界.*待执行.*实际结果.*位置' \
     "spec reviewer must check the verification contract"
+assert_contains \
+    "skills/brainstorming/spec-document-reviewer-prompt.md" \
+    '软件 contract.*验收标准.*验证合同.*迁移和兼容' \
+    "spec reviewer must treat the verification contract as the software verification owner"
+assert_contains \
+    "skills/brainstorming/spec-document-reviewer-prompt.md" \
+    'Slice 完整性.*验收 criterion ID.*审查门槛' \
+    "spec reviewer must keep evidence out of implementation slices"
+assert_absent \
+    '测试映射|Slice 完整性.*证据' \
+    "$REPO_ROOT/skills/brainstorming/spec-document-reviewer-prompt.md"
 
 for software_slice_field in \
     '^每个软件 \*\*Implementation Slice\*\* 还包含：$' \
     '\*\*文件\*\*：预计创建、修改或删除的精确文件' \
     '\*\*数据决策\*\*：引用上面的结构定义和转换条目' \
     '\*\*验收标准\*\*：该 slice 证明的精确 criterion ID' \
-    '\*\*聚焦验证\*\*：针对直接行为的精确命令' \
-    '\*\*扩展验证\*\*：' \
     '\*\*审查门槛\*\*：.*单独只读审查'; do
     assert_contains \
         "skills/brainstorming/SKILL.md" \
         "$software_slice_field" \
         "software implementation-slice contract is missing: $software_slice_field"
 done
+
+assert_absent \
+    '^\- \*\*验证合同\*\*：|^\- \*\*聚焦验证\*\*：|^\- \*\*扩展验证\*\*：|\*\*测试映射\*\*' \
+    "$REPO_ROOT/skills/brainstorming/SKILL.md"
 
 for debugging_contract in \
     '长时间 debugging' \
@@ -303,7 +317,7 @@ for required_common_contract in \
     '输入与 Authority' \
     '交付物' \
     '完成证据' \
-    '验证或审查门槛' \
+    '审查门槛' \
     '重新打开'; do
     assert_contains \
         "skills/brainstorming/SKILL.md" \
@@ -311,12 +325,20 @@ for required_common_contract in \
         "common executable spec contract is missing: $required_common_contract"
 done
 
+assert_contains \
+    "skills/brainstorming/SKILL.md" \
+    '软件 Implementation Slice 只引用 criterion ID.*Oracle.*验证合同' \
+    "software slices must not duplicate verification-contract details"
+assert_absent \
+    '验证或审查门槛|简单 criterion 可以直接写在 slice' \
+    "$REPO_ROOT/skills/brainstorming/SKILL.md"
+
 for required_profile in \
     '^### Behavior Evidence（软件行为证据）$' \
     '^### Research Evidence（研究证据）$' \
     '^### Artifact or State Evidence（产物或状态证据）$' \
     '人工研究和判断不使用 TDD' \
-    '只有改变软件行为的 slice 使用 `test-driven-development`'; do
+    '软件行为变化或纯行为保持型重构的 slice 使用 `test-driven-development`'; do
     assert_contains \
         "skills/brainstorming/SKILL.md" \
         "$required_profile" \
@@ -329,7 +351,7 @@ for required_software_contract in \
     '接口与边界 contract' \
     'Implementation Slice' \
     '验收标准' \
-    '测试映射' \
+    '验证合同' \
     'canonical owner' \
     'containment' \
     '相同形状' \
@@ -413,6 +435,25 @@ for completion_entry in \
         "software workflow must name the review-feedback and verification route"
 done
 
+for tdd_refactor_contract in \
+    '^description: .*新增或修改软件行为.*bugfix.*行为保持型重构' \
+    '核心原则：行为变化没有先看到测试失败' \
+    '纯行为保持型重构' \
+    '先运行现有相关测试.*GREEN' \
+    'characterization test.*旧行为' \
+    '不要为了制造 RED' \
+    '需要改变行为.*回到 RED' \
+    '新行为或 bugfix.*实现前以正确原因失败'; do
+    assert_contains \
+        "skills/test-driven-development/SKILL.md" \
+        "$tdd_refactor_contract" \
+        "TDD refactor boundary is missing: $tdd_refactor_contract"
+done
+
+assert_absent \
+    '^没有先失败的测试，就不能写生产代码$' \
+    "$REPO_ROOT/skills/test-driven-development/SKILL.md"
+
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     '^description: 完成软件实现' \
@@ -429,6 +470,17 @@ assert_contains \
     "skills/receiving-code-review/SKILL.md" \
     '只有用户已明确授权.*直接修复.*才进入实施' \
     "review findings must not silently authorize implementation"
+for receiving_tdd_contract in \
+    '代码 finding.*`test-driven-development`.*实施路径' \
+    '新行为、行为修改或 bugfix.*RED-GREEN' \
+    '纯行为保持型重构.*GREEN 基线' \
+    '测试不足.*characterization test' \
+    '改变行为.*回到 RED'; do
+    assert_contains \
+        "skills/receiving-code-review/SKILL.md" \
+        "$receiving_tdd_contract" \
+        "receiving review must preserve the TDD behavior/refactor boundary: $receiving_tdd_contract"
+done
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     '影响.*触发频率.*修复成本' \
@@ -442,6 +494,18 @@ assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     '只读 reviewer subagent' \
     "code review must use a read-only reviewer"
+assert_contains \
+    "skills/requesting-code-review/SKILL.md" \
+    '当前 harness 的原生 agent 工具.*fresh-context.*只读 reviewer' \
+    "code review dispatch must be harness-neutral and fresh-context"
+assert_contains \
+    "skills/requesting-code-review/code-reviewer.md" \
+    '当前 harness 的原生 agent 工具.*fresh-context.*只读 reviewer' \
+    "code reviewer template must be harness-neutral and fresh-context"
+assert_absent \
+    'general-purpose' \
+    "$REPO_ROOT/skills/requesting-code-review/SKILL.md" \
+    "$REPO_ROOT/skills/requesting-code-review/code-reviewer.md"
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     '不得编辑文件、运行实现任务或提交' \
@@ -462,11 +526,27 @@ assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     '^\- reviewer 返回 findings 后，必须先加载 `receiving-code-review`，不能把 finding 直接当成修改指令。$' \
     "review findings must route explicitly to receiving-code-review"
+for review_fix_tdd_contract in \
+    '新行为、行为修改或 bugfix finding.*失败测试' \
+    '纯行为保持型重构 finding.*GREEN 基线' \
+    '测试不足.*characterization test.*旧行为'; do
+    assert_contains \
+        "skills/requesting-code-review/SKILL.md" \
+        "$review_fix_tdd_contract" \
+        "review fix must preserve the TDD behavior/refactor boundary: $review_fix_tdd_contract"
+done
+assert_absent \
+    '每个有效代码 finding.*先用失败测试复现' \
+    "$REPO_ROOT/skills/requesting-code-review/SKILL.md"
 
 assert_contains \
     "skills/verification-before-completion/SKILL.md" \
     '声明的完成证据' \
     "completion verification must follow the spec evidence contract"
+assert_contains \
+    "skills/verification-before-completion/SKILL.md" \
+    '逐项执行.*criterion.*Oracle.*通过条件.*原位回填.*Evidence.*覆盖边界' \
+    "completion verification must execute and fill the criterion evidence contract"
 for evidence_profile in \
     'Behavior Evidence' \
     'Research Evidence' \

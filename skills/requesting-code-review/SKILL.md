@@ -41,7 +41,7 @@ git diff "$BASE_SHA"
 
 ### 3. 派出只读 reviewer
 
-派出 `general-purpose` subagent，并填写 [code-reviewer.md](code-reviewer.md) 模板。
+使用当前 harness 的原生 agent 工具派出 fresh-context、只读 reviewer，并填写 [code-reviewer.md](code-reviewer.md) 模板。
 
 reviewer 不得编辑文件、运行实现任务或提交。它只返回 findings；reviewer 返回后，主 agent 必须加载 `receiving-code-review` 验证意见，获得修复授权后再通过 TDD 实施有效修复。
 
@@ -59,7 +59,8 @@ reviewer 不得编辑文件、运行实现任务或提交。它只返回 finding
 - 先把核查后的 findings 交给用户；只有已明确授权 review 后直接修复时，才立即修复 Critical、在继续前修复 Important，Minor 可留待以后。
 - reviewer 错误时用技术证据反驳。
 - 对每个 finding 核对可达触发路径、发生概率或频率、影响范围和修复成本；证据不足时标记 `NOT VERIFIED`，不能把理论可能性写成确定 bug。
-- 每个有效代码 finding 都必须由主 session 先用失败测试复现，再实施修复。
+- 新行为、行为修改或 bugfix finding 由主 session 先用失败测试复现，再实施修复。
+- 纯行为保持型重构 finding 先确认相关测试的 GREEN 基线，再重构并让相同测试继续 GREEN；测试不足时先增加 characterization test 并确认旧行为。
 - 修复后重新验证并重复审查，直到没有 Critical 或 Important。
 
 ## 示例
@@ -88,7 +89,7 @@ You: 加载 receiving-code-review，评估 finding，并向用户返回核查结
 
 [用户授权直接修复]
 
-You: 在主 session 添加失败测试、修复、验证并再次审查。
+You: 在主 session 按 finding 性质走 RED-GREEN 或 GREEN 基线重构，验证并再次审查。
 ```
 
 ## 常见合理化借口
@@ -97,7 +98,7 @@ You: 在主 session 添加失败测试、修复、验证并再次审查。
 |---|---|
 | “自己看看 diff 就行，不用 reviewer” | 独立审查能发现实现 session 遗漏的假设。派只读 reviewer，所有编辑仍留在主 session。 |
 | “reviewer 需要完整 session 历史” | 只提供精心整理的工作产物上下文，避免其被你的思考过程影响。 |
-| “这个小问题让 reviewer 直接修” | 审查与实现的 authority 分离。reviewer 只报告，主 agent 用失败测试复现后修复。 |
+| “这个小问题让 reviewer 直接修” | 审查与实现的 authority 分离。reviewer 只报告，主 agent 按 finding 性质选择失败测试或 GREEN 基线后修复。 |
 
 ## 必须停下的信号
 

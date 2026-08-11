@@ -40,6 +40,7 @@ description: 用于准备声称任务、修复、分析、交付物、迁移或�
 
 用于软件行为修改：
 
+- 逐项执行 spec 中 criterion 对应的 Oracle，对照通过条件，原位回填 Evidence，并保持声明的覆盖边界；
 - 运行 spec 映射的聚焦测试、扩展测试、build、lint、format 和 integration 检查；
 - 确认测试实际覆盖目标行为，而不只是命令退出 0；
 - 检查 schema、serialization、binding、API、兼容和迁移消费方；

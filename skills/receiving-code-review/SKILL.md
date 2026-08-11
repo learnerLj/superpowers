@@ -69,6 +69,8 @@ reviewer 建议“正确地完整实现”某功能时，先在代码库搜索�
 
 已获修复授权时，多项反馈先澄清全部疑问，再按 blocking 问题（破坏、安全）-> 简单修复（typo、import）-> 复杂修复（重构、逻辑）的顺序处理。每项单独测试，并验证没有回归。
 
+代码 finding 使用 `test-driven-development` 选择实施路径：新行为、行为修改或 bugfix 走 RED-GREEN；纯行为保持型重构先确认 GREEN 基线，测试不足时先增加 characterization test。重构需要改变行为时回到 RED。
+
 ## 何时反驳
 
 建议会破坏已有行为、reviewer 缺少上下文、违反 YAGNI、不适用于当前技术栈、存在 legacy/兼容原因，或违背人类伙伴架构决定时，都应反驳。

@@ -1,11 +1,11 @@
 # 代码 reviewer 提示词模板
 
-派出只读 code reviewer subagent 时使用此模板。
+使用当前 harness 的原生 agent 工具派出 fresh-context、只读 reviewer 时使用此模板。
 
 **目的：** 在已完成工作扩散到后续任务前，对照当前任务的唯一 review authority 和代码质量标准进行审查。
 
 ````markdown
-Subagent (general-purpose):
+Reviewer:
   description: "审查代码变更"
   prompt: |
     你是一名高级 code reviewer，熟悉软件架构、设计模式和最佳实践。
