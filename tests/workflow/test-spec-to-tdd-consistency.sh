@@ -582,6 +582,28 @@ assert_contains \
     "material decisions in the final spec must invalidate pre-authorization"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
+    '现有系统融入检查' \
+    "mature-system specs must include the integration check"
+for integration_field in \
+    '现有 owner' \
+    '复用入口' \
+    '新增责任' \
+    '平行系统检查'; do
+    assert_contains \
+        "skills/brainstorming/SKILL.md" \
+        "$integration_field" \
+        "mature-system integration check is missing: $integration_field"
+done
+assert_contains \
+    "skills/brainstorming/spec-document-reviewer-prompt.md" \
+    '成熟系统.*现有 owner.*复用入口.*新增责任.*平行系统' \
+    "spec review must check mature-system integration boundaries"
+assert_contains \
+    "skills/test-driven-development/SKILL.md" \
+    '未批准的状态 owner.*状态机.*重试.*缓存.*生命周期.*停止 TDD.*修订 spec' \
+    "TDD must stop when implementation crosses the approved integration boundary"
+assert_contains \
+    "skills/brainstorming/SKILL.md" \
     '应用 profile 的执行门槛.*非软件工作.*等待或继续指令.*Behavior-evidence 软件工作.*书面 spec 获批.*明确实现预授权.*提交已批准 spec.*`BASE_SHA`' \
     "the common process must not bypass the software approval and baseline gate"
 assert_absent \
