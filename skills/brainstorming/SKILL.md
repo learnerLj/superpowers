@@ -54,17 +54,18 @@ description: 用于开始或恢复具有相互依赖阶段、重大不确定性�
 6. **编写 executable spec**：使用通用 contract，只加入适用 profile 的字段。
 7. **自审**：消除占位符、矛盾、歧义、无证据假设、范围漂移和叙述语言漂移。
 8. **审查重大风险**：跨组件、高风险或下游关键 spec 使用只读 reviewer。
-9. **应用 profile 的执行门槛**：非软件工作完成必要审查后，按照用户的等待或继续指令执行。Behavior-evidence 软件工作只有在书面 spec 获批，或完整设计已被用户审阅且存在明确实现预授权后才能开始；生产修改前提交已批准 spec，并记录 `BASE_SHA`。
+9. **应用 profile 的执行门槛**：非软件工作完成必要审查后，按照用户的等待或继续指令执行。Behavior-evidence 软件工作只有在书面 spec 获批，或完整设计已被用户审阅且存在明确实现预授权后才能开始；用户或治理流程授权本地 commit 后，生产修改前提交已批准 spec，并记录完整任务基线 `FULL_BASE_SHA`。
 
 ## 恢复工作
 
 恢复长任务时：
 
 1. 重新阅读用户指令、项目 authority 和现有 spec。
-2. 检查声明的交付物与完成证据，不要只相信对话记忆或已勾选的进度框。
-3. 如果某个已完成 slice 的输入、交付物或证据已经过期，重新打开该 slice。
-4. 从下一个依赖已满足的 slice 继续。
-5. 如果目标、authority、交付物、证据 profile 或风险边界发生实质变化，先修改 spec，再继续执行。
+2. 检查声明的交付物与完成证据，不要只相信对话记忆或已勾选的进度框；只回填命令、结果、时间、证据位置和完成标记的 **Evidence update** 不改变原 contract。
+3. 更新 `FULL_BASE_SHA`、实现起点、当前停点或下一个 slice 的 **Recovery metadata** 不改变设计；输入、交付物或证据过期时则重新打开受影响 slice。
+4. 当前已批准 contract 的实现授权仍有效时，实现遗漏违反已有 criterion 属于 implementation omission：修复实现，只更新原 criterion 的完成证据和 closure，不得改变 criterion 定义，不得为同一要求新增 criterion。
+5. 改变目标、authority、owner、接口、criterion、Oracle、覆盖边界、slice 结果或跨 spec 归属属于 **Semantic revision**；先修改同一份 spec、完成必要审查，并按治理规则判断是否重新批准。
+6. Evidence update 和 Recovery metadata 不能借回填改写决策；处理完适用修订后，从下一个全部前置 slice 已 accepted 的 slice 继续。
 
 ## Executable Spec Contract 结构
 
@@ -88,14 +89,14 @@ Spec 是唯一持久的执行大纲。一个没有对话历史的合格 agent �
 已批准基线中的每个 slice 使用未勾选的 Markdown 进度标记，并用 spec 选定的语言表达以下字段：
 
 - **结果**：slice 完成时可观察到的结果。
-- **依赖**：前置 slice ID；没有时写 `无`。
+- **依赖**：前置 slice ID；只有前置 slice 已 accepted 才算满足；没有时写 `无`。
 - **工作范围**：受影响的产物、系统、来源或责任边界。
 - **输入与 Authority**：所需起始证据和治理来源。
 - **交付物**：该 slice 产生的精确产物或状态。
 - **验收标准**：该 slice 必须满足的 criterion ID。
-- **审查门槛**：所需只读审查；没有时写 `无`。
+- **审查门槛**：所需只读审查及其 review subject；没有时写 `无`。
 
-只有声明的证据已经存在且可以定位时，才把 slice 标记为完成。如果后续工作改变了它的输入、交付物或证据，重新打开该 slice 并再次验证。
+进度标记只有一个含义：`slice accepted`。只有声明的完成证据已经存在且可以定位，并且适用的审查门槛已经关闭时，才勾选 slice；`implementation green` 或 reviewer 尚未 closure 都不能勾选。后续工作改变它的输入、交付物、证据或审查结论时，重新打开该 slice 并再次验证。后序 slice 的依赖只由前置 slice 的 accepted 状态满足。
 
 ## 完成证据 Profile
 
@@ -153,9 +154,9 @@ Adapter、provider、plugin、client 或其它跨模块接入任务必须在系�
 
 每个软件 **Implementation Slice** 还包含：
 
-- **文件**：预计创建、修改或删除的精确文件；
+- **文件**：预计创建、修改或删除的精确文件；不按 spec 行数拆分，而按 owner、production files/shared crate、concurrency/lifecycle 和 failure modes 的真实 blast radius 判断，一个 slice 跨多个高风险边界且不能由同一失败测试闭合时先拆分；
 - **数据决策**：引用上面的结构定义和转换条目，说明该 slice 创建或修改哪些结构；不得在 slice 中临时发明未进入 SSOT 设计的新 model；
-- **验收标准**：该 slice 证明的精确 criterion ID；
+- **验收标准**：该 slice 证明的精确 criterion ID；开始前在当前 task record 内把每项对齐到 `criterion -> runtime owner -> mutation/publication point -> RED test`，这只是内部开始门槛，不是新表格或第二份计划，任一项无法定位时先修订或拆分；
 - **审查门槛**：跨组件、高风险或下游关键工作必须单独只读审查，否则写 `无`。
 
 把所有结构关系归类为 containment、reference、derivation、projection 或有理由的 duplication。除非上述真实边界能够证明分离合理，否则把相同形状的 DTO、command、entity、model、state object 和 wrapper 视为同一结构。
@@ -200,19 +201,19 @@ Adapter、provider、plugin、client 或其它跨模块接入任务必须在系�
 
 - 如果用户说“先规划”“只写 spec”“执行前给我看”或同义指令，写完并审查 spec 后等待批准。
 - 对非软件 profile，如果用户授权直接执行、继续、不要停或同义指令，完成 spec 自审和必要独立审查后，开始第一个依赖就绪的 slice。
-- Behavior-evidence 软件工作必须获得书面 spec 批准，或在用户审阅完整设计后获得明确实现预授权。生产修改前，单独提交最终已批准 spec，并把该提交记录为 `BASE_SHA`；实现、review 和最终 diff 验证都使用这个已批准 spec 基线。如果最终 spec 加入了已审阅设计中不存在的实质决策，预授权立即失效。
+- Behavior-evidence 软件工作必须获得书面 spec 批准，或在用户审阅完整设计后获得明确实现预授权。用户或治理流程授权本地 commit 时，生产修改前单独提交最终已批准 spec，并把该提交记录为 `FULL_BASE_SHA`；未获授权就在生产修改前停止。`FULL_BASE_SHA` 拥有完整任务的最终 diff，当前 slice 或 review subject 使用自己的增量基线。如果最终 spec 加入了已审阅设计中不存在的实质决策，预授权立即失效。
 - 更高优先级的项目指令要求批准或安全门槛时，无论一般执行指令如何都必须遵守。
 
-目标、authority、交付物、证据 profile、风险边界、验收标准或 slice 结果发生变化，属于语义 spec 变化。停止执行、修改 spec、完成必要审查，并在治理规则要求时重新取得批准。
+目标、authority、交付物、证据 profile、风险边界、验收标准或 slice 结果发生变化，属于 Semantic revision。停止执行、修改 spec、完成必要审查，并在治理规则要求时重新取得批准。
 
 ## 审查
 
-长任务或跨范围 spec 使用 `spec-document-reviewer-prompt.md` 派遣只读 reviewer。Reviewer 只报告缺口和矛盾，不编辑文件、不执行任务 slice、不实施修复、不提交变更。主 agent 处理有效 finding，并重复审查，直到没有阻塞问题。
+长任务或跨范围 spec 使用 `spec-document-reviewer-prompt.md` 派遣只读 reviewer。同一 spec review subject 只派一个 reviewer 做 full review 并分配 stable finding ID；主 agent 处理有效 finding 后，优先由原 reviewer依据 ledger 做定点 closure，不启动新的 full review 重置同一 subject。Reviewer 失效时先结束该 session；同一 subject 总共最多替换一次且不得并行，已有 findings 时替代 reviewer 也只能 closure。默认最多两轮 closure；仍有阻塞 finding 时停止派 reviewer，重新检查 authority、scope、Oracle 或 Semantic revision。离开 spec review 前确认 reviewer 和相关 session 已结束。Reviewer 始终只报告，不编辑文件、不执行任务 slice、不实施修复、不提交变更。
 
 ## Spec 完成后
 
 - 把 spec 保存在项目 authority 指定的位置；未指定时默认使用 `docs/superpowers/specs/YYYY-MM-DD-<topic>-spec.md`。
-- 只执行依赖已经满足的 slice。
+- 只执行全部前置 slice 已 accepted 的 slice。
 - 只有新鲜完成证据存在后才更新进度标记。
 - 只有专业 skill 的自身触发条件成立时才使用它。
 - 最后调用 `verification-before-completion`，按照 spec 声明的证据完成验证。

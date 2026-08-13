@@ -7,6 +7,10 @@
 - `SPEC_PATH`：待审查的 executable spec。
 - `AUTHORITIES`：用户指令、项目指令、策略或其它优先 authority。
 - `SCOPE`：本次审查明确包含和排除的范围。
+- `REVIEW_MODE`：第一次审查为 `full`；修复复查为 `closure`。
+- `FINDING_LEDGER`：`closure` 模式下待复查的 stable finding ID、修订位置和验证证据；`full` 模式为 `None`。
+
+`full` 模式完整审查 `SCOPE`，为每个 finding 分配 stable finding ID，例如 `SR-001`。`closure` 模式只复查 `FINDING_LEDGER` 中的 finding、对应修订和修订直接影响的 contract；沿用原 ID，逐项返回 `CLOSED`、`OPEN` 或 `NOT VERIFIED`，不得扩张为新一轮完整审查。
 
 ## 审查目标
 
@@ -36,6 +40,8 @@
 
 ## Findings 格式
 
+`closure` 模式只按 stable finding ID 输出 closure 状态和对应证据，不输出新的完整 findings、优点或总体批准判断。以下格式只用于 `full` 模式。
+
 先列 findings，按严重度排序：
 
 - **Critical**：会导致执行错误、不可恢复、重大风险失控或完成声明失真。
@@ -44,6 +50,7 @@
 
 每条 finding 必须包含：
 
+- stable finding ID；
 - 可定位的文件与行号；
 - 缺失或矛盾的具体 contract；
 - 可能导致的错误行为；

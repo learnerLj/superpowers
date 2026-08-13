@@ -61,7 +61,7 @@ Restart Codex after adding or updating links. No session hook or startup prompt 
 
 1. **brainstorming** - Activates for substantial or resumable work and creates or resumes the single executable spec. Common fields constrain every long task; research evidence, artifact or state evidence, and behavior evidence add only the fields their deliverables require.
 
-2. **execution** - The main agent completes dependency-ready slices. Software behavior uses `test-driven-development` and risk-based read-only code review; analysis and other deliverables use the evidence declared by their spec.
+2. **execution** - The main agent completes slices whose prerequisites are accepted. Software behavior uses `test-driven-development`; risk-based read-only review is scoped to the current slice or checkpoint, with a full integration review only when required. Analysis and other deliverables use the evidence declared by their spec.
 
 3. **verification-before-completion** - Re-checks every slice and final claim against fresh behavior, research, artifact, or state evidence.
 

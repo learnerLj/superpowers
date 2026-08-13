@@ -18,18 +18,21 @@ code review 需要技术判断，不需要情绪表演。
 
 1. 阅读：不急于回应，完整读完
 2. 理解：用自己的话重述要求；不清楚就询问
-3. 验证：对照代码库事实检查
-4. 评估：它对当前代码库是否技术可靠？
-5. 回应：做技术确认，或给出有依据的反驳
-6. 授权：确认用户是否已经授权根据 review 直接修复
-7. 实施：获得授权后一次处理一项，每项分别测试
+3. 记录：为全部 finding 保留稳定 ID 和最小闭环状态
+4. 验证：对照代码库事实检查
+5. 评估：它对当前代码库是否技术可靠？
+6. 回应：做技术确认，或给出有依据的反驳
+7. 授权：判断原实现授权是否覆盖；不覆盖时识别 Semantic revision 或等待用户授权
+8. 实施：在有效授权内一次处理一项，每项分别测试
 ```
+
+先完整核查所有 finding 后再安排实施。长任务在 executable spec、短任务在当前 task record 保留最小 finding ledger：`ID`、`verdict`、`criterion/authority`、`RED 或事实证据`、`fix/diff`、`verification`、`closure`；它不是第二份计划。`verdict` 使用 `VERIFIED`、`REJECTED` 或 `NOT VERIFIED`，closure 沿用原 ID 记录 `CLOSED`、`OPEN` 或 `NOT VERIFIED`，不得靠新 reviewer 或新 ID 重置问题。
 
 ## 授权边界
 
 review finding 是待验证的技术意见，不是自动修改授权。用户只要求 review、检查或分析时，完成事实核查后返回核查结果和建议范围，等待确认；不能写测试、修改实现或提交。
 
-只有用户已明确授权“review 后直接修复”“发现问题顺带修复”或同等范围时，才进入实施。原请求只授权实现某项功能，并不自动授权 reviewer 新提出的架构变化、范围扩张或可选改善；这些仍需单独确认。
+当前任务已获实现授权时，确认违反已有 criterion 的 implementation omission 沿用原实现授权，直接按 TDD 修复并重新验证，不因 reviewer 换一种表述而重复等待。Reviewer 新提出 owner、架构、scope、业务目标或跨 spec 归属则属于 Semantic revision，必须先修改 authority 并按治理规则判断批准；可选改善也不由原实现授权自动覆盖。只有用户已明确授权“review 后直接修复”“发现问题顺带修复”或同等范围时，才处理不属于已有 criterion 的普通 review 建议。
 
 ## 禁止的回应
 

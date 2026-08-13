@@ -259,9 +259,9 @@ assert_absent \
 
 for software_slice_field in \
     '^每个软件 \*\*Implementation Slice\*\* 还包含：$' \
-    '\*\*文件\*\*：预计创建、修改或删除的精确文件' \
+    '\*\*文件\*\*：预计创建、修改或删除的精确文件.*owner.*production files/shared crate.*concurrency/lifecycle.*failure modes.*blast radius' \
     '\*\*数据决策\*\*：引用上面的结构定义和转换条目' \
-    '\*\*验收标准\*\*：该 slice 证明的精确 criterion ID' \
+    '\*\*验收标准\*\*：该 slice 证明的精确 criterion ID.*criterion -> runtime owner -> mutation/publication point -> RED test.*不是新表格或第二份计划' \
     '\*\*审查门槛\*\*：.*单独只读审查'; do
     assert_contains \
         "skills/brainstorming/SKILL.md" \
@@ -318,7 +318,13 @@ for required_common_contract in \
     '交付物' \
     '完成证据' \
     '审查门槛' \
-    '重新打开'; do
+    '重新打开' \
+    'Evidence update' \
+    'Recovery metadata' \
+    'Semantic revision' \
+    '实现遗漏违反已有 criterion.*不得为同一要求新增 criterion' \
+    '进度标记.*slice accepted.*完成证据.*审查门槛.*关闭' \
+    '依赖.*前置 slice.*accepted'; do
     assert_contains \
         "skills/brainstorming/SKILL.md" \
         "$required_common_contract" \
@@ -468,9 +474,10 @@ assert_contains \
     "review-only feedback must stop before implementation"
 assert_contains \
     "skills/receiving-code-review/SKILL.md" \
-    '只有用户已明确授权.*直接修复.*才进入实施' \
-    "review findings must not silently authorize implementation"
-for receiving_tdd_contract in \
+    '已有 criterion.*implementation omission.*原实现授权.*owner.*架构.*scope.*业务目标.*Semantic revision' \
+    "review handling must distinguish implementation omissions from semantic revisions"
+for receiving_contract in \
+    '完整核查所有 finding.*finding ledger.*`ID`.*`verdict`.*`criterion/authority`.*`RED 或事实证据`.*`fix/diff`.*`verification`.*`closure`.*不是第二份计划' \
     '代码 finding.*`test-driven-development`.*实施路径' \
     '新行为、行为修改或 bugfix.*RED-GREEN' \
     '纯行为保持型重构.*GREEN 基线' \
@@ -478,8 +485,8 @@ for receiving_tdd_contract in \
     '改变行为.*回到 RED'; do
     assert_contains \
         "skills/receiving-code-review/SKILL.md" \
-        "$receiving_tdd_contract" \
-        "receiving review must preserve the TDD behavior/refactor boundary: $receiving_tdd_contract"
+        "$receiving_contract" \
+        "receiving review contract is missing: $receiving_contract"
 done
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
@@ -510,18 +517,68 @@ assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     '不得编辑文件、运行实现任务或提交' \
     "reviewer must be prohibited from implementation"
+for review_scope_field in \
+    'REVIEW_SUBJECT' \
+    'FULL_BASE_SHA' \
+    'DIFF_BASE_SHA'; do
+    assert_contains \
+        "skills/requesting-code-review/SKILL.md" \
+        "$review_scope_field" \
+        "code review scope field is missing: $review_scope_field"
+done
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
-    'git diff.*BASE_SHA' \
-    "code review must cover the current working tree from the selected review baseline"
+    '当前 slice.*criterion.*`DIFF_BASE_SHA`.*最终集成审查.*FULL_BASE_SHA' \
+    "successive slice reviews must not repeatedly scan the accumulated task diff"
+assert_contains \
+    "skills/requesting-code-review/SKILL.md" \
+    '独立 review.*可用 checkpoint.*一次性.*授权.*未获授权.*停止.*不能.*累计 diff' \
+    "an independent slice review must stop when no authorized checkpoint can isolate its diff"
+assert_absent \
+    '就把这些变更合并为同一个 review subject' \
+    "$REPO_ROOT/skills/requesting-code-review/SKILL.md"
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     '审查前验证' \
     "code review must receive fresh pre-review verification evidence"
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
-    '重复审查' \
-    "important review fixes must be reviewed again"
+    '原 reviewer 定点 closure' \
+    "important review fixes must receive targeted closure from the original reviewer"
+for review_lifecycle_contract in \
+    '同一 review subject.*一个.*reviewer 完整审查' \
+    '不要启动 fresh full reviewer' \
+    '同一 subject.*最多替换一次.*不得并行' \
+    '最多两轮 closure' \
+    '检查 reviewer.*结束'; do
+    assert_contains \
+        "skills/requesting-code-review/SKILL.md" \
+        "$review_lifecycle_contract" \
+        "code review lifecycle is missing: $review_lifecycle_contract"
+done
+for reviewer_scope_contract in \
+    'REVIEW_SUBJECT' \
+    'FULL_BASE_SHA' \
+    'DIFF_BASE_SHA' \
+    'git diff.*DIFF_BASE_SHA' \
+    'final integration.*DIFF_BASE_SHA.*FULL_BASE_SHA'; do
+    assert_contains \
+        "skills/requesting-code-review/code-reviewer.md" \
+        "$reviewer_scope_contract" \
+        "reviewer scope contract is missing: $reviewer_scope_contract"
+done
+for reviewer_mode_contract in \
+    'REVIEW_MODE.*full.*closure' \
+    'stable finding ID' \
+    'closure.*只复查' \
+    '`closure` 模式只按 stable finding ID' \
+    '不输出优点' \
+    '新建议或合并判断'; do
+    assert_contains \
+        "skills/requesting-code-review/code-reviewer.md" \
+        "$reviewer_mode_contract" \
+        "reviewer mode contract is missing: $reviewer_mode_contract"
+done
 assert_contains \
     "skills/requesting-code-review/SKILL.md" \
     '^\- reviewer 返回 findings 后，必须先加载 `receiving-code-review`，不能把 finding 直接当成修改指令。$' \
@@ -547,19 +604,55 @@ assert_contains \
     "skills/verification-before-completion/SKILL.md" \
     '逐项执行.*criterion.*Oracle.*通过条件.*原位回填.*Evidence.*覆盖边界' \
     "completion verification must execute and fill the criterion evidence contract"
-for evidence_profile in \
+for completion_contract in \
     'Behavior Evidence' \
     'Research Evidence' \
-    'Artifact or State Evidence'; do
+    'Artifact or State Evidence' \
+    '最高、适用且有新鲜证据支持的层级' \
+    '仍未完成的适用上层' \
+    'implementation green.*review closed.*spec complete.*local runtime accepted.*external/testnet/remote accepted.*overall goal complete' \
+    '活跃 reviewer.*session' \
+    '完成声明.*subject.*S2.*spec path.*overall goal'; do
     assert_contains \
         "skills/verification-before-completion/SKILL.md" \
-        "$evidence_profile" \
-        "verification profile is missing: $evidence_profile"
+        "$completion_contract" \
+        "verification completion contract is missing: $completion_contract"
+done
+for spec_review_lifecycle in \
+    '同一 spec review subject.*一个.*reviewer' \
+    'stable finding ID' \
+    '原 reviewer.*closure' \
+    '同一 subject.*最多替换一次.*不得并行' \
+    '最多两轮 closure' \
+    '结束.*reviewer.*session'; do
+    assert_contains \
+        "skills/brainstorming/SKILL.md" \
+        "$spec_review_lifecycle" \
+        "spec review lifecycle is missing: $spec_review_lifecycle"
+done
+for spec_reviewer_mode in \
+    'REVIEW_MODE.*full.*closure' \
+    'FINDING_LEDGER' \
+    'stable finding ID' \
+    'closure.*只复查' \
+    '`CLOSED`.*`OPEN`.*`NOT VERIFIED`'; do
+    assert_contains \
+        "skills/brainstorming/spec-document-reviewer-prompt.md" \
+        "$spec_reviewer_mode" \
+        "spec reviewer closure contract is missing: $spec_reviewer_mode"
 done
 assert_contains \
     "skills/brainstorming/SKILL.md" \
     '非软件 profile.*授权直接执行.*第一个依赖就绪的 slice' \
     "an explicit continue instruction must allow non-software execution after spec self-review"
+assert_contains \
+    "skills/brainstorming/SKILL.md" \
+    'implementation omission.*更新原 criterion 的完成证据和 closure.*不得改变 criterion 定义' \
+    "implementation omissions must update evidence without redefining the criterion"
+assert_contains \
+    "README.md" \
+    'prerequisites are accepted.*current slice or checkpoint.*full integration review' \
+    "README workflow summary must match successive-slice review semantics"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
     '先规划.*等待批准' \
@@ -570,7 +663,7 @@ assert_contains \
     "software behavior work must retain written approval and a separate baseline"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
-    '单独提交最终已批准 spec，并把该提交记录为 `BASE_SHA`' \
+    '用户或治理流程授权.*单独提交最终已批准 spec.*`FULL_BASE_SHA`.*未获授权.*生产修改前停止' \
     "software behavior work must hand the approved-spec commit to review"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
@@ -604,7 +697,7 @@ assert_contains \
     "TDD must stop when implementation crosses the approved integration boundary"
 assert_contains \
     "skills/brainstorming/SKILL.md" \
-    '应用 profile 的执行门槛.*非软件工作.*等待或继续指令.*Behavior-evidence 软件工作.*书面 spec 获批.*明确实现预授权.*提交已批准 spec.*`BASE_SHA`' \
+    '应用 profile 的执行门槛.*非软件工作.*等待或继续指令.*Behavior-evidence 软件工作.*书面 spec 获批.*明确实现预授权.*授权.*提交已批准 spec.*`FULL_BASE_SHA`' \
     "the common process must not bypass the software approval and baseline gate"
 assert_absent \
     'Spec written and committed' \

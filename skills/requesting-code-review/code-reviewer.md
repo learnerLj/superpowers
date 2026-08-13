@@ -24,17 +24,25 @@ Reviewer:
 
     ## 审查范围
 
-    **Base:** [BASE_SHA]
+    **REVIEW_SUBJECT:** [REVIEW_SUBJECT]
+    **FULL_BASE_SHA:** [FULL_BASE_SHA]
+    **DIFF_BASE_SHA:** [DIFF_BASE_SHA]
     **未跟踪实现文件:** [UNTRACKED_FILES]
+    **REVIEW_MODE:** [REVIEW_MODE] (`full` 或 `closure`)
+    **FINDING_LEDGER:** [FINDING_LEDGER]
 
     ```bash
     git status --short
-    git diff --stat [BASE_SHA]
-    git diff [BASE_SHA]
+    git diff --stat [DIFF_BASE_SHA]
+    git diff [DIFF_BASE_SHA]
     ```
 
-    base 是已批准 spec 的提交，或短任务实现开始前的提交。审查自该基线以来全部已提交、已暂存和未暂存变更。
+    FULL_BASE_SHA 是已批准 spec 的提交，或短任务实现开始前的提交。DIFF_BASE_SHA 只界定当前 REVIEW_SUBJECT 的增量；审查自该增量基线以来已提交、已暂存和未暂存的相关变更。final integration subject 必须令 DIFF_BASE_SHA 等于 FULL_BASE_SHA，才审查完整任务 diff。
     普通 diff 不包含 untracked 内容，因此直接读取列出的每个未跟踪实现文件。
+
+    `full` 模式审查上述完整范围，并为每个问题分配 stable finding ID，例如 `CR-001`。
+    `closure` 模式只复查 FINDING_LEDGER 中的 finding、对应修复和修复直接影响的范围；沿用原 ID，逐项返回
+    `CLOSED`、`OPEN` 或 `NOT VERIFIED`，不得把 closure 扩张为新一轮完整审查。
 
     ## 新鲜验证证据
 
@@ -71,6 +79,9 @@ Reviewer:
 
     ## 输出格式
 
+    `closure` 模式只按 stable finding ID 输出 `CLOSED`、`OPEN` 或 `NOT VERIFIED` 和对应证据，不输出优点、
+    新建议或合并判断。以下完整格式只用于 `full` 模式。
+
     ### 优点
     [具体说明做得好的地方]
 
@@ -85,7 +96,7 @@ Reviewer:
     #### Minor（可选改善）
     [代码风格、优化机会、文档润色]
 
-    每个问题必须包含：file:line、错误内容、触发路径、发生概率或频率、影响范围、严重度理由，
+    每个问题必须包含：stable finding ID、file:line、错误内容、触发路径、发生概率或频率、影响范围、严重度理由，
     以及不明显时的修复方向。修复成本会改变是否值得现在处理时，也要明确说明。
 
     ### 建议
@@ -103,6 +114,6 @@ Reviewer:
     不得给出“改进错误处理”之类模糊反馈，也不得回避明确结论。
 ````
 
-占位符：`[DESCRIPTION]`、`[REVIEW_AUTHORITY]`、`[BASE_SHA]`、`[UNTRACKED_FILES]` 和 `[VERIFICATION_EVIDENCE]` 分别对应实现摘要、当前任务 authority、基线提交、未跟踪实现文件和新鲜验证结果。
+占位符：`[DESCRIPTION]`、`[REVIEW_AUTHORITY]`、`[REVIEW_SUBJECT]`、`[FULL_BASE_SHA]`、`[DIFF_BASE_SHA]`、`[UNTRACKED_FILES]`、`[VERIFICATION_EVIDENCE]`、`[REVIEW_MODE]` 和 `[FINDING_LEDGER]` 分别对应实现摘要、当前任务 authority、审查 subject、完整任务基线、当前增量基线、未跟踪实现文件、新鲜验证结果、审查模式和待 closure findings。
 
-reviewer 返回优点、按 Critical/Important/Minor 分类的问题、建议和合并判断。
+Reviewer 按模板中的 `REVIEW_MODE` 返回对应格式。

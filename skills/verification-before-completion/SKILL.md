@@ -25,14 +25,16 @@ description: 用于准备声称任务、修复、分析、交付物、迁移或�
 
 在任何完成声明之前：
 
-1. **确定声明**：把要说的话改写成可证伪的命题。
+1. **确定声明**：把要说的话改写成可证伪的命题，明确 subject 是具体 slice、spec 还是 overall goal，并定位当前完成层级。
 2. **定位证据**：找到能够直接证明该命题的检查、命令、产物或 observation。
 3. **执行完整验证**：现在运行它，不依赖旧输出或他人摘要。
 4. **阅读完整结果**：检查退出码、失败、警告、跳过项、覆盖范围和证据边界。
-5. **比较声明与证据**：证据只覆盖一部分时，缩小声明；证据冲突时，报告冲突。
-6. **然后再表达结论**：把结论和支持它的证据放在一起。
+5. **比较声明与证据**：只选择最高、适用且有新鲜证据支持的层级；证据冲突时报告冲突。
+6. **然后再表达结论**：把结论和证据放在一起，并明确仍未完成的适用上层。
 
 跳过任何一步，都不是验证。
+
+完成层级依次为 `implementation green`、`review closed`、`spec complete`、`local runtime accepted`、`external/testnet/remote accepted` 和 `overall goal complete`。每个完成声明都携带可定位 subject，例如 `S2: implementation green`、`<spec path>: review closed` 或 `<overall goal>: incomplete`；不能用无 subject 的局部层级暗示整个目标。较低层级不能替代较高层级的独立证据；不必罗列不适用层级。声称某 subject 达到 `review closed` 或更高层级前，确认它没有活跃 reviewer 或相关 agent session。
 
 ## 按 Evidence Profile 验证
 
@@ -44,7 +46,7 @@ description: 用于准备声称任务、修复、分析、交付物、迁移或�
 - 运行 spec 映射的聚焦测试、扩展测试、build、lint、format 和 integration 检查；
 - 确认测试实际覆盖目标行为，而不只是命令退出 0；
 - 检查 schema、serialization、binding、API、兼容和迁移消费方；
-- 阅读从已批准 `BASE_SHA` 到当前 working tree 的完整 diff；
+- 阅读从已批准 `FULL_BASE_SHA` 到当前 working tree 的完整任务 diff；
 - 代码在验证后发生变化时，重新运行受影响的检查。
 
 ### Research Evidence（研究证据）
