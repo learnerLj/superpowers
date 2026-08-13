@@ -1,6 +1,6 @@
 # 长任务审查收敛可执行规格
 
-> 状态：2026-08-13，`S1: slice accepted, review closed`；`S2: slice accepted`；本规格达到 `spec complete` 和 `local validation accepted`。用户已授权提交、fast-forward 合入 `main` 并 push，Git 交接执行中。
+> 状态：2026-08-13，`S1: slice accepted, review closed`；`S2: slice accepted`；本规格达到 `spec complete`、`local validation accepted` 和 `Git handoff accepted`。已提交、fast-forward 合入 `main` 并 push `origin/main`；未创建 PR 或发布。
 > 分支：`codex/workflow-convergence`；起点：`bf87a3a42c4207bea5f8311beb8c2d0684402af7`。
 
 ## 1. 目标与非目标
@@ -130,6 +130,7 @@ S0 旧 skill SHA-256：`brainstorming=01e2fa4a...e14e87e`、`requesting=7563cb9c
 - **验收标准：** `WC-01..06`。
 - **审查门槛：** 无；`S1` 已拥有唯一 full review 与 closure。
 - **完成证据：** 2026-08-13 在最终 tree 上重新运行 `bash tests/workflow/run-tests.sh`，中文内容与长任务 workflow contract 均通过；四个修改 skill 的 `quick_validate.py` 均通过；tracked 和 untracked diff whitespace 检查通过；旧 `BASE_SHA`、无限重复审查、旧授权等待和 `dependency-ready slices` 术语无生产残留；最终 diff 范围为 README、六个 owner/prompt 文件、一个 workflow test 和本规格。
+- **Git 交接证据：** 首个交付提交 `ac361684e1177ce1b82f19fe7083c711e297d8ce` 已 fast-forward 到 `main` 并 push；远端读回时 `HEAD`、`main`、`origin/main` 和 `codex/workflow-convergence` 均指向该提交，工作树干净，`main` 上重新运行 workflow tests 通过。本条为交接后的 Evidence update。
 - **当前停点：** `S2: slice accepted`；本规格 `spec complete`、`local validation accepted`。
 
 ## 6. 修订、回滚与最终验收
