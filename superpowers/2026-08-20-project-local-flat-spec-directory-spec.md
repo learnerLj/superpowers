@@ -230,7 +230,7 @@ CANDIDATE
 - **要证明的事实**：task spec baseline 与通过审查的 skill、测试、历史迁移分别形成两个内聚 commit，并存在于 `origin/main`。
 - **Oracle**：相关聚焦测试、`tests/workflow/run-tests.sh`、`git diff --check`、只读 code/spec review、`git status`、commit SHA、`git push origin main`、`git rev-parse origin/main`。
 - **通过条件**：测试全绿；Critical/Important finding 关闭；两个 commit 都只含本任务，且实现 diff 以 task spec commit 为 `FULL_BASE_SHA`；push 成功；本地 HEAD 等于 `origin/main`。
-- **完成证据**：待执行。
+- **完成证据**：`2026-08-20`，task spec baseline commit 为 `4bb08050aafeeaf9012fa150f6b5dc947f772b07`，只新增本 task spec；实现 commit 为 `9633b9b0942266098e4bfab1151ca1e8832297cb`，以 `4bb0805` 为 `FULL_BASE_SHA`，包含 `brainstorming` 路径 contract、静态测试、19 份历史 artifact 迁移及其明确消费方修复。`tests/workflow/test-spec-to-tdd-consistency.sh`、`tests/workflow/run-tests.sh`、`tests/writing-skills/test-evaluation-budget-contract.sh` 与 `git diff 4bb0805 --check` 在最终实现树上均通过。只读 reviewer 的 `IM-001`、`IM-002` 已由原 reviewer 定点关闭；最终 agent 状态显示 reviewer 与四个 evaluator 均已结束。实现 commit 已推送到 `origin/main`，Evidence update 前读回 `HEAD` 与 `origin/main` 均为 `9633b9b0942266098e4bfab1151ca1e8832297cb`。本次完成证据回填单独形成第三个 documentation-only commit；其最终 SHA 由提交后的远端读回提供，不改写前两个核心 commit 或实现内容。
 - **覆盖边界**：不创建 upstream PR，不代表上游项目接受该个人 fork 约定。
 
 ### 5.6 C5：Vault 11 份项目 spec 完成就近平铺迁移
@@ -238,7 +238,7 @@ CANDIDATE
 - **要证明的事实**：11 个旧路径均不存在，11 个 basename 均在对应项目的 `superpowers/`，内容除必要路径自引用外无损。
 - **Oracle**：迁移映射、SHA-256/精确 diff、`find project -type f -name '*-spec.md'`、旧路径存在性检查。
 - **通过条件**：11 对 11 一一映射；没有误迁 retrospective、项目主页或 plan；没有 basename 冲突。
-- **完成证据**：待执行。
+- **完成证据**：`2026-08-20`，`find project -type f -name '*-spec.md'` 只返回 11 份文件，全部直接位于各自项目的 `superpowers/`，11 个固定旧路径逐项检查均不存在，且没有 basename 冲突。Base、Asset Opportunity Graph、BSC Active LP、BSC Cyclic、Ethereum、Monad、Polygon 七份当前 SHA-256 与 C0 基线逐字节一致。Arbitrum、Blockchain Indexing Infrastructure、Crypto Data、Solana SMB 四份只发生迁移所需的路径修复：Arbitrum 把移动后会误解析的 `[[README]]` 改为项目显式链接；Blockchain Indexing Infrastructure 与 Crypto Data 更新自身 spec 路径；Solana SMB 把两处移动后歧义的 `[[README]]` 改为项目显式链接。没有迁移 plan、retrospective、项目主页或 Raw。
 - **覆盖边界**：只迁移当前 Vault 中以 `-spec.md` 结尾的文件。
 
 ### 5.7 C6：Vault 消费方和结构继续有效
@@ -246,7 +246,7 @@ CANDIDATE
 - **要证明的事实**：移动后的 Wikilink、Markdown path、标题和 Manifest 均有效。
 - **Oracle**：运行标题、Vault link、Topic Manifest validator；`rg` 旧路径；人工检查各项目 README 的 spec 入口。
 - **通过条件**：标题 0 错误、Vault link 0 错误、Topic Manifest 0 新增错误；旧路径无现役引用。
-- **完成证据**：待执行。
+- **完成证据**：`2026-08-20`，11 份迁移 spec 的标题校验输出为「检查 11 个路径」且通过；`validate_vault_links.py --root .` 索引并检查 1,591 个来源，0 错误；`validate_topic_manifests.py --vault-root .` 验证 251 个 Manifest，跳过 0；`validate_project_data_layout.py` 输出 `Validated current project evidence layout.`。排除自动生成的 `vault_structure.md` 后，11 个旧完整路径只剩 `project/person-canonical-readability-maintenance/person-canonical-readability-maintenance.md:150` 的历史 `git status` 记录，不承担现役入口。`vault_structure.md` 仍有 7 条提交前生成的旧 basename 路径缓存；根 `AGENTS.md` 禁止手改该文件，`.githooks/pre-commit` 会在未来 Vault commit 时运行 `scripts/generate_vault_index.py` 重建。由于本任务明确不提交 Vault，没有为了刷新该缓存制造跨并发资产的生成 diff；现役链接解析和三个结构 validator 均已通过。
 - **覆盖边界**：不验证外部 URL 或项目业务结论。
 
 ### 5.8 C7：副作用受控
@@ -254,7 +254,7 @@ CANDIDATE
 - **要证明的事实**：Superpowers 的 task spec 与实现两个 commit 只提交并推送本任务；Vault 只移动 spec 和修消费方，不覆盖既有 dirty 资产。
 - **Oracle**：两端执行前后 `git status`、Superpowers staged/committed diff、Vault status 与目标路径映射。
 - **通过条件**：Superpowers 两个 commit scope 精确；Vault staged path 为 0；任务外 dirty 文件未被本任务修改。
-- **完成证据**：待执行。
+- **完成证据**：`2026-08-20`，Superpowers 的 baseline 与实现 commit 均只包含本任务；完成证据回填也只修改本 task spec。Vault `git diff --cached --name-only` 为空，`git diff --check` 通过；11 份迁移、直接消费方、registry 和 CEX-DEX 正文改写保持在未提交工作树中。`.agents/skills/telegram-information-retrieval/`、`area/self/`、`area/society/`、`project/person-canonical-readability-maintenance/` 及其它执行前或并发 dirty/untracked 资产未被 stage、commit、删除或覆盖。Vault 未 push，Superpowers 未创建 upstream PR。
 - **覆盖边界**：并发任务产生的变化只记录，不归因。
 
 ## 6 执行 Slice
@@ -291,7 +291,7 @@ CANDIDATE
 
 ### 6.4 S3：提交并推送 Superpowers
 
-- [ ] **结果**：task spec baseline 与完整实现以两个内聚 commit 存在于 `origin/main`。
+- [x] **结果**：task spec baseline 与完整实现以两个内聚 commit 存在于 `origin/main`。
 - **依赖**：S2。
 - **工作范围**：Superpowers 仓库本任务 diff。
 - **输入与 Authority**：C4、用户 push 授权。
@@ -301,7 +301,7 @@ CANDIDATE
 
 ### 6.5 S4：迁移 Vault 历史 Spec 并修消费方
 
-- [ ] **结果**：11 份 Vault spec 在所属项目 `superpowers/` 平铺，旧路径与失效引用清零。
+- [x] **结果**：11 份 Vault spec 在所属项目 `superpowers/` 平铺，旧路径与失效引用清零。
 - **依赖**：S3。
 - **工作范围**：固定 11 份 spec 及直接消费方。
 - **输入与 Authority**：C5/C6、Vault AGENTS/README。
@@ -311,7 +311,7 @@ CANDIDATE
 
 ### 6.6 S5：最终验收
 
-- [ ] **结果**：两个工作区都满足新规范，Superpowers 已推送，Vault 无结构或链接回归。
+- [x] **结果**：两个工作区都满足新规范，Superpowers 已推送，Vault 无结构或链接回归。
 - **依赖**：S4。
 - **工作范围**：C0-C7、review closure、两个 Git 状态。
 - **输入与 Authority**：最终工作树和远端状态。
@@ -323,8 +323,8 @@ CANDIDATE
 
 ### 7.1 恢复信息
 
-- **当前停点**：S0-S2 已 accepted；两个 Important finding 已由原 reviewer 关闭，等待提交并推送 Superpowers。
-- **下一个阶段**：S3。
+- **当前停点**：S0-S5 已 accepted；两个 Important finding 已由原 reviewer 关闭，Superpowers 核心提交已推送，Vault 迁移与最终 validator 已通过。
+- **下一个阶段**：无；只需提交并远端读回本次 documentation-only Evidence update。
 - **实现与推送授权**：用户已明确要求直接执行完并上传 GitHub。
 - **治理恢复**：恢复执行时发现原 spec 的“单一 commit”与 `brainstorming` 的 behavior-work baseline 门槛冲突；改为 task spec baseline + 实现 commit。生产文件已开始修改，因此该 baseline 晚于首次 RED/GREEN，但它仍真实隔离后续完整实现 diff；最终证据必须如实保留这个边界，不能把它描述成修改前基线。
 
