@@ -212,7 +212,10 @@ Adapter、provider、plugin、client 或其它跨模块接入任务必须在系�
 
 ## Spec 完成后
 
-- 把 spec 保存在项目 authority 指定的位置；未指定时默认使用 `docs/superpowers/specs/YYYY-MM-DD-<topic>-spec.md`。
+- 把 spec 保存在项目 authority 显式指定的位置；未指定时默认使用 `<project-root>/superpowers/YYYY-MM-DD-<topic>-spec.md`。
+- 项目根按当前项目的真实边界解析：普通 Git 仓库或 workspace 使用 repository/workspace root；更高优先级 authority 定义了嵌套项目根时使用该边界。
+- `superpowers/` 内的 spec 直接平铺；不得再增加 `specs/`、`plans/`、日期目录或主题子目录。
+- 项目 authority 显式指定其它位置时继续服从；`docs/superpowers/specs/` 是已退役的旧默认目录，它或其中遗留的 spec 不构成自定义 authority。同一目标的现有 spec 若只因旧默认落在那里，先迁入当前默认目录，再从同一份 spec 恢复。
 - 只执行全部前置 slice 已 accepted 的 slice。
 - 只有新鲜完成证据存在后才更新进度标记。
 - 只有专业 skill 的自身触发条件成立时才使用它。

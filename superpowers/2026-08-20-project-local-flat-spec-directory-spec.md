@@ -149,7 +149,7 @@ d7652a367408d1514890e48024c3c72d6630d7024e85bb756c68979f08785936  project/solana
 - **要证明的事实**：无项目自定义 authority 时，agent 能唯一解析到 `<project-root>/superpowers/YYYY-MM-DD-<topic>-spec.md`，不会再生成 `docs/superpowers/specs/` 或嵌套目录。
 - **Oracle**：先新增并运行静态 RED contract；修改 skill 后重跑；检查旧默认路径从现役 contract 消失。
 - **通过条件**：RED 在旧 skill 上失败；GREEN 后新路径、平铺、项目根和 authority override 四项均通过。
-- **完成证据**：`2026-08-20`，先修改 `tests/workflow/test-spec-to-tdd-consistency.sh`，新增默认路径、项目根、平铺、authority override 和旧目录非 authority 五项 contract；第一次执行以 `exit 1` 失败，精确消息为 `project-local flat spec location contract is missing: 未指定时默认使用 <project-root>/superpowers/...`。随后只修改 `skills/brainstorming/SKILL.md` 的「Spec 完成后」四条路径规则，再执行同一命令以 `exit 0` 输出 `General long-task spec workflow consistency checks passed`。旧 skill SHA-256 为 `68401a0353f98217c6a8563cc2e4489f92d36503b1c0ad4a36e321785e5cdcb0`，GREEN skill SHA-256 为 `265120afd0309f2dfe08fad36b49dc8079377cc1c321c29873ed5aee3be9592c`，测试 SHA-256 为 `41853ec7682ed7835092c69e4344974c96ce81665d02e45625c53d1862c933bd`。
+- **完成证据**：`2026-08-20`，先修改 `tests/workflow/test-spec-to-tdd-consistency.sh`，新增默认路径、项目根、平铺、authority override 和旧目录非 authority 五项 contract；第一次执行以 `exit 1` 失败，精确消息为 `project-local flat spec location contract is missing: 未指定时默认使用 <project-root>/superpowers/...`。随后只修改 `skills/brainstorming/SKILL.md` 的「Spec 完成后」四条路径规则，再执行同一命令以 `exit 0` 输出 `General long-task spec workflow consistency checks passed`。旧 skill SHA-256 为 `68401a0353f98217c6a8563cc2e4489f92d36503b1c0ad4a36e321785e5cdcb0`，首次 GREEN skill SHA-256 为 `265120afd0309f2dfe08fad36b49dc8079377cc1c321c29873ed5aee3be9592c`。Reviewer `IM-001` 触发第二轮 RED：精确旧路径映射 contract 首次以缺少 `` `docs/superpowers/specs/` 是已退役的旧默认目录 `` 失败；补入该映射后再次 GREEN。Closure 时 skill SHA-256 为 `94c45fa86011eec999809dd2b3f941aa64d3f961ab3af68545595d1751d2601f`，测试 SHA-256 为 `bf9ee20d09b0bcd3942bbc8ea3ecf125c4c0bf18885aa022a75f853f2a0d5d17`。
 - **覆盖边界**：静态 contract 不证明模型在真实语境中采用规则。
 
 ### 5.3 C2：Fresh-context 行为采用新位置
@@ -157,7 +157,13 @@ d7652a367408d1514890e48024c3c72d6630d7024e85bb756c68979f08785936  project/solana
 - **要证明的事实**：面对「仓库没有 spec 位置 authority，请给长任务创建 spec」的同一场景，旧 skill/control 会采用旧位置或无法给出新 contract，新 skill/candidate 会选择项目根 `superpowers/` 并拒绝额外 `specs/` 层。
 - **Oracle**：按 `writing-skills` 运行一对只读 fresh-context control/candidate，保留 prompt、skill source/hash、原始响应和判定。
 - **通过条件**：control 暴露目标缺口；candidate 同时命中项目根、`superpowers/` 平铺、日期命名、authority override，不编辑任何文件。
-- **完成证据**：`2026-08-20`，按 `writing-skills` 预算运行一对 `fork_turns=none` 的只读 evaluator。两边场景一致：普通 Git 仓库 `/work/acme`、authority 未指定位置、只回答精确路径、目录层级、旧默认是否构成 authority，不得编辑。Control 读取 `git show HEAD:skills/brainstorming/SKILL.md`；candidate 读取当前工作树 skill。原始回答如下：
+- **完成证据**：`2026-08-20`，按 `writing-skills` 预算运行一对 `fork_turns=none` 的只读 evaluator。Control 读取 `git show HEAD:skills/brainstorming/SKILL.md`；candidate 读取当前工作树 skill。第一对的逐字场景 prompt 如下：
+
+```text
+当前目录是一个普通 Git 仓库 `/work/acme`，项目 authority 没有指定 executable spec 的保存位置。用户用中文要求：`请为这个跨多个阶段、需要恢复进度的长任务创建一份 executable spec；只告诉我你会把它保存到哪个精确路径，以及目录层级规则。如果旧版默认目录已经存在，也说明它是否构成项目自定义 authority。不要创建或修改任何文件。`
+```
+
+第一对原始回答如下：
 
 ```text
 CONTROL
@@ -182,6 +188,26 @@ CANDIDATE
 
 依据是当前 skill 的「Spec 完成后」段落：默认使用 `<project-root>/superpowers/YYYY-MM-DD-<topic>-spec.md`；普通 Git 仓库或 workspace 使用 repository/workspace root；`superpowers/` 内直接平铺；旧默认目录不构成自定义 authority。
 ```
+
+S2 reviewer 指出第一对 prompt 把现存目录预先称为「旧版默认目录」，不能证明 agent 能把具体的 `docs/superpowers/specs/` 映射到退役默认。这个已观察歧义会改变 skill 是否需要写出旧路径，因此将 evaluator 总预算从 2 次增加到 4 次，只追加一对受影响场景，不扩展其它维度。第二对共同使用的逐字场景 prompt 如下；control 读取 `git show 4bb0805:skills/brainstorming/SKILL.md`，candidate 读取加入精确旧路径映射后的当前 skill：
+
+```text
+当前目录是普通 Git 仓库 /work/acme。项目 authority 没有指定 executable spec 的保存位置。仓库中已经存在 /work/acme/docs/superpowers/specs/2026-07-01-legacy-task-spec.md，它拥有我现在要恢复的同一目标；仓库中没有其它 spec。请只告诉我：你会从哪个精确路径继续维护这份 spec，是否会先移动它，以及这个已存在目录是否构成项目自定义 authority。不要创建、修改或移动任何文件。
+```
+
+```text
+CONTROL
+1. 最终精确路径：`/work/acme/docs/superpowers/specs/2026-07-01-legacy-task-spec.md`
+2. 是否先移动：否，直接在原文件继续维护。
+3. 该目录是否构成项目自定义 authority：否。它只是 skill 在项目 authority 未指定位置时规定的默认目录；目录已经存在，不会因此升级为项目 authority。
+4. 依据：「查找现有 spec：如果现有 spec 仍拥有同一目标，修改或恢复它」以及旧版「未指定时默认使用 `docs/superpowers/specs/YYYY-MM-DD-<topic>-spec.md`」。
+
+CANDIDATE
+1. 最终精确路径：`/work/acme/superpowers/2026-07-01-legacy-task-spec.md`
+2. 是否先移动：是。先将现有 spec 从 `/work/acme/docs/superpowers/specs/2026-07-01-legacy-task-spec.md` 移入上述当前默认路径，再从同一份 spec 恢复维护。
+3. `docs/superpowers/specs/` 是否构成项目自定义 authority：否。
+4. 依据：当前默认为 `<project-root>/superpowers/YYYY-MM-DD-<topic>-spec.md`；`docs/superpowers/specs/` 是已退役的旧默认目录，它或其中遗留的 spec 不构成自定义 authority；同一目标的现有 spec 先迁入当前默认目录。
+```
 - **覆盖边界**：一对样本不证明所有模型和项目形状。
 
 ### 5.4 C3：Superpowers 历史 spec 迁移与引用闭合
@@ -189,8 +215,15 @@ CANDIDATE
 - **要证明的事实**：19 份历史 artifact 全部位于根 `superpowers/`，旧目录不再拥有 spec 文件，内容和明确消费方有效。
 - **Oracle**：迁移前后 basename 集合、SHA-256/必要路径 diff、`rg` 旧路径、workflow tests、Git rename 状态。
 - **通过条件**：19 个 basename 一一对应；无丢失或冲突；现役引用不指向不存在路径；plans 保留。
-- **完成证据**：`2026-08-20`，19 个 basename 全部位于仓库根 `superpowers/`，连同本 task spec 该目录共 20 个 Markdown 文件，且无二级文件；`docs/superpowers/specs/` 中 Markdown 数为 0。迁移后 19 份 source 的 SHA-256 与 C0 基线完全一致，随后只对 `2026-07-06-sdd-plan-scoped-workspace.md` 和 `2026-07-26-system-composition-and-implementation-slices-spec.md` 各更新一处迁移后的自引用。七份保留的历史 plan 及 `skills/requesting-code-review/SKILL.md` 中指向真实现存 artifact 的路径已改到 `superpowers/`。旧路径剩余命中已分类为 task spec 中的迁移前 provenance、`RELEASE-NOTES.md` 的历史发布事实、测试中必须不存在的 retired fixture、旧 plan 中已删除的临时 `eval-notes-red.md`，以及一份明确禁止重写历史 artifact 的历史说明。`docs/superpowers/plans/` 与 `docs/plans/` 均保留；聚焦 workflow、全量 workflow、writing-skills budget test 和 `git diff HEAD --check` 均通过。只读 reviewer 尚未执行，因此 C3 与 S2 尚未 accepted。
+- **完成证据**：`2026-08-20`，19 个 basename 全部位于仓库根 `superpowers/`，连同本 task spec 该目录共 20 个 Markdown 文件，且无二级文件；`docs/superpowers/specs/` 中 Markdown 数为 0。迁移后 19 份 source 的 SHA-256 与 C0 基线完全一致，随后只对 `2026-07-06-sdd-plan-scoped-workspace.md` 和 `2026-07-26-system-composition-and-implementation-slices-spec.md` 各更新一处迁移后的自引用。七份保留的历史 plan 及 `skills/requesting-code-review/SKILL.md` 中指向真实现存 artifact 的路径已改到 `superpowers/`。旧路径剩余命中已分类为 task spec 中的迁移前 provenance、`RELEASE-NOTES.md` 的历史发布事实、测试中必须不存在的 retired fixture、旧 plan 中已删除的临时 `eval-notes-red.md`，以及一份明确禁止重写历史 artifact 的历史说明。`docs/superpowers/plans/` 与 `docs/plans/` 均保留；聚焦 workflow、全量 workflow、writing-skills budget test 和 `git diff 4bb0805 --check` 均通过。一个 fresh-context 只读 reviewer 完成 full review，提出 `IM-001`、`IM-002` 两个 Important；主 agent 按 RED/GREEN 和事实证据修复后，原 reviewer 定点 closure 为两个 `CLOSED`，reviewer session 已结束。C3 与 S2 accepted。
 - **覆盖边界**：历史发布说明中描述当时旧默认的文字可保留，并不构成现役入口。
+
+#### 5.4.1 S2 Review Finding Ledger
+
+| ID | Verdict | Criterion / Authority | RED 或事实证据 | Fix / Diff | Verification | Closure |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `IM-001` | `VERIFIED` | C1：旧默认不得继续拥有当前 spec | 原 skill 只写抽象的「旧默认目录」；新增精确静态 contract 首次运行以缺少 `` `docs/superpowers/specs/` 是已退役的旧默认目录 `` 失败 | `brainstorming` 显式映射退役路径；测试锁定该映射 | 聚焦测试 GREEN；第二对 control 原地维护旧路径，candidate 迁入根 `superpowers/` | `CLOSED`：原 reviewer 确认精确映射、静态 contract、非诱导 candidate 和 workflow tests 闭合 |
+| `IM-002` | `VERIFIED` | C2 Oracle：保留 prompt、source/hash 和原始响应 | task spec 原来只有第一对 prompt 摘要，没有逐字文本 | C2 原位补入两对逐字 prompt、读取版本、原始响应与增加预算理由 | task spec 可独立复核 prompt 是否同场景、是否诱导 | `CLOSED`：原 reviewer 确认两对逐字 prompt、原始回答、读取版本和增样理由齐全 |
 
 ### 5.5 C4：Superpowers 改进通过 review、两次内聚 commit 与 GitHub push
 
@@ -248,7 +281,7 @@ CANDIDATE
 
 ### 6.3 S2：验证 Skill 行为并迁移 Superpowers 历史 Spec
 
-- [ ] **结果**：fresh-context candidate 采用新位置；19 份历史 artifact 和明确消费方迁入根 `superpowers/`。
+- [x] **结果**：fresh-context candidate 采用新位置；19 份历史 artifact 和明确消费方迁入根 `superpowers/`。
 - **依赖**：S1。
 - **工作范围**：C2/C3 的 evaluator、`docs/superpowers/specs/`、根 `superpowers/`、直接引用。
 - **输入与 Authority**：迁移基线、新 skill、历史文档。
@@ -290,8 +323,8 @@ CANDIDATE
 
 ### 7.1 恢复信息
 
-- **当前停点**：S0、S1 已 accepted；C2 行为评测通过，Superpowers 19 份迁移完成，等待 S2 只读 review 后接受 C3。
-- **下一个阶段**：S2 只读 review。
+- **当前停点**：S0-S2 已 accepted；两个 Important finding 已由原 reviewer 关闭，等待提交并推送 Superpowers。
+- **下一个阶段**：S3。
 - **实现与推送授权**：用户已明确要求直接执行完并上传 GitHub。
 - **治理恢复**：恢复执行时发现原 spec 的“单一 commit”与 `brainstorming` 的 behavior-work baseline 门槛冲突；改为 task spec baseline + 实现 commit。生产文件已开始修改，因此该 baseline 晚于首次 RED/GREEN，但它仍真实隔离后续完整实现 diff；最终证据必须如实保留这个边界，不能把它描述成修改前基线。
 

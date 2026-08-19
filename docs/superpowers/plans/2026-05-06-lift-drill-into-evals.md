@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.11 + uv (drill's existing toolchain, unchanged); rsync; bash; git.
 
-**Spec:** `docs/superpowers/specs/2026-05-06-lift-drill-into-evals-design.md` — read this first.
+**Spec:** `superpowers/2026-05-06-lift-drill-into-evals-design.md` — read this first.
 
 **Drill source location:** `/Users/jesse/Documents/GitHub/superpowers/drill/` (sibling to `superpowers/`).
 
@@ -1221,7 +1221,7 @@ assigned the identical task.
 
 **Branch:** f/evals-lift, in /Users/jesse/Documents/GitHub/superpowers/superpowers
 **Base:** dev (currently b4363df)
-**Spec:** docs/superpowers/specs/2026-05-06-lift-drill-into-evals-design.md
+**Spec:** superpowers/2026-05-06-lift-drill-into-evals-design.md
 
 This branch lifts the obra/drill repo into superpowers/evals/ and
 deletes redundant bash tests that drill scenarios cover. Two prior
@@ -1327,7 +1327,7 @@ Drill's own pytest suite passes from the new location. `triggering-test-driven-d
 
 ## Evaluation
 
-- Initial prompt: see linked spec (`docs/superpowers/specs/2026-05-06-lift-drill-into-evals-design.md`).
+- Initial prompt: see linked spec (`superpowers/2026-05-06-lift-drill-into-evals-design.md`).
 - Drill's own pytest suite passes.
 - One drill scenario re-run from the new location end-to-end (proves the SUPERPOWERS_ROOT default works).
 - Per-deleted-file subagent verification recorded in each deletion commit's message.

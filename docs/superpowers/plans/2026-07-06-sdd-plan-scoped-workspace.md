@@ -4,7 +4,7 @@
 
 **Goal:** Make SDD's durable-progress workspace plan-scoped (`.superpowers/sdd/<plan-basename>/`) with a self-identifying ledger and end-of-plan cleanup, so a follow-up plan can never collide with a previous plan's artifacts and resumed controllers stop paying a forensic disambiguation tax.
 
-**Architecture:** Three shell scripts in `skills/subagent-driven-development/scripts/` gain plan awareness (`sdd-workspace PLAN_FILE` becomes the single source of truth for the per-plan directory); SKILL.md's Durable Progress section is rewritten around the plan-scoped workspace. Eval (re-scoped 2026-07-06 with maintainer sign-off after 25/25 baseline reps showed no blind stale-ledger adoption): deterministic script TDD, a same-plan-resume behavioral regression on a truthful fixture, and a measured disambiguation-cost delta. Spec: `docs/superpowers/specs/2026-07-06-sdd-plan-scoped-workspace.md`.
+**Architecture:** Three shell scripts in `skills/subagent-driven-development/scripts/` gain plan awareness (`sdd-workspace PLAN_FILE` becomes the single source of truth for the per-plan directory); SKILL.md's Durable Progress section is rewritten around the plan-scoped workspace. Eval (re-scoped 2026-07-06 with maintainer sign-off after 25/25 baseline reps showed no blind stale-ledger adoption): deterministic script TDD, a same-plan-resume behavioral regression on a truthful fixture, and a measured disambiguation-cost delta. Spec: `superpowers/2026-07-06-sdd-plan-scoped-workspace.md`.
 
 **Tech Stack:** bash, shellcheck (via `scripts/lint-shell.sh`), repo shell-test conventions (`tests/claude-code/test-sdd-workspace.sh`), subagent pressure-test evals.
 
@@ -661,7 +661,7 @@ review is clean — git history is the durable record."
 
 **Files:**
 - Create (temp only, not committed): `$EVAL_ROOT/make-fixture.sh` (v3, below), fixture repos, reply files
-- Create: `docs/superpowers/specs/2026-07-06-sdd-plan-scoped-workspace-eval-results.md`
+- Create: `superpowers/2026-07-06-sdd-plan-scoped-workspace-eval-results.md`
 - Delete: `docs/superpowers/specs/2026-07-06-sdd-plan-scoped-workspace-eval-notes-red.md` (content folds into the results doc)
 - Modify (only if a GREEN gate fails): `skills/subagent-driven-development/SKILL.md`
 
@@ -997,7 +997,7 @@ Also record per-rep `tool_uses` for the cost comparison (RED resume-round baseli
 
 - [ ] **Step 7: Write the results doc**
 
-Create `docs/superpowers/specs/2026-07-06-sdd-plan-scoped-workspace-eval-results.md` with exactly these sections (fill with real data):
+Create `superpowers/2026-07-06-sdd-plan-scoped-workspace-eval-results.md` with exactly these sections (fill with real data):
 
 ```markdown
 # SDD plan-scoped workspace — eval results
@@ -1077,7 +1077,7 @@ paths recorded in the eval-notes history (see git log for
 
 ```bash
 git rm -q docs/superpowers/specs/2026-07-06-sdd-plan-scoped-workspace-eval-notes-red.md
-git add docs/superpowers/specs/2026-07-06-sdd-plan-scoped-workspace-eval-results.md
+git add superpowers/2026-07-06-sdd-plan-scoped-workspace-eval-results.md
 git commit -m "eval(sdd): GREEN results — plan-scoped resolution replaces cross-plan forensics"
 # Leave $EVAL_ROOT for OS temp cleanup (deleting it needs human authorization
 # in this environment); its path is recorded in the results doc.

@@ -178,7 +178,7 @@ committed eval docs.
   1–2 recognized, Task 3 dispatched. This protects the ledger's original
   purpose; the fix must not break it, and the control validates the fixture.
 
-Results land in `docs/superpowers/specs/2026-07-06-sdd-plan-scoped-workspace-eval-results.md`
+Results land in `superpowers/2026-07-06-sdd-plan-scoped-workspace-eval-results.md`
 and are summarized in the PR.
 
 ## Risks

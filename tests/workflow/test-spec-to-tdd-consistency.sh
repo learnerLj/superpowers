@@ -146,6 +146,24 @@ for required_trigger in \
         "long-task trigger contract is missing: $required_trigger"
 done
 
+for spec_location_contract in \
+    '未指定时默认使用 `<project-root>/superpowers/YYYY-MM-DD-<topic>-spec.md`' \
+    '项目根.*普通 Git 仓库或 workspace.*repository/workspace root' \
+    '`superpowers/` 内.*直接平铺' \
+    '不得再增加 `specs/`、`plans/`、日期目录或主题子目录' \
+    '项目 authority.*显式指定其它位置.*继续服从' \
+    '`docs/superpowers/specs/` 是已退役的旧默认目录' \
+    '旧默认目录.*不构成.*自定义 authority'; do
+    assert_contains \
+        "skills/brainstorming/SKILL.md" \
+        "$spec_location_contract" \
+        "project-local flat spec location contract is missing: $spec_location_contract"
+done
+
+assert_absent \
+    '默认使用 `docs/superpowers/specs/' \
+    "$REPO_ROOT/skills/brainstorming/SKILL.md"
+
 assert_absent \
     'starting any conversation|even a 1% chance|simple question.*task|before any response or action' \
     "$REPO_ROOT/skills/brainstorming/SKILL.md"

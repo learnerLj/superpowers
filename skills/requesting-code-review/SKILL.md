@@ -86,7 +86,7 @@ git diff "$DIFF_BASE_SHA"
 
 [派出一个只读 code reviewer，REVIEW_MODE: full]
   DESCRIPTION: 添加 verifyIndex() 和 repairIndex()，覆盖 4 种问题
-  REVIEW_AUTHORITY: FULL_BASE_SHA 中的 docs/superpowers/specs/deployment-spec.md
+  REVIEW_AUTHORITY: FULL_BASE_SHA 中的 superpowers/deployment-spec.md
   REVIEW_SUBJECT: S2 / IDX-01..04
   FULL_BASE_SHA: a7981ec
   DIFF_BASE_SHA: a7981ec

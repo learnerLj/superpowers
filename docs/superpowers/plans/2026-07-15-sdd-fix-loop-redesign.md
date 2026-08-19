@@ -8,7 +8,7 @@
 
 **Tech Stack:** Markdown skill content; Bash scenario DSL (`story.md`/`setup.sh`/`checks.sh`); TypeScript setup-helpers on Bun (`bun test`); quorum live runs.
 
-**Design spec:** `docs/superpowers/specs/2026-07-15-sdd-fix-loop-redesign-design.md`. Read it before starting any task.
+**Design spec:** `superpowers/2026-07-15-sdd-fix-loop-redesign-design.md`. Read it before starting any task.
 
 ## Global Constraints
 

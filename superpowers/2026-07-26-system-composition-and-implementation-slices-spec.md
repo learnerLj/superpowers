@@ -191,7 +191,7 @@ criteria 或 scope 属于 semantic spec change。主 Agent 必须停止实现、
 
 ### 新建
 
-- `docs/superpowers/specs/2026-07-26-system-composition-and-implementation-slices-spec.md`
+- `superpowers/2026-07-26-system-composition-and-implementation-slices-spec.md`
   - 本次改动的批准 authority 和 `BASE_SHA` 文档。
 
 ### 实现阶段修改
