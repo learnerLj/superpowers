@@ -83,12 +83,14 @@ Skills are discovered natively from the linked directories and trigger from thei
 - **code-simplification-review** - Evidence-based review for deletable complexity, ownership mistakes, wrapper/layer sprawl, and maintainability regressions
 
 **Code Understanding**
-- **code-path-explainer** - Trace a line or execution path through callers, state changes, side effects, owners, and consumers with file-line evidence
+- **traceable-explainer** - Explain existing code, completed research, and active plans/specs from their real authority, using the smallest useful visual form when relationships need it
 
 **Collaboration** 
 - **brainstorming** - Long-task routing, executable specifications, and resume workflow
 - **requesting-code-review** - Read-only independent review
 - **receiving-code-review** - Responding to feedback
+- **retro** - User-invoked, report-only retrospective of the current active conversation
+- **ai-session-review** - Review, compare, retain, archive, or delete persisted agent sessions and audit skill effectiveness across multiple sessions
 
 **Meta**
 - **writing-skills** - Create new skills following best practices (includes testing methodology)

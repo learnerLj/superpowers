@@ -12,18 +12,30 @@ fail() {
 model_files=()
 while IFS= read -r file; do
     model_files+=("$file")
-done < <(find "$REPO_ROOT/skills" -type f \( -name '*.md' -o -name '*.dot' \) | sort)
+done < <(find "$REPO_ROOT/skills" -type f \( -name '*.md' -o -name '*.dot' \) \
+    ! -path "$REPO_ROOT/skills/ai-session-review/tests/skill-pressure-scenarios.md" | sort)
 
 skill_files=("$REPO_ROOT"/skills/*/SKILL.md)
-[[ "${#skill_files[@]}" -eq 10 ]] ||
-    fail "expected 10 SKILL.md entrypoints, found ${#skill_files[@]}"
+[[ "${#skill_files[@]}" -eq 12 ]] ||
+    fail "expected 12 SKILL.md entrypoints, found ${#skill_files[@]}"
 
-for required_skill in code-path-explainer code-simplification-review verify-this; do
+for required_skill in traceable-explainer retro ai-session-review code-simplification-review verify-this; do
     [[ -f "$REPO_ROOT/skills/$required_skill/SKILL.md" ]] ||
         fail "required skill entrypoint is missing: $required_skill"
     rg -q "\*\*$required_skill\*\*" "$REPO_ROOT/README.md" ||
         fail "README discovery entry is missing: $required_skill"
 done
+
+retired_skill="code-path""-explainer"
+[[ ! -e "$REPO_ROOT/skills/$retired_skill" ]] ||
+    fail "retired skill directory remains: $retired_skill"
+
+ai_review_dir="$REPO_ROOT/skills/ai-session-review"
+[[ -d "$ai_review_dir" ]] || fail "required skill directory is missing: ai-session-review"
+[[ "$(find "$ai_review_dir" -type f ! -path '*/__pycache__/*' ! -name '*.pyc' | wc -l | tr -d ' ')" == 17 ]] ||
+    fail "ai-session-review must contain exactly 17 source files"
+! rg -n -i '/Users/mike|users[-_]mike|obsidian[-_]vault[-_]study|nautilus[-_]trader|mantistrade|VAULT=.*obsidian_vault_study' "$ai_review_dir" ||
+    fail "ai-session-review contains a private or Vault-local skill path"
 
 for file in "${skill_files[@]}"; do
     description="$(sed -n '3p' "$file")"

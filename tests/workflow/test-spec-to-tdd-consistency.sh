@@ -184,12 +184,18 @@ assert_absent \
     '/plugin install|plugin marketplace|/add-plugin|agy plugin install|pi install|opencode plugin|\.codex-plugin|\.claude-plugin' \
     "$REPO_ROOT/README.md"
 
+distribution_skill_entrypoints=()
+for skill_entrypoint in "$REPO_ROOT"/skills/*/SKILL.md; do
+    [[ "$skill_entrypoint" == "$REPO_ROOT/skills/ai-session-review/SKILL.md" ]] ||
+        distribution_skill_entrypoints+=("$skill_entrypoint")
+done
+
 assert_absent \
     'Gemini|Kimi|Antigravity|OpenCode|Copilot|Cursor|Pi extension' \
     "$REPO_ROOT/README.md" \
     "$REPO_ROOT/CLAUDE.md" \
     "$REPO_ROOT/docs/testing.md" \
-    "$REPO_ROOT"/skills/*/SKILL.md
+    "${distribution_skill_entrypoints[@]}"
 
 assert_contains \
     "README.md" \
