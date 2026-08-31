@@ -1,6 +1,6 @@
 ---
 name: ai-session-review
-description: 用户要求查找、筛选、归档、比较、保留或删除已落盘的一个或多个 AI agent 会话，或按 session ID、项目、来源、时间窗口、月份执行历史复盘、经验晋级、retention 或多会话 skill audit 时使用；用户主动复盘当前 active conversation 的错误、弯路、记忆和环境改进时改用 retro
+description: 用户要求查找、筛选、归档、比较、保留或删除已落盘的一个或多个 AI agent 会话，包括 Codex、Claude Code、OpenCode、~/.claude/transcripts、Grok、Gemini、Antigravity，或按 session ID、项目、来源、时间窗口、月份执行历史复盘、经验晋级、retention 或多会话 skill audit 时使用；用户主动复盘当前 active conversation 的错误、弯路、记忆和环境改进时改用 retro
 ---
 
 # AI 会话复盘
@@ -44,7 +44,7 @@ description: 用户要求查找、筛选、归档、比较、保留或删除已�
 | 来源 | 必读文件 |
 |---|---|
 | Codex CLI / Desktop | `references/codex.md` |
-| Claude / Claude Code | `references/claude.md` |
+| Claude / Claude Code / OpenCode / Oh My OpenCode | `references/claude.md` |
 | Grok Build 本地 CLI / Dashboard | `references/grok-build.md` |
 | Grok Bot Desktop | `references/grok-bot.md` |
 | Gemini CLI | `references/gemini-cli.md` |
@@ -101,7 +101,7 @@ AI_SESSION_REVIEW_DIR="${AI_SESSION_REVIEW_DIR:-$HOME/.agents/skills/superpowers
 python3 "$AI_SESSION_REVIEW_DIR/scripts/codex_session_inventory.py" [filters]
 ```
 
-Grok Build、Grok Bot、Gemini CLI 和 Antigravity 走统一的本地只读入口：
+Grok Build、Grok Bot、Gemini CLI、Antigravity 和 Claude 走统一的本地只读入口：
 
 ```bash
 AI_SESSION_REVIEW_DIR="${AI_SESSION_REVIEW_DIR:-$HOME/.agents/skills/superpowers/ai-session-review}"
@@ -109,7 +109,9 @@ python3 "$AI_SESSION_REVIEW_DIR/scripts/local_session_inventory.py" \
   --source all [filters]
 ```
 
-`--source` 可选 `grok-build`、`grok-bot`、`gemini-cli`、`antigravity-desktop`、`antigravity-cli` 或 `all`。默认排除 subagent；需要时显式加 `--include-subagents`。这里只读本机 transcript，不读浏览器 History / IndexedDB、Cookie、Grok.com、X Grok、Gemini Apps 或云端账户。
+`--source` 可选 `grok-build`、`grok-bot`、`gemini-cli`、`antigravity-desktop`、`antigravity-cli`、`claude-code`、`claude-transcripts` 或 `all`。默认排除 subagent；需要时显式加 `--include-subagents`。这里只读本机 transcript，不读浏览器 History / IndexedDB、Cookie、Grok.com、X Grok、Gemini Apps 或云端账户。
+
+用户说 Claude、Claude Code、OpenCode 或 Oh My OpenCode 时，必须同时盘点 `claude-code`（`~/.claude/projects`）和 `claude-transcripts`（`~/.claude/transcripts`）。`--source all` 已包含二者。禁止只看项目 jsonl 或 Claude-3p 元数据，就把 `~/.claude/transcripts` 标成桌面闲聊并跳过。OpenCode 的正文写在 transcripts 里，不在独立的 sessions 目录。
 
 `--source all --id <ID>` 命中多个来源的同一 ID 时原子失败，必须换成具体 `--source` 消歧。同一来源发现多个同 ID artifact 时只留一条 inventory row，并标 `evidence_status=unavailable`，不得静默挑其中一份当完整正文。
 

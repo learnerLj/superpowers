@@ -21,6 +21,8 @@ SOURCES = (
     "gemini-cli",
     "antigravity-desktop",
     "antigravity-cli",
+    "claude-code",
+    "claude-transcripts",
 )
 SOURCE_ORDER = {source: index for index, source in enumerate(SOURCES)}
 TABLE_FIELDS = (
@@ -113,7 +115,7 @@ class JsonlResult:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="只读列出 Grok Build、Grok Bot、Gemini CLI 和 Antigravity 本地会话。"
+        description="只读列出 Grok Build、Grok Bot、Gemini CLI、Antigravity 和 Claude 本地会话。"
     )
     parser.add_argument(
         "--source", choices=("all", *SOURCES), default="all", help="本地会话来源"
@@ -146,6 +148,7 @@ def parse_args() -> argparse.Namespace:
         help="Grok Bot Application Support 根",
     )
     parser.add_argument("--gemini-home", default="~/.gemini", help="Gemini 数据根")
+    parser.add_argument("--claude-home", default="~/.claude", help="Claude / OpenCode 数据根")
     return parser.parse_args()
 
 
@@ -391,6 +394,150 @@ def build_record(
         model=model if isinstance(model, str) and model else None,
         evidence_status="available" if available else "unavailable",
     )
+
+
+CLAUDE_TITLE_SKIP_PREFIXES = (
+    "[search-mode]",
+    "[analyze-mode]",
+    "[BACKGROUND TASK",
+    "[SYSTEM REMINDER",
+    "<command-instruction>",
+    "<command-name>",
+    "<local-command",
+    "1. TASK:",
+    "Caveat: The messages below",
+)
+
+
+def flatten_claude_content(value: Any, depth: int = 0) -> str:
+    if depth > 6 or value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        return "\n".join(
+            part
+            for item in value
+            for part in [flatten_claude_content(item, depth + 1)]
+            if part
+        )
+    if isinstance(value, dict):
+        item_type = value.get("type")
+        if item_type in {"tool_result", "tool_use", "image", "thinking"}:
+            return ""
+        if isinstance(value.get("text"), str):
+            return value["text"]
+        if "content" in value:
+            return flatten_claude_content(value.get("content"), depth + 1)
+        return ""
+    return ""
+
+
+def claude_user_text(record: dict[str, Any]) -> str | None:
+    if record.get("type") not in {"user", "human"}:
+        return None
+    if record.get("isSidechain"):
+        return None
+    message = record.get("message")
+    if isinstance(message, dict):
+        content = message.get("content")
+    elif isinstance(message, str):
+        content = message
+    else:
+        content = record.get("content")
+    if (
+        isinstance(content, list)
+        and content
+        and isinstance(content[0], dict)
+        and content[0].get("type") == "tool_result"
+    ):
+        return None
+    text = flatten_claude_content(content).strip()
+    return text or None
+
+
+def claude_title(records: list[dict[str, Any]]) -> str | None:
+    for record in records:
+        text = claude_user_text(record)
+        if not text:
+            continue
+        if text.startswith(CLAUDE_TITLE_SKIP_PREFIXES):
+            continue
+        return clean_title(text)
+    return None
+
+
+def claude_timestamps(records: list[dict[str, Any]]) -> list[datetime]:
+    timestamps: list[datetime] = []
+    for record in records:
+        parsed = parse_timestamp(record.get("timestamp"))
+        if parsed is not None:
+            timestamps.append(parsed)
+    return timestamps
+
+
+def claude_cwd(records: list[dict[str, Any]]) -> str | None:
+    for record in records:
+        cwd = record.get("cwd")
+        if isinstance(cwd, str) and cwd:
+            return cwd
+    return None
+
+
+def claude_record_available(result: JsonlResult) -> bool:
+    if result.malformed or not result.records:
+        return False
+    return any(
+        isinstance(record.get("type"), str) and bool(record["type"])
+        for record in result.records
+    )
+
+
+def discover_claude_code(root: Path, now: datetime) -> Iterable[SessionRecord]:
+    projects = root / "projects"
+    if not projects.is_dir():
+        return
+    for path in sorted(projects.rglob("*.jsonl")):
+        if not path.is_file():
+            continue
+        result = read_jsonl(path)
+        timestamps = claude_timestamps(result.records)
+        thread_kind = "subagent" if "subagents" in path.parts else "user"
+        yield build_record(
+            source="claude-code",
+            session_id=path.stem,
+            title=claude_title(result.records),
+            cwd=claude_cwd(result.records),
+            transcript_path=path,
+            created_at=min(timestamps, default=None),
+            last_active_at=max(timestamps, default=None),
+            now=now,
+            thread_kind=thread_kind,
+            available=claude_record_available(result),
+        )
+
+
+def discover_claude_transcripts(root: Path, now: datetime) -> Iterable[SessionRecord]:
+    transcripts = root / "transcripts"
+    if not transcripts.is_dir():
+        return
+    for path in sorted(transcripts.glob("*.jsonl")):
+        if not path.is_file():
+            continue
+        result = read_jsonl(path)
+        timestamps = claude_timestamps(result.records)
+        yield build_record(
+            source="claude-transcripts",
+            session_id=path.stem,
+            title=claude_title(result.records),
+            cwd=claude_cwd(result.records),
+            transcript_path=path,
+            created_at=min(timestamps, default=None),
+            last_active_at=max(timestamps, default=None),
+            now=now,
+            thread_kind="user",
+            available=claude_record_available(result),
+        )
 
 
 def discover_grok_build(root: Path, now: datetime) -> Iterable[SessionRecord]:
@@ -715,6 +862,7 @@ def discover(args: argparse.Namespace, now: datetime) -> list[SessionRecord]:
     grok_home = Path(args.grok_home).expanduser()
     grok_bot_data = Path(args.grok_bot_data).expanduser()
     gemini_home = Path(args.gemini_home).expanduser()
+    claude_home = Path(args.claude_home).expanduser()
     selected = SOURCES if args.source == "all" else (args.source,)
     records: list[SessionRecord] = []
     for source in selected:
@@ -724,6 +872,10 @@ def discover(args: argparse.Namespace, now: datetime) -> list[SessionRecord]:
             records.extend(discover_grok_bot(grok_bot_data, now))
         elif source == "gemini-cli":
             records.extend(discover_gemini_cli(gemini_home, now))
+        elif source == "claude-code":
+            records.extend(discover_claude_code(claude_home, now))
+        elif source == "claude-transcripts":
+            records.extend(discover_claude_transcripts(claude_home, now))
         else:
             records.extend(discover_antigravity(gemini_home, source, now))
     return records

@@ -29,6 +29,7 @@ class LocalSessionInventoryTest(unittest.TestCase):
         self.grok_home = self.root / ".grok"
         self.grok_bot_data = self.root / "Grok Bot"
         self.gemini_home = self.root / ".gemini"
+        self.claude_home = self.root / ".claude"
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -44,6 +45,8 @@ class LocalSessionInventoryTest(unittest.TestCase):
                 str(self.grok_bot_data),
                 "--gemini-home",
                 str(self.gemini_home),
+                "--claude-home",
+                str(self.claude_home),
                 "--now",
                 NOW,
                 "--format",
@@ -66,6 +69,8 @@ class LocalSessionInventoryTest(unittest.TestCase):
                 str(self.grok_bot_data),
                 "--gemini-home",
                 str(self.gemini_home),
+                "--claude-home",
+                str(self.claude_home),
                 "--now",
                 NOW,
                 "--format",
@@ -230,6 +235,56 @@ class LocalSessionInventoryTest(unittest.TestCase):
             ],
         )
 
+    def add_claude_code_session(self) -> None:
+        session_id = "55555555-5555-4555-8555-555555555555"
+        project = self.claude_home / "projects" / "-Users-mike-Documents-vault"
+        write_jsonl(
+            project / f"{session_id}.jsonl",
+            [
+                {
+                    "type": "user",
+                    "timestamp": "2026-08-05T00:00:00Z",
+                    "cwd": "/Users/mike/Documents/vault",
+                    "sessionId": session_id,
+                    "message": {"role": "user", "content": "扫描本地 demo"},
+                },
+                {
+                    "type": "assistant",
+                    "timestamp": "2026-08-05T00:05:00Z",
+                    "message": {"role": "assistant", "content": "开始"},
+                },
+            ],
+        )
+        write_jsonl(
+            project / session_id / "subagents" / "agent-sub-1.jsonl",
+            [
+                {
+                    "type": "user",
+                    "timestamp": "2026-08-05T00:02:00Z",
+                    "cwd": "/Users/mike/Documents/vault",
+                    "sessionId": session_id,
+                    "message": {"role": "user", "content": "子代理任务"},
+                }
+            ],
+        )
+
+    def add_claude_transcript(self) -> None:
+        write_jsonl(
+            self.claude_home / "transcripts" / "ses_opencode_parent.jsonl",
+            [
+                {
+                    "type": "user",
+                    "timestamp": "2026-01-12T08:00:00Z",
+                    "content": "你来设置opencode，默认用antigravity的 opus 4.6",
+                },
+                {
+                    "type": "tool_use",
+                    "timestamp": "2026-01-12T08:01:00Z",
+                    "content": "read",
+                },
+            ],
+        )
+
     def test_all_sources_use_local_transcript_authorities(self) -> None:
         self.add_grok_build_session(
             "11111111-aaaa-4aaa-8aaa-111111111111",
@@ -244,6 +299,8 @@ class LocalSessionInventoryTest(unittest.TestCase):
             self.gemini_home / "antigravity-cli" / "history.jsonl",
             [{"display": "不是 canonical conversation", "timestamp": 1}],
         )
+        self.add_claude_code_session()
+        self.add_claude_transcript()
 
         rows = self.rows(self.run_script("--source", "all"))
 
@@ -255,12 +312,61 @@ class LocalSessionInventoryTest(unittest.TestCase):
                 "gemini-cli",
                 "antigravity-desktop",
                 "antigravity-cli",
+                "claude-code",
+                "claude-transcripts",
             ],
         )
         self.assertTrue(all(row["evidence_status"] == "available" for row in rows))
         self.assertNotIn("private-account", json.dumps(rows))
         self.assertNotIn("secret-value", json.dumps(rows))
         self.assertFalse(any(row["transcript_path"].endswith("history.jsonl") for row in rows))
+
+    def test_claude_transcripts_are_inventoried_without_include_subagents(self) -> None:
+        self.add_claude_code_session()
+        self.add_claude_transcript()
+        write_jsonl(
+            self.claude_home / "transcripts" / "ses_hello_only.jsonl",
+            [
+                {
+                    "type": "user",
+                    "timestamp": "2026-01-13T14:06:18.786Z",
+                    "content": "你好",
+                }
+            ],
+        )
+
+        default_rows = self.rows(self.run_script("--source", "all"))
+        included_rows = self.rows(
+            self.run_script("--source", "all", "--include-subagents")
+        )
+
+        default_ids = {row["id"] for row in default_rows}
+        self.assertIn("55555555-5555-4555-8555-555555555555", default_ids)
+        self.assertIn("ses_opencode_parent", default_ids)
+        self.assertIn("ses_hello_only", default_ids)
+        self.assertNotIn("agent-sub-1", default_ids)
+        self.assertEqual(
+            {row["id"] for row in default_rows if row["source"] == "claude-transcripts"},
+            {"ses_opencode_parent", "ses_hello_only"},
+        )
+
+        code_row = next(row for row in default_rows if row["source"] == "claude-code")
+        self.assertEqual(code_row["cwd"], "/Users/mike/Documents/vault")
+        self.assertEqual(code_row["title"], "扫描本地 demo")
+        self.assertEqual(code_row["last_active_at"], "2026-08-05T08:05:00+08:00")
+        self.assertNotIn("mtime", json.dumps(code_row))
+
+        transcript_row = next(
+            row for row in default_rows if row["id"] == "ses_opencode_parent"
+        )
+        self.assertEqual(
+            transcript_row["title"],
+            "你来设置opencode，默认用antigravity的 opus 4.6",
+        )
+        self.assertEqual(transcript_row["thread_kind"], "user")
+
+        included_ids = {row["id"] for row in included_rows}
+        self.assertIn("agent-sub-1", included_ids)
 
     def test_grok_bot_locator_does_not_expose_reversible_blob_key(self) -> None:
         conversation_id = "33333333-3333-4333-8333-333333333333"

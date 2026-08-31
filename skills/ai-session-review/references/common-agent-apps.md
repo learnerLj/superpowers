@@ -40,6 +40,7 @@ find "$HOME/Library/Application Support" -maxdepth 2 -type d \( \
 | Aider Desk | `~/.aider-desk/`、项目 `.aider-desk/` | 当前只验证目录存在性；无会话文件样本时不写正文复盘 |
 | CodexBar | `~/.codexbar/`、`~/Library/Application Support/CodexBar/` | 只作为 Codex 管理器线索 |
 | OpenAI / Codex app | `~/Library/Application Support/OpenAI/Codex`、`~/Library/Application Support/Codex`、`~/Library/Application Support/com.openai.codex` | 与 Codex Desktop 元数据交叉验证 |
+| OpenCode / Oh My OpenCode | `~/.claude/transcripts/*.jsonl` | 本机实测：会话 jsonl 写在 Claude transcripts 目录。复盘走 `references/claude.md` 与 `--source claude-transcripts`，不要当未知应用跳过 |
 
 资料分级：
 
@@ -132,6 +133,7 @@ sqlite3 "$db" 'select key, length(value) from ItemTable order by length(value) d
 | `aider-desk` | Aider Desk 项目状态或会话 |
 | `gemini-cli` | Gemini CLI 明文会话；见 `references/gemini-cli.md` |
 | `antigravity-desktop` / `antigravity-cli` | Antigravity 两套 brain transcript；见 `references/antigravity.md` |
+| `claude-code` / `claude-transcripts` | Claude Code 项目 jsonl，以及 OpenCode 写在 `~/.claude/transcripts` 的会话；见 `references/claude.md` |
 | `agent-app-log` | 只有日志和状态线索 |
 
 如果只有缓存、空 index 或配置文件，不要进入高价值会话表。可以放进“可删除或降级的原始材料”或“待确认来源”。

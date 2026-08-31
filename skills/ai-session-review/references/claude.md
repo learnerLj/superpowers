@@ -1,10 +1,10 @@
 # Claude 会话格式与读取方法
 
-Claude 本机历史有三类来源：轻量 transcript、项目会话 jsonl、Claude Code session metadata。先判断路径和字段，再决定它能提供正文、索引还是状态。
+Claude 本机历史有三类来源：`~/.claude/transcripts`、项目会话 jsonl、Claude Code session metadata。用户说 Claude、Claude Code、OpenCode 或 Oh My OpenCode 时，三类都要进 inventory。先判断路径和字段，再决定它能提供正文、索引还是状态。
 
 ## 1. 存储位置
 
-轻量 transcript。依据：`local-verified`。
+`~/.claude/transcripts`。OpenCode / Oh My OpenCode 也把会话写在这里。依据：`local-verified`。
 
 ```text
 ~/.claude/transcripts/*.jsonl
@@ -34,7 +34,9 @@ Claude-3p / Claude Code session metadata。依据：`local-verified`。
 
 `Claude/IndexedDB` 和 UI 缓存只在缺少明文 transcript 时探测，默认不作为主会话来源。
 
-## 2. 轻量 transcript：`.claude/transcripts/*.jsonl`
+## 2. `~/.claude/transcripts/*.jsonl`
+
+inventory 来源名：`claude-transcripts`。2026-01 本机样本里，这里既有「你好」空会话，也有 OpenCode / Oh My OpenCode 的完整工具会话（`type=user|tool_use|tool_result`）。不要因为路径叫 transcripts、不在 `projects/` 下，就整批标成桌面闲聊并跳过。
 
 已见到的形态：
 
@@ -46,28 +48,27 @@ Claude-3p / Claude Code session metadata。依据：`local-verified`。
 
 | 字段 | 含义 |
 |---|---|
-| `type` | 消息类型，已见到 `user` |
-| `timestamp` | 消息时间 |
-| `content` | 消息正文，当前样本为字符串 |
+| `type` | 已见到 `user`、`tool_use`、`tool_result` |
+| `timestamp` | 消息时间。inventory 用事件时间，不用文件 `mtime` |
+| `content` | 用户正文；字符串或后续 TASK 包装 |
 
 读取命令：
 
 ```bash
-find "$HOME/.claude/transcripts" -type f -name '*.jsonl' -print
-jq -r '.type' "$file" | sort | uniq -c
-jq -c '{type,timestamp,content_type:(.content|type)}' "$file" | head
-jq -r 'select(.type=="user") | .content' "$file" | head
+python3 "$AI_SESSION_REVIEW_DIR/scripts/local_session_inventory.py" \
+  --source claude-transcripts --format jsonl
 ```
 
 读取策略：
 
 1. `content` 是字符串时，直接抽首条用户请求和后续关键请求。
 2. 文件名通常不含可读标题，主题从 `content` 判断。
-3. 只含单条 `user` 的 transcript 多半价值低，先归为轻量索引，不做长摘要。
+3. 只含「你好」的单条可以低价值，但必须先出现在 inventory 里；同一批里的 OpenCode 父会话和 `1. TASK:` 子任务不能跟着跳过。
+4. 默认 `thread_kind=user`。不要把 transcripts 当成 subagent 藏起来。
 
 ## 3. 项目会话：`.claude/projects/*/*.jsonl`
 
-项目会话通常更接近 Claude Code 的工作流记录，其目录名称通过将绝对路径的斜杠（`/`）转换为中划线（`-`）进行编码（例如 `/Users/example/projects/sample-project/` 转换为 `-Users-example-projects-sample-project-`）。
+inventory 来源名：`claude-code`。项目会话更接近 Claude Code 工作流记录。目录名称把绝对路径的斜杠（`/`）换成中划线（`-`），例如 `/Users/example/projects/sample-project/` 变成 `-Users-example-projects-sample-project-`。cwd 以 jsonl 记录里的 `cwd` 为准，不要靠解码目录名猜。
 
 会话文件存储有两类结构：
 1. **主会话**：`~/.claude/projects/<encoded-project-path>/<session-id>.jsonl`
@@ -104,6 +105,8 @@ jq -r 'select(.type=="user") | .content' "$file" | head
 读取命令：
 
 ```bash
+python3 "$AI_SESSION_REVIEW_DIR/scripts/local_session_inventory.py" \
+  --source claude-code --format jsonl
 find "$HOME/.claude/projects" -type f -name '*.jsonl' -print
 jq -r '.type? // .role? // empty' "$file" | sort | uniq -c
 jq -c '{type,timestamp,sessionId,cwd,gitBranch,uuid,parentUuid,userType,entrypoint}' "$file" | head
@@ -198,11 +201,11 @@ jq '{sessionId,cliSessionId,cwd,originCwd,createdAt,lastActivityAt,model,effort,
 
 ## 6. 判断注意事项
 
-Claude 有多套历史来源。`.claude/transcripts` 适合快速抽用户输入，`.claude/projects` 更适合复盘代码代理工作，`Claude-3p/claude-code-sessions` 适合建索引和判断归档状态。
+Claude 有多套历史来源。复盘时先跑 `local_session_inventory.py` 的 `claude-code` 与 `claude-transcripts`。`Claude-3p/claude-code-sessions` 只做索引和归档状态，不是正文。`sessions-index.json` 和 `memory/MEMORY.md` 不是会话原文。
 
-项目目录名经过路径编码，例如 `-Users-example-projects-sample-project`。归类时把它还原为真实 cwd。
+项目目录名经过路径编码，例如 `-Users-example-projects-sample-project`。cwd 只取 jsonl 里的 `cwd` 字段；目录名只用于定位文件。
 
-只含问候、短确认或单轮空会话的文件先标低价值。含有 cwd、gitBranch、工具执行、长助手输出和多轮用户修正的项目会话优先进入 skim。
+只含问候、短确认或单轮空会话的文件先标低价值，但仍要出现在清单里。含有 cwd、gitBranch、工具执行、长助手输出和多轮用户修正的会话优先进入 skim。
 
 ## 7. 资料来源
 
