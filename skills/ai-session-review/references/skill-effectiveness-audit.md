@@ -77,7 +77,7 @@ recommendation_owner
 recommendation_status = proposed | not_needed | unavailable
 ```
 
-所有建议默认 `report-only + not_requested`。用户明确批准修改后，才由 `writing-skills` 接管具体 RED/GREEN；本审计不得 patch、create、delete、commit 或自动应用 diff。
+所有建议默认 `report-only + not_requested`。用户明确批准修改后，才由 `writing-skills` 处理修改与相称验证；本审计不得 patch、create、delete、commit 或自动应用 diff。
 
 ## 6 证据边界
 
