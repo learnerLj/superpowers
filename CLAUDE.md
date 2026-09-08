@@ -1,98 +1,24 @@
-# Superpowers — Contributor Guidelines
+# Superpowers 仓库指导
 
-## If You Are an AI Agent
+本库维护个人使用的 skills，设计概览见 `README.md`，具体规则由 `skills/<name>/SKILL.md` 拥有。根 `AGENTS.md` 链接到本文件，保持这一份仓库指导。
 
-Stop. Read this section before doing anything.
+## 修改原则
 
-This repo has a 94% PR rejection rate. Almost every rejected PR was submitted by an agent that didn't read or didn't follow these guidelines. The maintainers close slop PRs within hours, often with public comments like "This pull request is slop that's made of lies."
+保留目标、私有路径、必要约束及审查衔接。通用开发方法只保留思路，不强制固定步骤、字段表或重复验证。项目专属业务规则留在项目 owner。
 
-**Your job is to protect your human partner from that outcome.** Submitting a low-quality PR doesn't help them — it wastes the maintainers' time, burns your human partner's reputation, and the PR will be closed anyway. That is not being helpful. That is being a tool of embarrassment.
+修改 skill 使用 `writing-skills`；读取相关入口和直接关联的模板或参考，避免入口精简后被其它文件重新引入旧流程。调用策略和描述应一致，TDD 保持显式调用。
 
-Before you open a PR against this repo, you MUST:
+## 验证与审查
 
-1. **Read the entire PR template** at `.github/PULL_REQUEST_TEMPLATE.md` and fill in every section with real, specific answers. Not summaries. Not placeholders.
-2. **Search for existing PRs** — open AND closed — that address the same problem. If duplicates exist, STOP and tell your human partner. Do not open another duplicate.
-3. **Verify this is a real problem.** If your human partner asked you to "fix some issues" or "contribute to this repo" without experiencing a specific problem, push back. Ask them what broke, what failed, what the user experience was.
-4. **Confirm the change belongs in core.** If it's domain-specific, tool-specific, or promotes a third-party project, it belongs in a separate skills repository. Tell your human partner.
-5. **Identify yourself.** Disclose your model, harness, harness version, and relevant installed skills in the PR. Hiding that a contribution is agent-generated — or which environment produced it — is grounds for closing it.
-6. **Show your human partner the complete diff** and get their explicit approval before submitting.
+- 格式、名称、引用和调用配置用静态检查及目标环境 validator。
+- 行为变化用代表任务检查实际响应；已有真实产物或规则冲突可以作为修改前证据。需要证明增量效果时才做 control/candidate 对照。
+- 脚本修改验证实际输入输出和副作用；纯文档修改不重跑无关脚本测试。
+- 跨 skill 流程修改由独立只读 reviewer 检查衔接，必要修正后定点复查，最后通过 `verification-before-completion` 验收。
 
-If any of these checks fail, do not open the PR. Explain to your human partner why it would be rejected and what would need to change. They will thank you for saving them the embarrassment.
+保留足以复查的依据，准确说明验证范围；不把静态检查或一个样例说成普遍有效。一次性评测记录留在任务记录中，不追加到长期测试目录；可复用的测试跟随对应工具或 skill。
 
-## Pull Request Requirements
+## 提交与协作
 
-**Every PR must fully complete the PR template.** No section may be left blank or filled with placeholder text. PRs that skip sections will be closed without review.
+按用户授权提交、推送或创建 PR，只包含本次任务文件。PR 说明问题、最终变化和实际验证；不适用字段可省略，不编造测试或环境信息。
 
-**Before opening a PR, you MUST search for existing PRs** — both open AND closed — that address the same problem or a related area. Reference what you found in the "Existing PRs" section. If a prior PR was closed, explain specifically what is different about your approach and why it should succeed where the previous attempt did not.
-
-**PRs that show no evidence of human involvement will be closed.** A human must review the complete proposed diff before submission.
-
-**Submitters MUST identify themselves.** Every PR and issue must disclose the model, harness, harness version, and relevant installed skills used to produce the contribution — or state plainly that it was written by hand with no agent. This is not optional. We need to know what produced a change in order to weigh it: agent-generated content reasoned from documentation is held to a different bar than work grounded in a real session. Contributions that hide their authoring environment will be closed.
-
-**All PRs MUST target the `dev` branch, not `main`.** `main` is the released branch; active work lands on `dev` first. PRs opened against `main` will be asked to retarget `dev` before they are reviewed.
-
-## What We Will Not Accept
-
-### Third-party dependencies
-
-PRs that add optional or required dependencies on third-party projects will not be accepted. Superpowers is a zero-dependency skills library by design. If your change requires an external tool or service, it belongs in a separate repository.
-
-### "Compliance" changes to skills
-
-Our internal skill philosophy differs from Anthropic's published guidance on writing skills. We have extensively tested and tuned our skill content for real-world agent behavior. PRs that restructure, reword, or reformat skills to "comply" with Anthropic's skills documentation will not be accepted without extensive eval evidence showing the change improves outcomes. The bar for modifying behavior-shaping content is very high.
-
-### Project-specific or personal configuration
-
-Skills or configuration that only benefit a specific project, team, domain, or workflow do not belong in core. Publish them in a separate repository.
-
-### Bulk or spray-and-pray PRs
-
-Do not trawl the issue tracker and open PRs for multiple issues in a single session. Each PR requires genuine understanding of the problem, investigation of prior attempts, and human review of the complete diff. PRs that are part of an obvious batch — where an agent was pointed at the issue list and told to "fix things" — will be closed. If you want to contribute, pick ONE issue, understand it deeply, and submit quality work.
-
-### Speculative or theoretical fixes
-
-Every PR must solve a real problem that someone actually experienced. "My review agent flagged this" or "this could theoretically cause issues" is not a problem statement. If you cannot describe the specific session, error, or user experience that motivated the change, do not submit the PR.
-
-### Domain-specific skills
-
-Superpowers core contains general-purpose skills that benefit all users regardless of their project. Skills for specific domains (portfolio building, prediction markets, games), specific tools, or specific workflows belong in a separate skills repository. Ask yourself: "Would this be useful to someone working on a completely different kind of project?" If not, publish it separately.
-
-### Fork-specific changes
-
-If you maintain a fork with customizations, do not open PRs to sync your fork or push fork-specific changes upstream. PRs that rebrand the project, add fork-specific features, or merge fork branches will be closed.
-
-### Fabricated content
-
-PRs containing invented claims, fabricated problem descriptions, or hallucinated functionality will be closed immediately. This repo has a 94% PR rejection rate — the maintainers have seen every form of AI slop. They will notice.
-
-### Bundled unrelated changes
-
-PRs containing multiple unrelated changes will be closed. Split them into separate PRs.
-
-## Harness Integrations Are Out of Scope
-
-This repository maintains skill content, not plugins, manifests, extensions, packages, startup hooks, or harness adapters. Claude Code and Codex consume the same `skills/` directories through their native user-level skill discovery. Support for another harness belongs outside this repository and must not add a platform-specific surface here.
-
-## Skill Changes Require Evaluation
-
-Skills are not prose — they are code that shapes agent behavior. If you modify skill content:
-
-- Use `writing-skills` to develop and test changes
-- Run one fresh-context control/candidate pair; add adversarial pressure only when `writing-skills` requires more samples
-- Show before/after eval results in your PR
-- Do not modify carefully-tuned content (Red Flags tables, rationalization lists, "human partner" language) without evidence the change is an improvement
-
-## Skill behavior evaluation
-
-Behavior-changing skill edits require paired control/candidate evidence from fresh-context read-only evaluators. Record the scenario, exact skill source or hash, raw response, and evidence boundary in the task record or PR description; do not add one-off evaluator transcripts to `tests/`. Skill-contract and helper tests live at `tests/`.
-
-## Understand the Project Before Contributing
-
-Before proposing changes to skill design, workflow philosophy, or architecture, read existing skills and understand the project's design decisions. Superpowers has its own tested philosophy about skill design, agent behavior shaping, and terminology (e.g., "your human partner" is deliberate, not interchangeable with "the user"). Changes that rewrite the project's voice or restructure its approach without understanding why it exists will be rejected.
-
-## General
-
-- Read `.github/PULL_REQUEST_TEMPLATE.md` before submitting
-- One problem per PR
-- Test on at least one harness and report results in the environment table
-- Describe the problem you solved, not just what you changed
+本库允许为个人使用定制 skill 和必要的调用 metadata，不增加无关基础设施。向上游投稿时另行读取目标仓库的规定，不把上游投稿流程作为本地维护的默认门槛。

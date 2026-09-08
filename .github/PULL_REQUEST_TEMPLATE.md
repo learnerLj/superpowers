@@ -1,103 +1,14 @@
-<!--
-BEFORE SUBMITTING: Read every word of this template. PRs that leave
-sections blank, contain multiple unrelated changes, or show no evidence
-of human involvement will be closed without review.
--->
+## 问题与结果
 
-> **This PR MUST target the `dev` branch, not `main`.** `main` is the
-> released branch; active work lands on `dev` first. PRs opened against
-> `main` will be asked to retarget `dev` before review.
+<!-- 说明具体问题、期望结果和本次变化。 -->
 
-## Who is submitting this PR? (required)
-<!-- Required. PRs that omit this will be closed. We assume an agent wrote
-     this PR — tell us which one and where it ran. We weigh contributions by
-     what produced them: content reasoned from documentation is held to a
-     different bar than work grounded in a real session. -->
+## 验证
 
-| Field | Value |
-|-------|-------|
-| Your model + version | |
-| Harness + version | |
-| Relevant skills installed | |
-| Human partner who reviewed this diff | |
+<!-- 列出实际检查、结果与未覆盖范围。
+格式和引用可使用静态检查；行为修改说明代表场景及实际响应。
+仅在声称增量效果时提供对照证据，不适用时无需填写。 -->
 
-## What problem are you trying to solve?
-<!-- Describe the specific problem you encountered. If this was a session
-     issue, include: what you were doing, what went wrong, the model's
-     exact failure mode, and ideally a transcript or session log.
+## 审查与风险
 
-     "Improving" something is not a problem statement. What broke? What
-     failed? What was the user experience that motivated this? -->
-
-## What does this PR change?
-<!-- 1-3 sentences. What, not why — the "why" belongs above. -->
-
-## Is this change appropriate for the core library?
-<!-- Superpowers core contains general-purpose skills and infrastructure
-     that benefit all users. Ask yourself:
-
-     - Would this be useful to someone working on a completely different
-       kind of project than yours?
-     - Is this project-specific, team-specific, or tool-specific?
-     - Does this integrate or promote a third-party service?
-
-     If your change is a new skill for a specific domain, workflow tool,
-     or third-party integration, it belongs in a separate repository — not here. -->
-
-## What alternatives did you consider?
-<!-- What other approaches did you try or evaluate before landing on this
-     one? Why were they worse? If you didn't consider alternatives, say so
-     — but know that's a red flag. -->
-
-## Does this PR contain multiple unrelated changes?
-<!-- If yes: stop. Split it into separate PRs. Bundled PRs will be closed.
-     If you believe the changes are related, explain the dependency. -->
-
-## Existing PRs
-- [ ] I have reviewed all open AND closed PRs for duplicates or prior art
-- Related PRs: <!-- #number, #number, or "none found" -->
-
-<!-- If a related closed PR exists, explain what's different about your
-     approach and why it should succeed where the other didn't. -->
-
-## Environment tested
-
-| Harness (Claude Code or Codex) | Harness version | Model | Model version/ID |
-|-------------------------------------|-----------------|-------|------------------|
-|                                     |                 |       |                  |
-
-## Evaluation
-- What was the initial prompt you (or your human partner) used to start
-  the session that led to this change?
-- What fresh-context control/candidate pair did you run after making the change?
-- How did outcomes change compared to before the change?
-
-<!-- "It works" is not evaluation. Describe the before/after difference
-     you observed across the paired control/candidate sessions. -->
-
-## Rigor
-
-- [ ] If this is a skills change: I used `writing-skills` and
-      completed one fresh-context control/candidate pair
-- [ ] I added adversarial pressure only when `writing-skills` required more samples
-- [ ] I did not modify carefully-tuned content (Red Flags table,
-      rationalizations, "human partner" language) without extensive evals
-      showing the change is an improvement
-
-<!-- If you changed wording in skills that shape agent behavior, show your
-     eval methodology and results. These are not prose — they are code. -->
-
-## Human review
-- [ ] A human has reviewed the COMPLETE proposed diff before submission
-
-<!--
-STOP. If the checkbox above is not checked, do not submit this PR.
-
-PRs will be closed without review if they:
-- Show no evidence of human involvement
-- Contain multiple unrelated changes
-- Promote or integrate third-party services or tools
-- Submit project-specific or personal configuration as core changes
-- Leave required sections blank or use placeholder text
-- Modify behavior-shaping content without eval evidence
--->
+<!-- 适用时说明独立审查、修复复查及剩余风险。
+按用户授权提交；不要声明未经执行的验证或未经取得的批准。 -->
