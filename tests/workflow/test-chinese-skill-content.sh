@@ -16,10 +16,10 @@ done < <(find "$REPO_ROOT/skills" -type f \( -name '*.md' -o -name '*.dot' \) \
     ! -path "$REPO_ROOT/skills/ai-session-review/tests/skill-pressure-scenarios.md" | sort)
 
 skill_files=("$REPO_ROOT"/skills/*/SKILL.md)
-[[ "${#skill_files[@]}" -eq 12 ]] ||
-    fail "expected 12 SKILL.md entrypoints, found ${#skill_files[@]}"
+[[ "${#skill_files[@]}" -eq 13 ]] ||
+    fail "expected 13 SKILL.md entrypoints, found ${#skill_files[@]}"
 
-for required_skill in traceable-explainer retro ai-session-review code-simplification-review verify-this; do
+for required_skill in traceable-explainer retro ai-session-review code-simplification-review verify-this worktree-and-pr; do
     [[ -f "$REPO_ROOT/skills/$required_skill/SKILL.md" ]] ||
         fail "required skill entrypoint is missing: $required_skill"
     rg -q "\*\*$required_skill\*\*" "$REPO_ROOT/README.md" ||

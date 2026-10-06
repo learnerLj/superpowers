@@ -19,8 +19,9 @@
 3. **开发与测试**：根据任务实现、测试和整理代码，遵守项目范围与资源限制。用户明确要求 TDD 时才调用 `test-driven-development`；它提供简短的测试先行思路，不约束普通开发。
 4. **实现审查与复查**：重大实现、复杂修复、公共接口、跨组件或高风险变更使用 `requesting-code-review`；反馈由 `receiving-code-review` 核查，在授权内修复并定点复查。项目要求的合并审查照常执行。
 5. **最终验收**：`verification-before-completion` 对照目标、必要审查和实际证据确认交付。局部低风险改动可以自审，不强制写 spec。
+6. **代码落点**：软件代码仓库的提交使用 `worktree-and-pr`。知识库笔记不走这一步。
 
-Reviewer 只检查与报告，实施者负责修复。用户只要求规划或审查时交付对应结果；已有实现授权不因进入这些环节而失效。提交、发布等操作遵循用户授权。
+Reviewer 只检查与报告，实施者负责修复。用户只要求规划或审查时交付对应结果；已有实现授权不因进入这些环节而失效。知识库和当次明确不推远程的改动仍按当次授权；软件代码仓库的提交落点见该 skill。
 
 ## 安装与目录
 
@@ -60,12 +61,13 @@ TDD 的入口只匹配用户明确请求；`skills/test-driven-development/agent
 | `requesting-code-review` | 组织必要的独立代码审查 |
 | `receiving-code-review` | 核查反馈、修复与复查 |
 | `verification-before-completion` | 交付前验收 |
-| `verify-this` | 核实用户指定的声明 |
-| `code-simplification-review` | 识别值得去除的复杂度 |
-| `traceable-explainer` | 依据已有产物解释机制 |
-| `retro` | 复盘当前会话 |
-| `ai-session-review` | 查找和复盘历史会话，按专项合同处理归档与保留 |
+| **verify-this** | 核实用户指定的声明 |
+| **code-simplification-review** | 识别值得去除的复杂度 |
+| **traceable-explainer** | 依据已有产物解释机制 |
+| **retro** | 复盘当前会话 |
+| **ai-session-review** | 查找和复盘历史会话，按专项合同处理归档与保留 |
 | `writing-skills` | 编写、验证和审查 skill 修改 |
+| **worktree-and-pr** | 软件代码改动用 worktree 打开 GitHub pull request |
 
 ## 修改本库
 
