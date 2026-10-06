@@ -30,10 +30,18 @@ description: 软件代码仓库里要提交的改动使用。在 git worktree �
 - setup 拒绝覆盖已经存在的普通文件时停下来，不要改脚本去强行替换。
 - 没有这份 toml 时，只建 worktree，不补配置链接。
 
-## 3 打开 pull request
+## 3 审查单位
 
-只暂存这次任务的文件。用 `git push -u origin <branch>` 推送当前分支，分支名不要写成默认分支。再用 `gh pr create` 在 GitHub 上打开 pull request。不合并。
+代码审查看 GitHub 上的这一个 pull request。Codex 的审查跑在这个 PR 上，规则仍来自目标仓库 `AGENTS.md` 的 `## Code Review Rules`。
 
-## 4 衔接
+一个 spec 写一个要迭代的功能。这个 spec 一般对应一个 pull request。同一功能后面的修改继续推到这个 PR 的分支。另一个功能另写 spec，并另开 pull request。
+
+没有 spec 的短改动单独开一个 pull request，不为它补写 spec。
+
+## 4 打开 pull request
+
+已有未合并的 pull request 属于当前 spec 时，把这次提交推上去，不新开一个。否则用 `git push -u origin <branch>` 推送当前分支，分支名不要写成默认分支，再用 `gh pr create` 打开 pull request。只暂存这次任务的文件。不合并。
+
+## 5 衔接
 
 打开 pull request 之前，这次改动仍用 `verification-before-completion` 核对证据。本地独立审查仍用 `requesting-code-review`。这两步不代替 GitHub 上的 Codex review，也不负责推送。
