@@ -5,11 +5,11 @@ description: 用户要求规划或设计，或任务有实质设计分歧、需�
 
 # 规划与恢复长任务
 
-计划保存目标、关键决定、执行进度和完成条件，深度按任务决定。短小明确的任务直接完成；多个文件或步骤本身不要求 spec。需要 spec 时，一个 spec 只写一个要迭代的功能；软件代码实现一般由 `worktree-and-pr` 收成一个 pull request。
+计划保存目标、关键决定、执行进度和完成条件，深度按任务决定。短小明确的任务直接完成；多个文件或步骤本身不要求 spec。
 
 ## 文件与依据
 
-读取相关项目规则和真实入口，沿用同一目标的现有计划及其位置。新 spec 放到项目指定位置，未指定时使用 `<project-root>/superpowers/YYYY-MM-DD-<topic>-spec.md`。默认中文；范围与进度留在同一文件，不另建执行清单或仅因模板变化迁移旧计划。
+读取相关项目规则和真实入口，沿用同一目标的现有计划及其位置。新 spec 放到项目指定位置，未指定时使用 `<project-root>/superpowers/YYYY-MM-DD-<topic>-spec.md`。一个 spec 只写一个要迭代的功能。默认中文；范围与进度留在同一文件，不另建执行清单或仅因模板变化迁移旧计划。
 
 Spec 顶部 YAML 统一定义 `status` 字段，全生命周期仅使用三个标准状态：
 - `spec`：立项就绪 / 待执行。目标、非目标、数据合同或第一道证伪闸门已定义完毕，等待资源或启动；
@@ -24,4 +24,4 @@ Spec 顶部 YAML 统一定义 `status` 字段，全生命周期仅使用三个�
 
 恢复时核对实际产物、有效证据和下一步。已有授权内的遗漏直接修正；改变用户目标、权限或重要承诺的决定先解决并更新原计划。保留已有用户批准条件，不额外要求提交 spec 或逐阶段确认。
 
-实现中验证相关行为；重大、跨组件或高风险实现后进入 `requesting-code-review`，反馈由 `receiving-code-review` 核查、修复并定点复查。最后通过 `verification-before-completion` 验收。
+实现中验证相关行为；重大、跨组件或高风险实现后进入 `requesting-code-review`，反馈由 `receiving-code-review` 核查、修复并定点复查。最后通过 `verification-before-completion` 验收。软件代码仓库的提交接着走 `worktree-and-pr`。

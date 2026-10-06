@@ -22,7 +22,7 @@ skill_files=("$REPO_ROOT"/skills/*/SKILL.md)
 for required_skill in traceable-explainer retro ai-session-review code-simplification-review verify-this worktree-and-pr; do
     [[ -f "$REPO_ROOT/skills/$required_skill/SKILL.md" ]] ||
         fail "required skill entrypoint is missing: $required_skill"
-    rg -q "\*\*$required_skill\*\*" "$REPO_ROOT/README.md" ||
+    rg -q "\`$required_skill\`" "$REPO_ROOT/README.md" ||
         fail "README discovery entry is missing: $required_skill"
 done
 
